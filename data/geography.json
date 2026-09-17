@@ -1,0 +1,39 @@
+{
+  "version": "2026.01.15",
+  "districts": {
+    "kampala": {
+      "label": "Kampala",
+      "subcounties": [
+        "Kibuli",
+        "Mengo",
+        "Nakasero",
+        "Kawempe",
+        "Bwaise",
+        "Makerere",
+        "Makindye",
+        "Kibuye",
+        "Katwe",
+        "Nakawa",
+        "Ntinda",
+        "Luzira",
+        "Rubaga",
+        "Nateete",
+        "Busega"
+      ]
+    },
+    "mukono": {
+      "label": "Mukono",
+      "subcounties": [
+        "Nakisunga",
+        "Kyampisi",
+        "Mpatta",
+        "Mpunge",
+        "Koome",
+        "Kasawo",
+        "Ntunda",
+        "Goma",
+        "Central"
+      ]
+    }
+  }
+}
