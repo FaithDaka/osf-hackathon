@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import BottomNav from '../lib/bottom-nav';
 import { getAnnouncements } from '../lib/announcement-store';
 import { speakText, stopSpeaking } from '../lib/speech';
 import annData from '../data/announcements.json';
@@ -125,7 +126,7 @@ export default function Announcements() {
     const detail = annData.items.find((a) => a.id === id);
     if (!detail) {
       return (
-        <main className="min-h-screen bg-ac-bg p-4">
+        <main className="min-h-screen bg-ac-bg p-4 pb-24">
           <div className="max-w-md mx-auto text-center">
             <p className="font-bold">{S.not_found.replace('{location}', id)}</p>
             <Link
@@ -135,13 +136,14 @@ export default function Announcements() {
               ← {S.announcements}
             </Link>
           </div>
+          <BottomNav active={router.pathname} lang={lang} strings={S} />
         </main>
       );
     }
     const title = detail.title[lang] || detail.title.en;
     const body = detail.description[lang] || detail.description.en;
     return (
-      <main className="min-h-screen bg-ac-bg p-4">
+      <main className="min-h-screen bg-ac-bg p-4 pb-24">
         <div className="max-w-md mx-auto">
           <Link
             href={`/announcements?lang=${lang}`}
@@ -232,6 +234,7 @@ export default function Announcements() {
             </div>
           </div>
         )}
+        <BottomNav active={router.pathname} lang={lang} strings={S} />
       </main>
     );
   }
@@ -250,7 +253,7 @@ export default function Announcements() {
   });
 
   return (
-    <main className="min-h-screen bg-ac-bg p-4">
+    <main className="min-h-screen bg-ac-bg p-4 pb-24">
       <div className="max-w-md mx-auto">
         <Link
           href={`/home?lang=${lang}`}
@@ -347,6 +350,7 @@ export default function Announcements() {
           })}
         </div>
       </div>
+      <BottomNav active={router.pathname} lang={lang} strings={S} />
     </main>
   );
 }
