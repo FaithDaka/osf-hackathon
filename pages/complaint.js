@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import BottomNav from '../lib/bottom-nav';
 import {
   fileComplaint,
   getAllComplaints,
@@ -156,7 +157,7 @@ export default function Complaint() {
     const c = getComplaint(refParam);
     if (!c) {
       return (
-        <main className="min-h-screen bg-ac-bg p-4">
+        <main className="min-h-screen bg-ac-bg p-4 pb-24">
           <div className="max-w-md mx-auto text-center">
             <p className="font-bold">{S.not_found.replace('{location}', refParam)}</p>
             <Link
@@ -167,6 +168,7 @@ export default function Complaint() {
             </Link>
           </div>
           <Toast message={toast} />
+          <BottomNav active={router.pathname} lang={lang} strings={S} />
         </main>
       );
     }
@@ -206,7 +208,7 @@ export default function Complaint() {
     };
 
     return (
-      <main className="min-h-screen bg-ac-bg p-4">
+      <main className="min-h-screen bg-ac-bg p-4 pb-24">
         <div className="max-w-md mx-auto">
           <Link
             href={`/complaint?lang=${lang}`}
@@ -291,13 +293,14 @@ export default function Complaint() {
           </div>
         </div>
         <Toast message={toast} />
+        <BottomNav active={router.pathname} lang={lang} strings={S} />
       </main>
     );
   }
 
   // ---------------- LIST + FORM ----------------
   return (
-    <main className="min-h-screen bg-ac-bg p-4">
+    <main className="min-h-screen bg-ac-bg p-4 pb-24">
       <div className="max-w-md mx-auto">
         <Link
           href={`/home?lang=${lang}`}
@@ -517,6 +520,7 @@ export default function Complaint() {
         )}
       </div>
       <Toast message={toast} />
+      <BottomNav active={router.pathname} lang={lang} strings={S} />
     </main>
   );
 }

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import BottomNav from '../lib/bottom-nav';
 import {
   answerQuestion,
   calculateParishRank,
@@ -167,7 +168,7 @@ function QuizResults({
   };
 
   return (
-    <main className="min-h-screen bg-ac-bg p-4">
+    <main className="min-h-screen bg-ac-bg p-4 pb-24">
       <div className="max-w-md mx-auto text-center">
         <h1 className="text-lg font-bold">{title}</h1>
         <p className="mt-2 font-bold" style={{ fontSize: '32px' }} aria-live="polite">
@@ -311,6 +312,7 @@ function QuizResults({
             </div>
           </div>
         )}
+        <BottomNav active="/quiz" lang={lang} strings={S} />
       </main>
     );
   }
@@ -378,7 +380,7 @@ export default function Quiz() {
   if (!quizId) {
     const list = quizzesData.quizzes.filter((q) => !district || q.district === district);
     return (
-      <main className="min-h-screen bg-ac-bg p-4">
+      <main className="min-h-screen bg-ac-bg p-4 pb-24">
         <div className="max-w-md mx-auto">
           <Link
             href={`/home?lang=${lang}`}
@@ -444,13 +446,14 @@ export default function Quiz() {
             </p>
           </div>
         </div>
+        <BottomNav active="/quiz" lang={lang} strings={S} />
       </main>
     );
   }
 
   if (!quiz) {
     return (
-      <main className="min-h-screen bg-ac-bg p-4">
+      <main className="min-h-screen bg-ac-bg p-4 pb-24">
         <div className="max-w-md mx-auto text-center">
           <p className="font-bold">{S.not_found.replace('{location}', quizId)}</p>
           <Link
@@ -460,6 +463,7 @@ export default function Quiz() {
             ← {S.quiz}
           </Link>
         </div>
+        <BottomNav active="/quiz" lang={lang} strings={S} />
       </main>
     );
   }
@@ -506,7 +510,7 @@ export default function Quiz() {
   };
 
   return (
-    <main className="min-h-screen bg-ac-bg p-4">
+    <main className="min-h-screen bg-ac-bg p-4 pb-24">
       <div className="max-w-md mx-auto">
         <Link
           href={`/quiz?lang=${lang}`}
@@ -575,6 +579,7 @@ export default function Quiz() {
           </div>
         )}
       </div>
+      <BottomNav active="/quiz" lang={lang} strings={S} />
     </main>
   );
 }

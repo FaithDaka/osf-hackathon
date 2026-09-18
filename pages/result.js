@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import BottomNav from '../lib/bottom-nav';
 import { composeResponse, match, verify } from '../lib/matcher';
 import lga from '../data/national/lga_mandates.json';
 import landAct from '../data/national/land_act.json';
@@ -111,7 +112,7 @@ export default function Result() {
       return subOk && parOk;
     });
     return (
-      <main className="min-h-screen bg-ac-bg p-4">
+      <main className="min-h-screen bg-ac-bg p-4 pb-24">
         <div className="max-w-md mx-auto">
           <Link
             href={backHref}
@@ -195,6 +196,7 @@ export default function Result() {
           </div>
         </div>
         <Toast message={toast} />
+        <BottomNav active="" lang={lang} strings={S} />
       </main>
     );
   }
@@ -211,7 +213,7 @@ export default function Result() {
 
   if (!entry) {
     return (
-      <main className="min-h-screen bg-ac-bg p-4">
+      <main className="min-h-screen bg-ac-bg p-4 pb-24">
         <div className="max-w-md mx-auto">
           <Link
             href={backHref}
@@ -238,6 +240,7 @@ export default function Result() {
             </a>
           </div>
         </div>
+        <BottomNav active="" lang={lang} strings={S} />
       </main>
     );
   }
@@ -296,7 +299,7 @@ export default function Result() {
     `&district=${entry.district === 'national' ? district : entry.district}`;
 
   return (
-    <main className="min-h-screen bg-ac-bg p-4">
+    <main className="min-h-screen bg-ac-bg p-4 pb-24">
       <div className="max-w-md mx-auto">
         <Link
           href={backHref}
@@ -477,6 +480,7 @@ export default function Result() {
         </div>
       </div>
       <Toast message={toast} />
+      <BottomNav active="" lang={lang} strings={S} />
     </main>
   );
 }

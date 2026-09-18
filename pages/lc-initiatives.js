@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import BottomNav from '../lib/bottom-nav';
 import { getInitiatives, rateInitiative } from '../lib/lc-initiative-store';
 import { fileComplaint } from '../lib/complaint-store';
 import initiativesData from '../data/lc-initiatives.json';
@@ -137,7 +138,7 @@ export default function Initiatives() {
   };
 
   return (
-    <main className="min-h-screen bg-ac-bg p-4">
+    <main className="min-h-screen bg-ac-bg p-4 pb-24">
       <div className="max-w-md mx-auto">
         <Link
           href={`/home?lang=${lang}`}
@@ -378,6 +379,7 @@ export default function Initiatives() {
           </div>
         </div>
       )}
+      <BottomNav active={router.pathname} lang={lang} strings={S} />
     </main>
   );
 }

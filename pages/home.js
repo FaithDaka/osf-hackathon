@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { setLang, t } from '../lib/i18n';
+import BottomNav from '../lib/bottom-nav';
 import { getActiveAnnouncements } from '../lib/announcement-store';
 import {
   advanceWalkthrough,
@@ -306,22 +307,7 @@ export default function Home() {
     speak(labelOf(current.id), lang, getAudioFile(walk, categories, lang));
   };
 
-  const nav = (path, tabLabel) => {
-    const active = router.pathname === path;
-    return (
-      <Link
-        key={path}
-        href={`${path}?lang=${lang}`}
-        aria-label={tabLabel}
-        aria-current={active ? 'page' : undefined}
-        className={`flex-1 text-center py-3 min-h-[48px] ${
-          active ? 'text-primary font-bold underline' : 'text-ac-muted'
-        }`}
-      >
-        {tabLabel}
-      </Link>
-    );
-  };
+  // Bottom tabs live in lib/bottom-nav.js (shared dark bar).
 
   // Sub-county prompt after tapping a category (?cat=).
   // Sub-counties come from a dropdown driven by the selected district.
@@ -378,6 +364,7 @@ export default function Home() {
             ← {S.no}
           </Link>
         </div>
+        <BottomNav active={router.pathname} lang={lang} strings={S} />
       </main>
     );
   }
@@ -736,18 +723,7 @@ export default function Home() {
       </div>
 
       {/* BOTTOM NAV */}
-      <nav
-        role="navigation"
-        aria-label="Main"
-        className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-300"
-      >
-        <div className="max-w-md mx-auto flex">
-          {nav('/home', `🏠 ${S.app_name}`)}
-          {nav('/announcements', `📢 ${S.announcements}`)}
-          {nav('/complaint', `📋 ${S.file_complaint}`)}
-          {nav('/quiz', `❓ ${S.quiz}`)}
-        </div>
-      </nav>
+      <BottomNav active={router.pathname} lang={lang} strings={S} />
     </main>
   );
 }
