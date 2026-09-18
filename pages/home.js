@@ -166,7 +166,7 @@ function speak(text, lang, audioPath) {
     }
     if (audioPath) {
       const audio = new Audio(audioPath);
-      audio.play().catch(() => {});
+      audio.play().catch(() => { });
     }
   } catch {
     // Audio unavailable — highlight still communicates the option.
@@ -374,13 +374,13 @@ export default function Home() {
       <div className="max-w-md mx-auto">
         {/* HEADER — darker than the page, no unnecessary borders */}
         <header className="bg-primary-soft -mx-4 -mt-4 px-4 pt-4 pb-3">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1 min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-start gap-1 min-w-0 flex-1 mt-2">
               <ShieldLogo />
               <span className="relative min-w-0 w-fit max-w-full">
                 <span
                   className="block truncate text-ink font-bold"
-                  style={{ fontSize: '24px', lineHeight: '1.2', letterSpacing:'-0.5px' }}
+                  style={{ fontSize: '24px', lineHeight: '1.2', letterSpacing: '-0.5px' }}
                 >
                   {S.app_name}
                 </span>
@@ -400,18 +400,17 @@ export default function Home() {
               </span>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <button
+              <div className="flex flex-col justify-end items-end"><button
                 type="button"
                 role="switch"
                 aria-checked={accessible}
                 aria-label={S.accessibility_mode}
                 title={S.accessibility_mode}
                 onClick={toggleAccessibility}
-                className={`relative rounded-full outline-none focus:outline-none focus-visible:outline-none border border-line ${
-                  accessible
-                    ? 'bg-secondary'
-                    : 'bg-white border border-line shadow-sm'
-                }`}
+                className={`relative rounded-full outline-none focus:outline-none focus-visible:outline-none border border-line ${accessible
+                  ? 'bg-secondary'
+                  : 'bg-white border border-line shadow-sm'
+                  }`}
                 style={{ width: '52px', height: '32px' }}
               >
                 <span
@@ -426,76 +425,76 @@ export default function Home() {
                   <SpeakerIcon size={16} />
                 </span>
               </button>
-              <span ref={langRef} className="relative inline-flex items-center">
-                <button
-                  type="button"
-                  aria-haspopup="listbox"
-                  aria-expanded={langOpen}
-                  aria-label="Switch language"
-                  onClick={() => setLangOpen((o) => !o)}
-                  className="inline-flex items-center bg-transparent border-0 outline-none focus:outline-none focus-visible:outline-none text-primary font-semibold rounded-full cursor-pointer"
-                  style={{ fontSize: '14px', minHeight: '48px' }}
-                >
-                  <span aria-hidden="true" style={{ fontSize: '14px' }}>
-                    🌐
-                  </span>
-                  <span style={{ paddingLeft: '4px', paddingRight: '4px' }}>
-                    {lang.toUpperCase()} · {LANG_LABELS[lang]}
-                  </span>
-                  <ChevronDownIcon size={12} />
-                </button>
-                {langOpen && (
-                  <span
-                    role="listbox"
+                <span ref={langRef} className="relative inline-flex items-center">
+                  <button
+                    type="button"
+                    aria-haspopup="listbox"
+                    aria-expanded={langOpen}
                     aria-label="Switch language"
-                    className="absolute right-0 top-full mt-1 z-50 block bg-white shadow-lg overflow-hidden"
-                    style={{ minWidth: '168px', borderRadius: '12px' }}
+                    onClick={() => setLangOpen((o) => !o)}
+                    className="inline-flex items-center bg-transparent border-0 outline-none focus:outline-none focus-visible:outline-none text-primary font-semibold rounded-full cursor-pointer"
+                    style={{ fontSize: '14px', minHeight: '48px' }}
                   >
-                    {LANGS.map((code) => {
-                      const selected = code === lang;
-                      return (
-                        <button
-                          key={code}
-                          type="button"
-                          role="option"
-                          aria-selected={selected}
-                          onClick={() => {
-                            setLangOpen(false);
-                            switchLang(code);
-                          }}
-                          className={`flex items-center gap-2 w-full text-left bg-white text-primary font-semibold hover:bg-primary-soft focus:bg-primary-soft focus:outline-none focus-visible:outline-none ${
-                            selected ? 'font-extrabold' : ''
-                          }`}
-                          style={{
-                            fontSize: '16px',
-                            minHeight: '36px',
-                            paddingLeft: '16px',
-                            paddingRight: '16px',
-                          }}
-                        >
-                          <span
-                            aria-hidden="true"
+                    <span aria-hidden="true" style={{ fontSize: '14px' }}>
+                      🌐
+                    </span>
+                    <span style={{ paddingLeft: '4px', paddingRight: '4px' }}>
+                      {lang.toUpperCase()} · {LANG_LABELS[lang]}
+                    </span>
+                    <ChevronDownIcon size={12} />
+                  </button>
+                  {langOpen && (
+                    <span
+                      role="listbox"
+                      aria-label="Switch language"
+                      className="absolute right-0 top-full mt-1 z-50 block bg-white shadow-lg overflow-hidden"
+                      style={{ minWidth: '168px', borderRadius: '12px' }}
+                    >
+                      {LANGS.map((code) => {
+                        const selected = code === lang;
+                        return (
+                          <button
+                            key={code}
+                            type="button"
+                            role="option"
+                            aria-selected={selected}
+                            onClick={() => {
+                              setLangOpen(false);
+                              switchLang(code);
+                            }}
+                            className={`flex items-center gap-2 w-full text-left bg-white text-primary font-semibold hover:bg-primary-soft focus:bg-primary-soft focus:outline-none focus-visible:outline-none ${selected ? 'font-extrabold' : ''
+                              }`}
                             style={{
-                              width: '20px',
-                              visibility: selected ? 'visible' : 'hidden',
+                              fontSize: '16px',
+                              minHeight: '36px',
+                              paddingLeft: '16px',
+                              paddingRight: '16px',
                             }}
                           >
-                            ✓
-                          </span>
-                          {code.toUpperCase()} · {LANG_LABELS[code]}
-                        </button>
-                      );
-                    })}
-                  </span>
-                )}
-              </span>
+                            <span
+                              aria-hidden="true"
+                              style={{
+                                width: '20px',
+                                visibility: selected ? 'visible' : 'hidden',
+                              }}
+                            >
+                              ✓
+                            </span>
+                            {code.toUpperCase()} · {LANG_LABELS[code]}
+                          </button>
+                        );
+                      })}
+                    </span>
+                  )}
+                </span></div>
+
             </div>
           </div>
 
           {/* DISTRICT CAROUSEL — small chips, horizontally scrollable,
               scrollbar hidden */}
           <div
-            className="no-scrollbar mt-2 flex gap-2 overflow-x-auto pb-1 pt-4"
+            className="no-scrollbar mt-2 flex gap-2 overflow-x-auto pb-1 pt-2"
             role="group"
             aria-label="District"
           >
@@ -507,11 +506,10 @@ export default function Home() {
                   type="button"
                   aria-pressed={active}
                   onClick={() => pickDistrict(d.code)}
-                  className={`shrink-0 whitespace-nowrap rounded-full px-4 font-semibold ${
-                    active
+                  className={`shrink-0 whitespace-nowrap rounded-full px-4 font-semibold ${active
                       ? 'bg-primary text-white'
                       : 'bg-white text-primary border border-primary'
-                  }`}
+                    }`}
                   style={{ minHeight: '36px', fontSize: '14px' }}
                 >
                   {d.label}
@@ -545,9 +543,8 @@ export default function Home() {
                   key={a.id}
                   href={`/announcements?id=${a.id}&lang=${lang}`}
                   aria-label={a.title[lang] || a.title.en}
-                  className={`shrink-0 w-56 bg-white rounded-lg shadow-sm p-3 border-l-4 text-left ${
-                    SEVERITY_BORDER[a.severity] || SEVERITY_BORDER.info
-                  }`}
+                  className={`shrink-0 w-56 bg-white rounded-lg shadow-sm p-3 border-l-4 text-left ${SEVERITY_BORDER[a.severity] || SEVERITY_BORDER.info
+                    }`}
                 >
                   <div className="text-lg" aria-hidden="true">
                     {TYPE_ICON[a.type] || '📢'}
@@ -579,11 +576,10 @@ export default function Home() {
                       <div
                         key={c.id}
                         aria-current={active ? 'true' : undefined}
-                        className={`rounded-lg p-6 ${
-                          active
+                        className={`rounded-lg p-6 ${active
                             ? 'bg-primary text-white font-bold opacity-100'
                             : 'bg-white text-ac-muted opacity-[0.15]'
-                        }`}
+                          }`}
                         style={{ fontSize: active ? '24px' : '16px' }}
                       >
                         {CATEGORY_ICONS[c.id] || '📦'} {labelOf(c.id)}
@@ -657,9 +653,8 @@ export default function Home() {
                   key={c.id}
                   href={`/home?cat=${c.id}&lang=${lang}`}
                   aria-label={labelOf(c.id)}
-                  className={`bg-white rounded-lg shadow-sm p-4 min-h-[80px] flex flex-col justify-center ${
-                    i === categories.length - 1 ? 'col-span-2' : ''
-                  }`}
+                  className={`bg-white rounded-lg shadow-sm p-4 min-h-[80px] flex flex-col justify-center ${i === categories.length - 1 ? 'col-span-2' : ''
+                    }`}
                 >
                   <span className="text-2xl" aria-hidden="true">
                     {CATEGORY_ICONS[c.id] || '📦'}
