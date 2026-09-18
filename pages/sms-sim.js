@@ -92,7 +92,7 @@ export default function SmsSim() {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        fontFamily: 'system-ui, sans-serif',
+        fontFamily: "'Public Sans', system-ui, sans-serif",
       }}
     >
       <style>{`

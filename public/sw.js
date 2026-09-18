@@ -32,6 +32,10 @@ const PRECACHE = [
   '/i18n/en.json',
   '/i18n/lg.json',
   '/i18n/sw.json',
+  '/fonts/public-sans-latin-wght-normal.woff2',
+  '/fonts/public-sans-latin-ext-wght-normal.woff2',
+  '/fonts/public-sans-latin-wght-italic.woff2',
+  '/fonts/public-sans-latin-ext-wght-italic.woff2',
 ];
 
 self.addEventListener('install', (event) => {

@@ -48,6 +48,22 @@ export default function App({ Component, pageProps }) {
         <link rel="manifest" href="/manifest.json" />
         <link rel="icon" href="/icons/icon-192.png" />
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+        {/* Public Sans variable (self-hosted) — preload the latin subset so
+            first paint uses the brand font; latin-ext loads on demand. */}
+        <link
+          rel="preload"
+          href="/fonts/public-sans-latin-wght-normal.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/public-sans-latin-ext-wght-normal.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
       </Head>
       <Component {...pageProps} />
     </>
