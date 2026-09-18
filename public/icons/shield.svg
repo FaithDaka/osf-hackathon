@@ -5,11 +5,7 @@
   <!-- Checkmark -->
   <path d="M186 262 L238 314 L330 210" fill="none" stroke="#FAFAFA" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
-<!-- AUTHOR NOTE: convert this SVG to PNGs for the PWA manifest:
-     icons/icon-192.png (192x192) and icons/icon-512.png (512x512).
-     Example (no Node native deps needed, uses macOS sips or any SVG→PNG tool):
-       sips -s format png -z 192 192 public/icons/shield.svg --out public/icons/icon-192.png
-       sips -s format png -z 512 512 public/icons/shield.svg --out public/icons/icon-512.png
-     Or: rsvg-convert -w 192 -h 192 shield.svg -o icon-192.png
-     A Node script (scripts/make-icons.mjs, pure zlib, no deps) also generates
-     placeholder PNGs if a converter is unavailable. -->
+<!-- SUPERSEDED: public/icons/icon.svg (person holding a microphone) is now
+     the source of truth for icons/icon-192.png and icons/icon-512.png.
+     Regenerate with: node scripts/make-icons.mjs
+     (this shield is kept for reference only — do NOT convert it over the PNGs). -->
