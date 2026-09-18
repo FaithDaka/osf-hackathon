@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { setLang, t } from '../lib/i18n';
 import BottomNav from '../lib/bottom-nav';
-import { t } from '../lib/i18n';
 import { getActiveAnnouncements } from '../lib/announcement-store';
 import {
   advanceWalkthrough,
@@ -20,11 +20,101 @@ import swStrings from '../public/i18n/sw.json';
 
 const UI = { en: enStrings, lg: lgStrings, sw: swStrings };
 const LANGS = ['en', 'lg', 'sw'];
+const LANG_LABELS = { en: 'English', lg: 'Luganda', sw: 'Swahili' };
 const DISTRICTS = [
   { code: 'kampala', label: 'Kampala' },
   { code: 'mukono', label: 'Mukono' },
 ];
-const TOLL_FREE = '0800-225-8424';
+// Supported districts are selectable; the rest preview as muted,
+// non-clickable chips in the same horizontal carousel.
+const UPCOMING_DISTRICTS = [
+  { code: 'wakiso', label: 'Wakiso' },
+  { code: 'jinja', label: 'Jinja' },
+  { code: 'gulu', label: 'Gulu' },
+  { code: 'mbarara', label: 'Mbarara' },
+];
+
+function ShieldLogo() {
+  return (
+    <svg width="32" height="32" viewBox="0 0 512 512" role="img" aria-label="AlertCitizen logo">
+      <rect width="512" height="512" rx="96" fill="#5B2D8E" />
+      <path
+        d="M256 72 L408 136 V264 C408 356 336 420 256 448 C176 420 104 356 104 264 V136 Z"
+        fill="none"
+        stroke="#F5F1FA"
+        strokeWidth="28"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M186 262 L238 314 L330 210"
+        fill="none"
+        stroke="#F5F1FA"
+        strokeWidth="34"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+// Downward chevron for the language dropdown trigger.
+function ChevronDownIcon({ size = 12 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 16 16"
+      role="img"
+      aria-hidden="true"
+      className="shrink-0"
+    >
+      <path
+        d="M3.5 6 L8 10.5 L12.5 6"
+        fill="none"
+        stroke="#5B2D8E"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+// Speaker icon for the accessibility toggle: person silhouette + speech
+// sound waves, matching the intro page. Compact size fits the toggle knob.
+function SpeakerIcon({ size = 16 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 48 48"
+      role="img"
+      aria-hidden="true"
+      className="shrink-0"
+    >
+      <circle cx="17" cy="14" r="7" fill="#5B2D8E" />
+      <path
+        d="M4 40c0-8 6-13 13-13s13 5 13 13v1H4v-1z"
+        fill="#5B2D8E"
+      />
+      <path
+        d="M33 16c2.5 2.3 2.5 5.7 0 8"
+        fill="none"
+        stroke="#5B2D8E"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+      <path
+        d="M37 12c4.5 4 4.5 10 0 14"
+        fill="none"
+        stroke="#5B2D8E"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+const TOLL_FREE = '0800-ALERT';
 
 const CATEGORY_ICONS = {
   public_services: '🏛️',
@@ -76,7 +166,7 @@ function speak(text, lang, audioPath) {
     }
     if (audioPath) {
       const audio = new Audio(audioPath);
-      audio.play().catch(() => {});
+      audio.play().catch(() => { });
     }
   } catch {
     // Audio unavailable — highlight still communicates the option.
@@ -94,7 +184,28 @@ export default function Home() {
   const [query, setQuery] = useState('');
   const [subcounty, setSubcounty] = useState('');
   const [walk, setWalk] = useState(() => createWalkthroughState());
+  const [langOpen, setLangOpen] = useState(false);
   const announcedRef = useRef('');
+  const langRef = useRef(null);
+
+  // Close the custom language menu on outside tap / Escape.
+  useEffect(() => {
+    if (!langOpen) return;
+    const onPointer = (e) => {
+      if (langRef.current && !langRef.current.contains(e.target)) {
+        setLangOpen(false);
+      }
+    };
+    const onKey = (e) => {
+      if (e.key === 'Escape') setLangOpen(false);
+    };
+    document.addEventListener('pointerdown', onPointer);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', onPointer);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [langOpen]);
 
   // Restore persisted prefs (client only).
   useEffect(() => {
@@ -141,6 +252,32 @@ export default function Home() {
     speak(labelOf(current.id), lang, getAudioFile(walk, categories, lang));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessible, walk.currentIndex, walk.finished, lang]);
+
+  const toggleAccessibility = () => {
+    const next = !accessible;
+    setAccessible(next);
+    try {
+      localStorage.setItem('ac_accessibility', next ? 'true' : 'false');
+    } catch {
+      // Ignore storage errors.
+    }
+  };
+
+  const switchLang = (next) => {
+    if (!LANGS.includes(next) || next === lang) return;
+    setLang(next);
+    try {
+      const params = new URLSearchParams({
+        ...Object.fromEntries(
+          Object.entries(router.query).map(([k, v]) => [k, String(v)]),
+        ),
+        lang: next,
+      });
+      router.push(`/home?${params.toString()}`);
+    } catch {
+      router.push(`/home?lang=${next}`);
+    }
+  };
 
   const goResult = (q, sc) => {
     if (sc) {
@@ -235,38 +372,163 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-ac-bg p-4 pb-24">
       <div className="max-w-md mx-auto">
-        {/* TOP BAR */}
-        <div className="flex items-center justify-between">
-          <span className="text-primary font-bold" style={{ fontSize: '16px' }}>
-            {S.app_name}
-          </span>
-          <Link
-            href="/"
-            aria-label="Switch language"
-            className="inline-flex items-center justify-center rounded-lg border border-primary min-h-[48px] min-w-[48px]"
-          >
-            🌐
-          </Link>
-        </div>
+        {/* HEADER — darker than the page, no unnecessary borders */}
+        <header className="bg-primary-soft -mx-4 -mt-4 px-4 pt-4 pb-3">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-start gap-1 min-w-0 flex-1 mt-2">
+              <ShieldLogo />
+              <span className="relative min-w-0 w-fit max-w-full">
+                <span
+                  className="block truncate text-ink font-bold"
+                  style={{ fontSize: '24px', lineHeight: '1.2', letterSpacing: '-0.5px' }}
+                >
+                  {S.app_name}
+                </span>
+                <span
+                  aria-label="Proof of concept"
+                  title="Proof of concept"
+                  className="absolute -top-2 left-24 ml-1 whitespace-nowrap rounded-full bg-amber-soft text-amber font-extrabold uppercase"
+                  style={{
+                    fontSize: '10px',
+                    letterSpacing: '0.06em',
+                    padding: '2px 6px',
+                    lineHeight: '1.2',
+                  }}
+                >
+                  PoC
+                </span>
+              </span>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <div className="flex flex-col justify-end items-end"><button
+                type="button"
+                role="switch"
+                aria-checked={accessible}
+                aria-label={S.accessibility_mode}
+                title={S.accessibility_mode}
+                onClick={toggleAccessibility}
+                className={`relative rounded-full outline-none focus:outline-none focus-visible:outline-none border border-line ${accessible
+                  ? 'bg-secondary'
+                  : 'bg-white border border-line shadow-sm'
+                  }`}
+                style={{ width: '52px', height: '32px' }}
+              >
+                <span
+                  aria-hidden="true"
+                  className="absolute top-[2px] rounded-full bg-white shadow-sm flex items-center justify-center"
+                  style={{
+                    width: '26px',
+                    height: '26px',
+                    left: accessible ? '23px' : '2px',
+                  }}
+                >
+                  <SpeakerIcon size={16} />
+                </span>
+              </button>
+                <span ref={langRef} className="relative inline-flex items-center">
+                  <button
+                    type="button"
+                    aria-haspopup="listbox"
+                    aria-expanded={langOpen}
+                    aria-label="Switch language"
+                    onClick={() => setLangOpen((o) => !o)}
+                    className="inline-flex items-center bg-transparent border-0 outline-none focus:outline-none focus-visible:outline-none text-primary font-semibold rounded-full cursor-pointer"
+                    style={{ fontSize: '14px', minHeight: '48px' }}
+                  >
+                    <span aria-hidden="true" style={{ fontSize: '14px' }}>
+                      🌐
+                    </span>
+                    <span style={{ paddingLeft: '4px', paddingRight: '4px' }}>
+                      {lang.toUpperCase()} · {LANG_LABELS[lang]}
+                    </span>
+                    <ChevronDownIcon size={12} />
+                  </button>
+                  {langOpen && (
+                    <span
+                      role="listbox"
+                      aria-label="Switch language"
+                      className="absolute right-0 top-full mt-1 z-50 block bg-white shadow-lg overflow-hidden"
+                      style={{ minWidth: '168px', borderRadius: '12px' }}
+                    >
+                      {LANGS.map((code) => {
+                        const selected = code === lang;
+                        return (
+                          <button
+                            key={code}
+                            type="button"
+                            role="option"
+                            aria-selected={selected}
+                            onClick={() => {
+                              setLangOpen(false);
+                              switchLang(code);
+                            }}
+                            className={`flex items-center gap-2 w-full text-left bg-white text-primary font-semibold hover:bg-primary-soft focus:bg-primary-soft focus:outline-none focus-visible:outline-none ${selected ? 'font-extrabold' : ''
+                              }`}
+                            style={{
+                              fontSize: '16px',
+                              minHeight: '36px',
+                              paddingLeft: '16px',
+                              paddingRight: '16px',
+                            }}
+                          >
+                            <span
+                              aria-hidden="true"
+                              style={{
+                                width: '20px',
+                                visibility: selected ? 'visible' : 'hidden',
+                              }}
+                            >
+                              ✓
+                            </span>
+                            {code.toUpperCase()} · {LANG_LABELS[code]}
+                          </button>
+                        );
+                      })}
+                    </span>
+                  )}
+                </span></div>
 
-        {/* DISTRICT SELECTOR */}
-        <div className="mt-2 flex gap-2" role="group" aria-label="District">
-          {DISTRICTS.map((d) => (
-            <button
-              key={d.code}
-              type="button"
-              aria-pressed={district === d.code}
-              onClick={() => pickDistrict(d.code)}
-              className={`btn-ac flex-1 rounded-lg border-2 ${
-                district === d.code
-                  ? 'bg-primary text-white border-primary'
-                  : 'bg-white text-primary border-primary'
-              }`}
-            >
-              {d.label}
-            </button>
-          ))}
-        </div>
+            </div>
+          </div>
+
+          {/* DISTRICT CAROUSEL — small chips, horizontally scrollable,
+              scrollbar hidden */}
+          <div
+            className="no-scrollbar mt-2 flex gap-2 overflow-x-auto pb-1 pt-2"
+            role="group"
+            aria-label="District"
+          >
+            {DISTRICTS.map((d) => {
+              const active = district === d.code;
+              return (
+                <button
+                  key={d.code}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => pickDistrict(d.code)}
+                  className={`shrink-0 whitespace-nowrap rounded-full px-4 font-semibold ${active
+                      ? 'bg-primary text-white'
+                      : 'bg-white text-primary border border-primary'
+                    }`}
+                  style={{ minHeight: '36px', fontSize: '14px' }}
+                >
+                  {d.label}
+                </button>
+              );
+            })}
+            {UPCOMING_DISTRICTS.map((d) => (
+              <span
+                key={d.code}
+                aria-disabled="true"
+                title={`${d.label} — coming soon`}
+                className="shrink-0 whitespace-nowrap rounded-full px-4 bg-black/5 text-ac-muted opacity-60 cursor-not-allowed inline-flex items-center"
+                style={{ minHeight: '36px', fontSize: '14px' }}
+              >
+                {d.label}
+              </span>
+            ))}
+          </div>
+        </header>
 
         {/* ANNOUNCEMENTS STRIP */}
         {announcements.length > 0 && (
@@ -281,9 +543,8 @@ export default function Home() {
                   key={a.id}
                   href={`/announcements?id=${a.id}&lang=${lang}`}
                   aria-label={a.title[lang] || a.title.en}
-                  className={`shrink-0 w-56 bg-white rounded-lg shadow-sm p-3 border-l-4 text-left ${
-                    SEVERITY_BORDER[a.severity] || SEVERITY_BORDER.info
-                  }`}
+                  className={`shrink-0 w-56 bg-white rounded-lg shadow-sm p-3 border-l-4 text-left ${SEVERITY_BORDER[a.severity] || SEVERITY_BORDER.info
+                    }`}
                 >
                   <div className="text-lg" aria-hidden="true">
                     {TYPE_ICON[a.type] || '📢'}
@@ -315,11 +576,10 @@ export default function Home() {
                       <div
                         key={c.id}
                         aria-current={active ? 'true' : undefined}
-                        className={`rounded-lg p-6 ${
-                          active
+                        className={`rounded-lg p-6 ${active
                             ? 'bg-primary text-white font-bold opacity-100'
                             : 'bg-white text-ac-muted opacity-[0.15]'
-                        }`}
+                          }`}
                         style={{ fontSize: active ? '24px' : '16px' }}
                       >
                         {CATEGORY_ICONS[c.id] || '📦'} {labelOf(c.id)}
@@ -393,9 +653,8 @@ export default function Home() {
                   key={c.id}
                   href={`/home?cat=${c.id}&lang=${lang}`}
                   aria-label={labelOf(c.id)}
-                  className={`bg-white rounded-lg shadow-sm p-4 min-h-[80px] flex flex-col justify-center ${
-                    i === categories.length - 1 ? 'col-span-2' : ''
-                  }`}
+                  className={`bg-white rounded-lg shadow-sm p-4 min-h-[80px] flex flex-col justify-center ${i === categories.length - 1 ? 'col-span-2' : ''
+                    }`}
                 >
                   <span className="text-2xl" aria-hidden="true">
                     {CATEGORY_ICONS[c.id] || '📦'}

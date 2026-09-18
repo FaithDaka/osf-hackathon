@@ -181,6 +181,15 @@
   }
 }
 
+/* Hide scrollbars on horizontal carousels while keeping them scrollable. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* Subtle dot-grid page pattern for the start page (inline SVG tile,
    ~180 bytes — no extra asset, no gradients). */
 .ac-pattern {
