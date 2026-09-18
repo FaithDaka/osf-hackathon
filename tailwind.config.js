@@ -53,6 +53,21 @@ module.exports = {
         // 18px base for low-vision users (not the 16px default).
         base: '18px',
       },
+      fontFamily: {
+        // Global brand font — self-hosted Public Sans variable (see
+        // styles/globals.css @font-face). System stack is the fallback for
+        // first paint (font-display: swap) and offline edge cases.
+        sans: [
+          '"Public Sans"',
+          'system-ui',
+          '-apple-system',
+          '"Segoe UI"',
+          'Roboto',
+          '"Helvetica Neue"',
+          'Arial',
+          'sans-serif',
+        ],
+      },
     },
   },
   // No animation / transition utilities by default; any residual
