@@ -13,19 +13,19 @@ const TOLL_FREE = '0800-225-8424';
 
 function ShieldLogo() {
   return (
-    <svg width="56" height="56" viewBox="0 0 512 512" role="img" aria-label="AlertCitizen logo">
-      <rect width="512" height="512" rx="96" fill="#1B5E20" />
+    <svg width="40" height="40" viewBox="0 0 512 512" role="img" aria-label="AlertCitizen logo">
+      <rect width="512" height="512" rx="96" fill="#5B2D8E" />
       <path
         d="M256 72 L408 136 V264 C408 356 336 420 256 448 C176 420 104 356 104 264 V136 Z"
         fill="none"
-        stroke="#FAFAFA"
+        stroke="#F5F1FA"
         strokeWidth="28"
         strokeLinejoin="round"
       />
       <path
         d="M186 262 L238 314 L330 210"
         fill="none"
-        stroke="#FAFAFA"
+        stroke="#F5F1FA"
         strokeWidth="34"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -46,29 +46,29 @@ function SpeakingUserIcon() {
       aria-hidden="true"
       className="shrink-0"
     >
-      <circle cx="17" cy="14" r="7" fill="#1B5E20" />
+      <circle cx="17" cy="14" r="7" fill="#5B2D8E" />
       <path
         d="M4 40c0-8 6-13 13-13s13 5 13 13v1H4v-1z"
-        fill="#1B5E20"
+        fill="#5B2D8E"
       />
       <path
         d="M33 16c2.5 2.3 2.5 5.7 0 8"
         fill="none"
-        stroke="#1B5E20"
+        stroke="#5B2D8E"
         strokeWidth="2.5"
         strokeLinecap="round"
       />
       <path
         d="M37 12c4.5 4 4.5 10 0 14"
         fill="none"
-        stroke="#1B5E20"
+        stroke="#5B2D8E"
         strokeWidth="2.5"
         strokeLinecap="round"
       />
       <path
         d="M41 8c6.5 5.8 6.5 14.2 0 20"
         fill="none"
-        stroke="#1B5E20"
+        stroke="#5B2D8E"
         strokeWidth="2.5"
         strokeLinecap="round"
       />
@@ -201,14 +201,14 @@ export default function Entry() {
                 aria-checked={accessible}
                 aria-label={en.accessibility_mode}
                 onClick={toggleAccessibility}
-                className={`relative rounded-full border-2 border-ac-green shrink-0 ${
-                  accessible ? 'bg-ac-green' : 'bg-white'
+                className={`relative rounded-full border-2 border-ac-muted shrink-0 ${
+                  accessible ? 'bg-secondary border-white' : 'bg-white'
                 }`}
                 style={{ width: '64px', height: '48px' }}
               >
                 <span
-                  className={`absolute top-1 rounded-full bg-white border border-ac-green ${
-                    accessible ? 'right-1' : 'left-1'
+                  className={`absolute top-1 rounded-full bg-white border border-ac-muted ${
+                    accessible ? 'right-1 border-secondary' : 'left-1'
                   }`}
                   style={{ width: '36px', height: '36px' }}
                 />
@@ -237,8 +237,8 @@ export default function Entry() {
                 onClick={() => choose(l.code)}
                 className={`btn-ac w-full max-w-full rounded-lg border-2 break-words ${
                   isActive
-                    ? 'bg-ac-green text-white border-ac-green'
-                    : 'bg-white text-ac-green border-ac-green'
+                    ? 'bg-primary text-white border-primary'
+                    : 'bg-white text-primary border-primary'
                 }`}
                 style={{
                   height: '64px',
@@ -258,7 +258,7 @@ export default function Entry() {
         {/* <p className="text-base break-words">{en.or_text}</p> */}
         <a
           href={`tel:${TOLL_FREE.replace(/-/g, '')}`}
-          className="text-ac-blue break-words"
+          className="text-primary break-words text-primary"
           style={{ fontSize: '16px' }}
         >
           {en.toll_free}

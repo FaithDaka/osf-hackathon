@@ -38,9 +38,9 @@ const CATEGORY_ICONS = {
 };
 
 const SEVERITY_BORDER = {
-  critical: 'border-ac-red',
-  warning: 'border-ac-amber',
-  info: 'border-ac-blue',
+  critical: 'border-accent',
+  warning: 'border-amber',
+  info: 'border-primary',
 };
 
 const TYPE_ICON = {
@@ -178,7 +178,7 @@ export default function Home() {
         aria-label={tabLabel}
         aria-current={active ? 'page' : undefined}
         className={`flex-1 text-center py-3 min-h-[48px] ${
-          active ? 'text-ac-green font-bold underline' : 'text-ac-muted'
+          active ? 'text-primary font-bold underline' : 'text-ac-muted'
         }`}
       >
         {tabLabel}
@@ -201,7 +201,7 @@ export default function Home() {
     return (
       <main className="min-h-screen bg-ac-bg p-4 pb-24">
         <div className="max-w-md mx-auto">
-          <h1 className="text-lg font-bold text-ac-green">
+          <h1 className="text-lg font-bold text-primary">
             {CATEGORY_ICONS[catEntry.id] || '📦'} {labelOf(catEntry.id)}
           </h1>
           <form
@@ -229,14 +229,14 @@ export default function Home() {
             </select>
             <button
               type="submit"
-              className="btn-ac mt-3 w-full bg-ac-green text-white rounded-lg"
+              className="btn-ac mt-3 w-full bg-primary text-white rounded-lg"
             >
               {S.yes} →
             </button>
           </form>
           <Link
             href={`/home?lang=${lang}`}
-            className="btn-ac mt-2 w-full inline-flex bg-white text-ac-green border border-ac-green rounded-lg"
+            className="btn-ac mt-2 w-full inline-flex bg-white text-primary border border-primary rounded-lg"
           >
             ← {S.no}
           </Link>
@@ -250,13 +250,13 @@ export default function Home() {
       <div className="max-w-md mx-auto">
         {/* TOP BAR */}
         <div className="flex items-center justify-between">
-          <span className="text-ac-green font-bold" style={{ fontSize: '16px' }}>
+          <span className="text-primary font-bold" style={{ fontSize: '16px' }}>
             {S.app_name}
           </span>
           <Link
             href="/"
             aria-label="Switch language"
-            className="inline-flex items-center justify-center rounded-lg border border-ac-green min-h-[48px] min-w-[48px]"
+            className="inline-flex items-center justify-center rounded-lg border border-primary min-h-[48px] min-w-[48px]"
           >
             🌐
           </Link>
@@ -272,8 +272,8 @@ export default function Home() {
               onClick={() => pickDistrict(d.code)}
               className={`btn-ac flex-1 rounded-lg border-2 ${
                 district === d.code
-                  ? 'bg-ac-green text-white border-ac-green'
-                  : 'bg-white text-ac-green border-ac-green'
+                  ? 'bg-primary text-white border-primary'
+                  : 'bg-white text-primary border-primary'
               }`}
             >
               {d.label}
@@ -330,7 +330,7 @@ export default function Home() {
                         aria-current={active ? 'true' : undefined}
                         className={`rounded-lg p-6 ${
                           active
-                            ? 'bg-ac-green text-white font-bold opacity-100'
+                            ? 'bg-primary text-white font-bold opacity-100'
                             : 'bg-white text-ac-muted opacity-[0.15]'
                         }`}
                         style={{ fontSize: active ? '24px' : '16px' }}
@@ -344,14 +344,14 @@ export default function Home() {
                   type="button"
                   onClick={replay}
                   aria-label={S.listen}
-                  className="btn-ac mt-2 w-full bg-white text-ac-green border border-ac-green rounded-lg"
+                  className="btn-ac mt-2 w-full bg-white text-primary border border-primary rounded-lg"
                 >
                   🔊 {S.listen}
                 </button>
                 <button
                   type="button"
                   onClick={answerYes}
-                  className="btn-ac mt-2 w-full bg-ac-green text-white rounded-lg"
+                  className="btn-ac mt-2 w-full bg-primary text-white rounded-lg"
                   style={{ height: '64px' }}
                 >
                   {S.yes}
@@ -359,7 +359,7 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={answerNo}
-                  className="btn-ac mt-2 w-full bg-white text-ac-green border-2 border-ac-green rounded-lg"
+                  className="btn-ac mt-2 w-full bg-white text-primary border-2 border-primary rounded-lg"
                   style={{ height: '64px' }}
                 >
                   {S.no}
@@ -370,13 +370,13 @@ export default function Home() {
                 <p className="font-bold">{S.no_match}</p>
                 <Link
                   href={`/complaint?lang=${lang}`}
-                  className="btn-ac mt-3 w-full inline-flex bg-ac-green text-white rounded-lg"
+                  className="btn-ac mt-3 w-full inline-flex bg-primary text-white rounded-lg"
                 >
                   {S.file_complaint}
                 </Link>
                 <a
                   href={`tel:${TOLL_FREE.replace(/-/g, '')}`}
-                  className="btn-ac mt-2 w-full inline-flex bg-white text-ac-green border-2 border-ac-green rounded-lg"
+                  className="btn-ac mt-2 w-full inline-flex bg-white text-primary border-2 border-primary rounded-lg"
                 >
                   {S.toll_free}
                 </a>
@@ -389,7 +389,7 @@ export default function Home() {
                   </p>
                   <Link
                     href={`/home?cat=${walk.selectedCategory}&lang=${lang}`}
-                    className="btn-ac mt-3 w-full inline-flex bg-ac-green text-white rounded-lg"
+                    className="btn-ac mt-3 w-full inline-flex bg-primary text-white rounded-lg"
                   >
                     {S.yes} →
                   </Link>
@@ -439,7 +439,7 @@ export default function Home() {
             <button
               type="submit"
               aria-label={S.search_submit}
-              className="btn-ac mt-2 w-full bg-ac-green text-white rounded-lg"
+              className="btn-ac mt-2 w-full bg-primary text-white rounded-lg"
             >
               🔍 {S.search_submit}
             </button>
@@ -454,7 +454,7 @@ export default function Home() {
                   setQuery(p.query);
                   goResult(p.query, '');
                 }}
-                className="bg-white border border-ac-green text-ac-green rounded-lg"
+                className="bg-white border border-primary text-primary rounded-lg"
                 style={{ height: '40px', fontSize: '14px' }}
               >
                 🔊 {p.label}
@@ -464,7 +464,7 @@ export default function Home() {
           <Link
             href={`/lc-initiatives?lang=${lang}`}
             aria-label={S.lc_initiatives}
-            className="btn-ac mt-2 w-full inline-flex bg-white text-ac-green border border-ac-green rounded-lg"
+            className="btn-ac mt-2 w-full inline-flex bg-white text-primary border border-primary rounded-lg"
           >
             🏗️ {S.lc_initiatives} →
           </Link>
