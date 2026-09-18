@@ -12,18 +12,18 @@ const TOLL_FREE = '0800-225-8424';
 function ShieldLogo() {
   return (
     <svg width="56" height="56" viewBox="0 0 512 512" role="img" aria-label="AlertCitizen logo">
-      <rect width="512" height="512" rx="96" fill="#1B5E20" />
+      <rect width="512" height="512" rx="96" fill="#5B2D8E" />
       <path
         d="M256 72 L408 136 V264 C408 356 336 420 256 448 C176 420 104 356 104 264 V136 Z"
         fill="none"
-        stroke="#FAFAFA"
+        stroke="#F5F1FA"
         strokeWidth="28"
         strokeLinejoin="round"
       />
       <path
         d="M186 262 L238 314 L330 210"
         fill="none"
-        stroke="#FAFAFA"
+        stroke="#F5F1FA"
         strokeWidth="34"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -104,7 +104,7 @@ export default function Entry() {
               type="button"
               aria-label={`Select ${l.label}`}
               onClick={() => choose(l.code)}
-              className="btn-ac w-full bg-white text-ac-green border-2 border-ac-green rounded-lg shadow-sm"
+              className="btn-ac w-full bg-white text-primary border-2 border-primary rounded-lg shadow-sm"
               style={{ height: '64px', fontSize: '20px' }}
             >
               {l.label}
@@ -133,7 +133,7 @@ export default function Entry() {
 
         <a
           href={`tel:${TOLL_FREE.replace(/-/g, '')}`}
-          className="mt-6 text-ac-blue"
+          className="mt-6 text-primary"
           style={{ fontSize: '16px' }}
         >
           {en.toll_free}
@@ -153,13 +153,13 @@ export default function Entry() {
               aria-checked={accessible}
               aria-label={en.accessibility_mode}
               onClick={toggleAccessibility}
-              className={`relative rounded-full border-2 border-ac-green shrink-0 ${
-                accessible ? 'bg-ac-green' : 'bg-white'
+              className={`relative rounded-full border-2 border-primary shrink-0 ${
+                accessible ? 'bg-primary' : 'bg-white'
               }`}
               style={{ width: '64px', height: '48px' }}
             >
               <span
-                className={`absolute top-1 rounded-full bg-white border border-ac-green ${
+                className={`absolute top-1 rounded-full bg-white border border-primary ${
                   accessible ? 'right-1' : 'left-1'
                 }`}
                 style={{ width: '36px', height: '36px' }}

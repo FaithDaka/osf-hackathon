@@ -15,18 +15,18 @@ export default function NotFound() {
           aria-label="AlertCitizen logo"
           className="mx-auto"
         >
-          <rect width="512" height="512" rx="96" fill="#1B5E20" />
+          <rect width="512" height="512" rx="96" fill="#5B2D8E" />
           <path
             d="M256 72 L408 136 V264 C408 356 336 420 256 448 C176 420 104 356 104 264 V136 Z"
             fill="none"
-            stroke="#FAFAFA"
+            stroke="#F5F1FA"
             strokeWidth="28"
             strokeLinejoin="round"
           />
           <path
             d="M186 262 L238 314 L330 210"
             fill="none"
-            stroke="#FAFAFA"
+            stroke="#F5F1FA"
             strokeWidth="34"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -38,7 +38,7 @@ export default function NotFound() {
         </p>
         <Link
           href="/"
-          className="btn-ac mt-6 w-full inline-flex bg-ac-green text-white rounded-lg"
+          className="btn-ac mt-6 w-full inline-flex bg-primary text-white rounded-lg"
         >
           ← AlertCitizen
         </Link>

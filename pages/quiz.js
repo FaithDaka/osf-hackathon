@@ -44,9 +44,9 @@ const DEMO_SEED = [
 ];
 
 function ringColor(percent) {
-  if (percent >= 80) return '#1B5E20';
-  if (percent >= 50) return '#F57F17';
-  return '#B71C1C';
+  if (percent >= 80) return '#0E7A55';
+  if (percent >= 50) return '#B45309';
+  return '#C22433';
 }
 
 function SourceLink({ source }) {
@@ -60,7 +60,7 @@ function SourceLink({ source }) {
         href="https://www.laws.go.ug/"
         target="_blank"
         rel="noreferrer"
-        className="text-ac-blue underline"
+        className="text-primary underline"
       >
         {source}
       </a>
@@ -174,7 +174,7 @@ function QuizResults({
           {S.quiz_score.replace('{score}', score.score).replace('{total}', score.total)}
         </p>
         <svg width="120" height="120" viewBox="0 0 120 120" role="img" aria-label={`${pct}%`}>
-          <circle cx="60" cy="60" r="54" fill="none" stroke="#E0E0E0" strokeWidth="12" />
+          <circle cx="60" cy="60" r="54" fill="none" stroke="#E3DDF0" strokeWidth="12" />
           <circle
             cx="60"
             cy="60"
@@ -187,7 +187,7 @@ function QuizResults({
             strokeDashoffset={C * (1 - pct / 100)}
             transform="rotate(-90 60 60)"
           />
-          <text x="60" y="68" textAnchor="middle" fontSize="22" fontWeight="bold" fill="#212121">
+            <text x="60" y="68" textAnchor="middle" fontSize="22" fontWeight="bold" fill="#201C2B">
             {pct}%
           </text>
         </svg>
@@ -206,7 +206,7 @@ function QuizResults({
             />
             <button
               type="submit"
-              className="btn-ac mt-2 w-full bg-ac-green text-white rounded-lg"
+              className="btn-ac mt-2 w-full bg-primary text-white rounded-lg"
             >
               {S.search_submit}
             </button>
@@ -229,9 +229,9 @@ function QuizResults({
               <div className="mt-3 bg-white rounded-lg shadow-sm p-4 text-left">
                 <h2 className="font-bold">Parish Ranking: {parish.trim()}</h2>
                 {[
-                  { label: 'Your score', value: score.score, cls: 'bg-ac-green' },
+                  { label: 'Your score', value: score.score, cls: 'bg-secondary' },
                   { label: 'Parish average', value: peerStats.avg, cls: 'bg-ac-muted' },
-                  { label: 'Parish high', value: peerStats.high, cls: 'bg-ac-blue' },
+                  { label: 'Parish high', value: peerStats.high, cls: 'bg-primary' },
                 ].map((b) => (
                   <div key={b.label} className="mt-2">
                     <div className="flex justify-between" style={{ fontSize: '14px' }}>
@@ -261,7 +261,7 @@ function QuizResults({
                 <div key={w.i} className="mt-3 border-t border-gray-200 pt-2">
                   <p className="font-bold">{w.q.question[lang] || w.q.question.en}</p>
                   <p>❌ {opts[w.mine] ?? '—'}</p>
-                  <p className="text-ac-green font-bold">✅ {opts[w.q.correct]}</p>
+                  <p className="text-secondary font-bold">✅ {opts[w.q.correct]}</p>
                   <p className="text-ac-muted" style={{ fontSize: '16px' }}>
                     Explanation: {fb.explanation}
                   </p>
@@ -278,20 +278,20 @@ function QuizResults({
           <button
             type="button"
             onClick={share}
-            className="btn-ac w-full bg-white text-ac-green border-2 border-ac-green rounded-lg"
+            className="btn-ac w-full bg-white text-primary border-2 border-primary rounded-lg"
           >
             📤 {S.share}
           </button>
           <Link
             href={`/quiz?lang=${lang}`}
-            className="btn-ac w-full inline-flex bg-white text-ac-green border-2 border-ac-green rounded-lg"
+            className="btn-ac w-full inline-flex bg-white text-primary border-2 border-primary rounded-lg"
           >
             {S.quiz} →
           </Link>
           {pct < 50 && (
             <Link
               href={`/complaint?new=1&lang=${lang}`}
-              className="btn-ac w-full inline-flex bg-ac-red text-white rounded-lg"
+              className="btn-ac w-full inline-flex bg-accent text-white rounded-lg"
             >
               📋 {S.file_complaint}
             </Link>
@@ -306,7 +306,7 @@ function QuizResults({
         </div>
         {toast && (
           <div role="status" className="fixed bottom-4 left-0 right-0 mx-auto max-w-md px-4">
-            <div className="bg-ac-green text-white rounded-lg p-4 text-center shadow">
+            <div className="bg-secondary text-white rounded-lg p-4 text-center shadow">
               {toast}
             </div>
           </div>
@@ -383,7 +383,7 @@ export default function Quiz() {
           <Link
             href={`/home?lang=${lang}`}
             aria-label={S.app_name}
-            className="inline-flex items-center min-h-[48px] text-ac-green font-bold"
+            className="inline-flex items-center min-h-[48px] text-primary font-bold"
           >
             ← {S.app_name}
           </Link>
@@ -407,8 +407,8 @@ export default function Quiz() {
                 }}
                 className={`btn-ac flex-1 rounded-lg border-2 capitalize ${
                   district === d
-                    ? 'bg-ac-green text-white border-ac-green'
-                    : 'bg-white text-ac-green border-ac-green'
+                    ? 'bg-primary text-white border-primary'
+                    : 'bg-white text-primary border-primary'
                 }`}
               >
                 {d}
@@ -455,7 +455,7 @@ export default function Quiz() {
           <p className="font-bold">{S.not_found.replace('{location}', quizId)}</p>
           <Link
             href={`/quiz?lang=${lang}`}
-            className="btn-ac mt-4 w-full inline-flex bg-ac-green text-white rounded-lg"
+            className="btn-ac mt-4 w-full inline-flex bg-primary text-white rounded-lg"
           >
             ← {S.quiz}
           </Link>
@@ -511,19 +511,19 @@ export default function Quiz() {
         <Link
           href={`/quiz?lang=${lang}`}
           aria-label={S.quiz}
-          className="inline-flex items-center min-h-[48px] text-ac-green font-bold"
+          className="inline-flex items-center min-h-[48px] text-primary font-bold"
         >
           ← {S.quiz}
         </Link>
         <h1 className="font-bold" style={{ fontSize: '20px' }}>
           {quiz.title[lang] || quiz.title.en}
         </h1>
-        <p className="text-ac-blue" style={{ fontSize: '14px' }} aria-live="polite">
+        <p className="text-primary" style={{ fontSize: '14px' }} aria-live="polite">
           Question {qIndex + 1} of {total}
         </p>
         <div className="h-2 bg-gray-200 rounded mt-1" aria-hidden="true">
           <div
-            className="h-2 rounded bg-ac-blue"
+            className="h-2 rounded bg-primary"
             style={{ width: `${((qIndex + 1) / total) * 100}%` }}
           />
         </div>
@@ -541,13 +541,13 @@ export default function Quiz() {
                 onClick={() => pick(i)}
                 disabled={!!picked}
                 aria-pressed={isPicked || undefined}
-                className="btn-ac w-full rounded-lg border-2 border-ac-green text-left px-4 flex items-center gap-3"
+                className="btn-ac w-full rounded-lg border-2 border-primary text-left px-4 flex items-center gap-3"
                 style={{ height: '56px' }}
               >
                 <span
-                  className={`inline-flex items-center justify-center rounded-full border border-ac-green font-bold ${
-                    isRight ? 'bg-white text-ac-green' : ''
-                  } ${isPicked && !isRight ? 'bg-white text-ac-red border-ac-red' : 'bg-white text-ac-green'}`}
+                  className={`inline-flex items-center justify-center rounded-full border border-primary font-bold ${
+                    isRight ? 'bg-white text-primary' : ''
+                  } ${isPicked && !isRight ? 'bg-white text-accent border-accent' : 'bg-white text-primary'}`}
                   style={{ width: '32px', height: '32px', minWidth: '32px' }}
                 >
                   {isRight ? '✅' : isPicked ? '❌' : LETTERS[i]}
@@ -568,7 +568,7 @@ export default function Quiz() {
             <button
               type="button"
               onClick={next}
-              className="btn-ac mt-2 w-full bg-ac-green text-white rounded-lg"
+              className="btn-ac mt-2 w-full bg-primary text-white rounded-lg"
             >
               {qIndex + 1 >= total ? 'SEE RESULTS' : 'NEXT QUESTION'} →
             </button>

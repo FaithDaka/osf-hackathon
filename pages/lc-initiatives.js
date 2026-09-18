@@ -21,17 +21,17 @@ const CATEGORY_ICONS = {
 };
 
 const STATUS_BADGE = {
-  announced: 'bg-ac-blue text-white',
-  in_progress: 'bg-ac-amber text-white',
-  completed: 'bg-ac-green text-white',
-  stalled: 'bg-ac-red text-white',
+  announced: 'bg-primary text-white',
+  in_progress: 'bg-amber text-white',
+  completed: 'bg-secondary text-white',
+  stalled: 'bg-accent text-white',
 };
 
 const RATING_BUTTONS = [
-  { key: 'low_effort', icon: '🔴', label: 'Low Effort', border: '#F44336' },
-  { key: 'poor_effort', icon: '🟠', label: 'Poor Effort', border: '#FF9800' },
-  { key: 'looking_good', icon: '🟡', label: 'Looking Good', border: '#FFC107' },
-  { key: 'excellent_work', icon: '🟢', label: 'Excellent Work', border: '#4CAF50' },
+  { key: 'low_effort', icon: '🔴', label: 'Low Effort', border: '#C22433' },
+  { key: 'poor_effort', icon: '🟠', label: 'Poor Effort', border: '#E8590C' },
+  { key: 'looking_good', icon: '🟡', label: 'Looking Good', border: '#B45309' },
+  { key: 'excellent_work', icon: '🟢', label: 'Excellent Work', border: '#0E7A55' },
 ];
 
 function fmtDate(iso) {
@@ -142,7 +142,7 @@ export default function Initiatives() {
         <Link
           href={`/home?lang=${lang}`}
           aria-label={S.app_name}
-          className="inline-flex items-center min-h-[48px] text-ac-green font-bold"
+          className="inline-flex items-center min-h-[48px] text-primary font-bold"
         >
           ← {S.app_name}
         </Link>
@@ -159,8 +159,8 @@ export default function Initiatives() {
               onClick={() => pickDistrict(d)}
               className={`btn-ac flex-1 rounded-lg border-2 capitalize ${
                 district === d
-                  ? 'bg-ac-green text-white border-ac-green'
-                  : 'bg-white text-ac-green border-ac-green'
+                  ? 'bg-primary text-white border-primary'
+                  : 'bg-white text-primary border-primary'
               }`}
             >
               {d}
@@ -193,7 +193,7 @@ export default function Initiatives() {
                 </div>
                 <div className="mt-1 flex gap-2">
                   <span
-                    className="px-2 py-0.5 rounded bg-ac-blue text-white"
+                    className="px-2 py-0.5 rounded bg-primary text-white"
                     style={{ fontSize: '12px' }}
                   >
                     {item.lc_level}
@@ -223,7 +223,7 @@ export default function Initiatives() {
                     href={item.source_url}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-ac-blue underline"
+                    className="text-primary underline"
                   >
                     {S.source_link}
                   </a>
@@ -290,7 +290,7 @@ export default function Initiatives() {
                     </p>
                     <button
                       type="submit"
-                      className="btn-ac mt-1 w-full bg-ac-green text-white rounded-lg"
+                      className="btn-ac mt-1 w-full bg-primary text-white rounded-lg"
                     >
                       {S.search_submit}
                     </button>
@@ -302,7 +302,7 @@ export default function Initiatives() {
                       setCommentText('');
                       setCommentOpen(item.id);
                     }}
-                    className="btn-ac mt-1 w-full bg-white text-ac-green border border-ac-green rounded-lg"
+                    className="btn-ac mt-1 w-full bg-white text-primary border border-primary rounded-lg"
                   >
                     ADD COMMENT
                   </button>
@@ -319,7 +319,7 @@ export default function Initiatives() {
             if (inProgress[0] && !stalledId) setStalledId(inProgress[0].id);
           }}
           aria-expanded={stalledOpen}
-          className="btn-ac mt-4 w-full bg-white text-ac-red border-2 border-ac-red rounded-lg"
+          className="btn-ac mt-4 w-full bg-white text-accent border-2 border-accent rounded-lg"
         >
           Report a Stalled Initiative
         </button>
@@ -364,7 +364,7 @@ export default function Initiatives() {
             />
             <button
               type="submit"
-              className="btn-ac w-full bg-ac-red text-white rounded-lg"
+              className="btn-ac w-full bg-accent text-white rounded-lg"
             >
               {S.file_complaint}
             </button>
@@ -373,7 +373,7 @@ export default function Initiatives() {
       </div>
       {toast && (
         <div role="status" className="fixed bottom-4 left-0 right-0 mx-auto max-w-md px-4">
-          <div className="bg-ac-green text-white rounded-lg p-4 text-center shadow">
+          <div className="bg-secondary text-white rounded-lg p-4 text-center shadow">
             {toast}
           </div>
         </div>
