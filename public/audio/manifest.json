@@ -1,0 +1,216 @@
+{
+  "version": "2026.01.15",
+  "format": "mp3",
+  "files": {
+    "en": {
+      "welcome": {
+        "text": "Welcome to AlertCitizen. Press 1 for English. Press 2 for Luganda. Press 3 for Swahili.",
+        "file": "welcome.mp3"
+      },
+      "cat_public_services": {
+        "text": "Public Services",
+        "file": "cat_public_services.mp3"
+      },
+      "cat_know_your_local_council": {
+        "text": "Know Your Local Council",
+        "file": "cat_know_your_local_council.mp3"
+      },
+      "cat_local_funding": {
+        "text": "Local Funding",
+        "file": "cat_local_funding.mp3"
+      },
+      "cat_community_events": {
+        "text": "Community Events",
+        "file": "cat_community_events.mp3"
+      },
+      "cat_policies": {
+        "text": "Policies",
+        "file": "cat_policies.mp3"
+      },
+      "cat_knowledge_base": {
+        "text": "Ask Our Knowledge Base",
+        "file": "cat_knowledge_base.mp3"
+      },
+      "cat_fees_permits": {
+        "text": "Fees & Permits",
+        "file": "cat_fees_permits.mp3"
+      },
+      "cat_education": {
+        "text": "Education",
+        "file": "cat_education.mp3"
+      },
+      "cat_other": {
+        "text": "Other",
+        "file": "cat_other.mp3"
+      },
+      "subcounty_prompt": {
+        "text": "What is the name of your sub-county?",
+        "file": "subcounty_prompt.mp3"
+      },
+      "all_no": {
+        "text": "I don't have information on that yet. Contact your LC1 or call 0800-225-8424.",
+        "file": "all_no.mp3"
+      },
+      "ann_ann-001": {
+        "text": "Planned power outage: Kibuli, Central Kampala",
+        "file": "ann_ann-001.mp3"
+      },
+      "ann_ann-002": {
+        "text": "Jinja Road partial closure: Nakawa works",
+        "file": "ann_ann-002.mp3"
+      },
+      "ann_ann-003": {
+        "text": "Water shutdown: Nakisunga, Mukono",
+        "file": "ann_ann-003.mp3"
+      },
+      "ann_ann-004": {
+        "text": "Community cleanup day: Kyampisi market",
+        "file": "ann_ann-004.mp3"
+      },
+      "ann_ann-005": {
+        "text": "Free national ID mass enrollment starts October",
+        "file": "ann_ann-005.mp3"
+      }
+    },
+    "lg": {
+      "welcome": {
+        "text": "Tukwaniriza ku AlertCitizen. Nyiga 1 ku Lungereza. Nyiga 2 ku Luganda. Nyiga 3 ku Luswahili.",
+        "file": "welcome.mp3"
+      },
+      "cat_public_services": {
+        "text": "Emirimu gy'Abantu Bonna",
+        "file": "cat_public_services.mp3"
+      },
+      "cat_know_your_local_council": {
+        "text": "Mannyi Omukulembeze wo mu Kibuga",
+        "file": "cat_know_your_local_council.mp3"
+      },
+      "cat_local_funding": {
+        "text": "Ensimbi z'Ekitundu",
+        "file": "cat_local_funding.mp3"
+      },
+      "cat_community_events": {
+        "text": "Ebikujja mu Kitundu",
+        "file": "cat_community_events.mp3"
+      },
+      "cat_policies": {
+        "text": "Amateeka",
+        "file": "cat_policies.mp3"
+      },
+      "cat_knowledge_base": {
+        "text": "Buuza Ekitabo Kyaffe",
+        "file": "cat_knowledge_base.mp3"
+      },
+      "cat_fees_permits": {
+        "text": "Ssente ne Permit",
+        "file": "cat_fees_permits.mp3"
+      },
+      "cat_education": {
+        "text": "Eby'enjigiriza",
+        "file": "cat_education.mp3"
+      },
+      "cat_other": {
+        "text": "Ebirala",
+        "file": "cat_other.mp3"
+      },
+      "subcounty_prompt": {
+        "text": "Ggombolola yo eyitibwa otya?",
+        "file": "subcounty_prompt.mp3"
+      },
+      "all_no": {
+        "text": "Sinina mawulire ku ekyo. Tuukirira LC1 yo oba okubire 0800-225-8424.",
+        "file": "all_no.mp3"
+      },
+      "ann_ann-001": {
+        "text": "Amasannyalaze gagenda kuzikizibwa: Kibuli, Kampala wakati",
+        "file": "ann_ann-001.mp3"
+      },
+      "ann_ann-002": {
+        "text": "Oluguudo lwa Jinja lugenda kuggalwaako: emirimu e Nakawa",
+        "file": "ann_ann-002.mp3"
+      },
+      "ann_ann-003": {
+        "text": "Amazzi gagenda kuggwaako: Nakisunga, Mukono",
+        "file": "ann_ann-003.mp3"
+      },
+      "ann_ann-004": {
+        "text": "Olunaku lw'okuyonja ekitundu: akatale k'e Kyampisi",
+        "file": "ann_ann-004.mp3"
+      },
+      "ann_ann-005": {
+        "text": "Okuwandiisa ID ey'eggwanga kwa bwereere kutandika mu October",
+        "file": "ann_ann-005.mp3"
+      }
+    },
+    "sw": {
+      "welcome": {
+        "text": "Karibu AlertCitizen. Bonyeza 1 kwa Kiingereza. Bonyeza 2 kwa Kiganda. Bonyeza 3 kwa Kiswahili.",
+        "file": "welcome.mp3"
+      },
+      "cat_public_services": {
+        "text": "Huduma za Umma",
+        "file": "cat_public_services.mp3"
+      },
+      "cat_know_your_local_council": {
+        "text": "Tambua Mamliko Yako ya Mitaa",
+        "file": "cat_know_your_local_council.mp3"
+      },
+      "cat_local_funding": {
+        "text": "Fedha za Eneo",
+        "file": "cat_local_funding.mp3"
+      },
+      "cat_community_events": {
+        "text": "Matukio ya Jamii",
+        "file": "cat_community_events.mp3"
+      },
+      "cat_policies": {
+        "text": "Sera",
+        "file": "cat_policies.mp3"
+      },
+      "cat_knowledge_base": {
+        "text": "Uliza Kitabu Chetu",
+        "file": "cat_knowledge_base.mp3"
+      },
+      "cat_fees_permits": {
+        "text": "Ada na Vibali",
+        "file": "cat_fees_permits.mp3"
+      },
+      "cat_education": {
+        "text": "Elimu",
+        "file": "cat_education.mp3"
+      },
+      "cat_other": {
+        "text": "Nyingine",
+        "file": "cat_other.mp3"
+      },
+      "subcounty_prompt": {
+        "text": "Tarafa yako inaitwa nani?",
+        "file": "subcounty_prompt.mp3"
+      },
+      "all_no": {
+        "text": "Sina taarifa kuhusu hilo bado. Wasiliana na LC1 wako au pigia 0800-225-8424.",
+        "file": "all_no.mp3"
+      },
+      "ann_ann-001": {
+        "text": "Kukatika kwa umeme kulikopangwa: Kibuli, Kampala ya Kati",
+        "file": "ann_ann-001.mp3"
+      },
+      "ann_ann-002": {
+        "text": "Kufungwa kwa sehemu ya Barabara ya Jinja: kazi Nakawa",
+        "file": "ann_ann-002.mp3"
+      },
+      "ann_ann-003": {
+        "text": "Maji yatakatika: Nakisunga, Mukono",
+        "file": "ann_ann-003.mp3"
+      },
+      "ann_ann-004": {
+        "text": "Siku ya usafi ya jamii: soko la Kyampisi",
+        "file": "ann_ann-004.mp3"
+      },
+      "ann_ann-005": {
+        "text": "Usajili wa halaiki wa vitambulisho vya taifa bure unaanza Oktoba",
+        "file": "ann_ann-005.mp3"
+      }
+    }
+  }
+}

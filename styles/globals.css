@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 3 language themes via CSS custom properties (hand-rolled i18n theming). */
+:root,
+:root[data-lang='en'] {
+  --ac-accent: #1b5e20;
+  --ac-bg: #fafafa;
+  --ac-card: #ffffff;
+  --ac-muted: #757575;
+}
+
+:root[data-lang='lg'] {
+  --ac-accent: #0d47a1;
+  --ac-bg: #fafafa;
+  --ac-card: #ffffff;
+  --ac-muted: #757575;
+}
+
+:root[data-lang='sw'] {
+  --ac-accent: #f57f17;
+  --ac-bg: #fafafa;
+  --ac-card: #ffffff;
+  --ac-muted: #757575;
+}
+
+html {
+  font-size: 18px;
+}
+
+body {
+  background-color: var(--ac-bg);
+  color: #212121;
+  line-height: 1.6;
+}
+
+/* No animations. No transitions (accessibility + low-end devices). */
+*,
+*::before,
+*::after {
+  animation: none !important;
+  transition: none !important;
+}

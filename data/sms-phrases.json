@@ -1,0 +1,39 @@
+{
+  "version": "2026.01.15",
+  "note": "Single reference for every 'I NEED HELP' translation used in language detection. Mirrored by: lib/sms-detect.js (imports this file), pages/sms-sim.js (via lib), public/sms-sim/index.html (inline copy with the same lists — keep in sync by hand, the static file cannot import JSON). Detection rule everywhere: uppercase, trim, first language whose phrase is a substring wins; en checked first, unmatched text falls back to en.",
+  "help_requests": {
+    "en": [
+      "I NEED HELP",
+      "HELP",
+      "I NEED ASSISTANCE",
+      "NEED HELP",
+      "HELP ME",
+      "PLEASE HELP",
+      "EMERGENCY",
+      "ASSISTANCE"
+    ],
+    "lg": [
+      "NSOLA",
+      "NTEEGAMWA",
+      "NSOLA BYAMASO",
+      "NTEEGAMWA BYAMASO",
+      "NETAAGA",
+      "OBUYAMBI",
+      "BUYAMBI",
+      "NNEETA OBUYAMBI",
+      "NNEETA OKUYAMBIBWA",
+      "MPA OBUYAMBI",
+      "YAMBA"
+    ],
+    "sw": [
+      "NITAHITAJA MSAADA",
+      "MSAADA",
+      "NITAHITAJA",
+      "NAHITAJI MSAADA",
+      "NINAHITAJI MSAADA",
+      "NINAHITAJI USAIDIZI",
+      "NISAIDIE",
+      "SAIDIA"
+    ]
+  }
+}
