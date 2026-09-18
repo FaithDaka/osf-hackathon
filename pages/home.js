@@ -116,16 +116,135 @@ function SpeakerIcon({ size = 16 }) {
 }
 const TOLL_FREE = '0800-ALERT';
 
-const CATEGORY_ICONS = {
-  public_services: '🏛️',
-  know_your_lc: '👥',
-  local_funding: '💰',
-  community_events: '📅',
-  policies: '📜',
-  knowledge_base: '🔍',
-  fees_permits: '📋',
-  education: '🎓',
-  other: '📦',
+const CATEGORY_COLORS = {
+  public_services: '#5B2D8E',
+  know_your_lc: '#2563EB',
+  local_funding: '#0E7A55',
+  community_events: '#C22433',
+  policies: '#92600A',
+  knowledge_base: '#0E7490',
+  fees_permits: '#C2410C',
+  education: '#1E1B4B',
+  other: '#92400E',
+};
+
+// Coloured SVG icons that match each topic (no emojis).
+function CategoryIcon({ id, size = 64 }) {
+  const color = CATEGORY_COLORS[id] || '#5B2D8E';
+  const common = {
+    width: size,
+    height: size,
+    viewBox: '0 0 28 28',
+    role: 'img',
+    'aria-hidden': 'true',
+    className: 'shrink-0',
+  };
+  switch (id) {
+    case 'public_services':
+      return (
+        <svg {...common} fill="none">
+          <path d="M14 3 3.5 8.5h21L14 3Z" fill={color} />
+          <rect x="5" y="10.5" width="2.6" height="8" rx="0.6" fill={color} />
+          <rect x="9.4" y="10.5" width="2.6" height="8" rx="0.6" fill={color} />
+          <rect x="13.4" y="10.5" width="2.6" height="8" rx="0.6" fill={color} opacity="0.85" />
+          <rect x="17.4" y="10.5" width="2.6" height="8" rx="0.6" fill={color} />
+          <rect x="21" y="10.5" width="2.6" height="8" rx="0.6" fill={color} opacity="0.85" />
+          <rect x="3" y="19.5" width="22" height="2.6" rx="1.3" fill={color} />
+          <rect x="5" y="23" width="18" height="2" rx="1" fill={color} opacity="0.45" />
+        </svg>
+      );
+    case 'know_your_lc':
+      return (
+        <svg {...common} fill="none">
+          <circle cx="10" cy="9" r="5" fill={color} />
+          <path d="M1.5 23c0-4.8 3.8-7.8 8.5-7.8s8.5 3 8.5 7.8v1h-17v-1Z" fill={color} />
+          <circle cx="19.5" cy="10" r="4" fill={color} opacity="0.65" />
+          <path d="M18.5 15.6c3.9 0.3 7 2.9 7 6.4v1h-6.5c.3-2.8-.3-5.4-.5-7.4Z" fill={color} opacity="0.65" />
+        </svg>
+      );
+    case 'local_funding':
+      return (
+        <svg {...common} fill="none">
+          <path d="M10 3.5h8l-1.6 3.2c1.9 1 3.1 2.6 3.1 4.7 0 3.6-3.6 9.6-5.5 9.6s-5.5-6-5.5-9.6c0-2.1 1.2-3.7 3.1-4.7L10 3.5Z" fill={color} />
+          <path d="M10 3.5h8l-1 2H11l-1-2Z" fill="#fff" opacity="0.85" />
+          <text x="14" y="16.5" textAnchor="middle" fontSize="9" fontWeight="800" fill="#fff">$</text>
+          <ellipse cx="14" cy="22.5" rx="4.5" ry="1.6" fill={color} opacity="0.3" />
+        </svg>
+      );
+    case 'community_events':
+      return (
+        <svg {...common} fill="none">
+          <rect x="3.5" y="5" width="21" height="19" rx="2.5" fill={color} opacity="0.18" />
+          <rect x="3.5" y="5" width="21" height="6.5" rx="2.5" fill={color} />
+          <rect x="3.5" y="9" width="21" height="3" fill={color} />
+          <rect x="3.5" y="5" width="21" height="19" rx="2.5" stroke={color} strokeWidth="1.8" />
+          <path d="M8 3.5v4M20 3.5v4" stroke={color} strokeWidth="2.2" strokeLinecap="round" />
+          <text x="14" y="20.5" textAnchor="middle" fontSize="8.5" fontWeight="800" fill={color}>17</text>
+        </svg>
+      );
+    case 'policies':
+      return (
+        <svg {...common} fill="none">
+          <path d="M6 5.5h13.5c2 0 2 2.8 0 2.8H8.5v12.2c0 1-.8 1.5-1.4 1L5 19.6c-.5-.4-.5-1 0-1.4l1-1V5.5Z" fill="#D9B98A" stroke={color} strokeWidth="1.6" strokeLinejoin="round" />
+          <path d="M9.5 10.5h8M9.5 13.5h8M9.5 16.5h5.5" stroke={color} strokeWidth="1.5" strokeLinecap="round" opacity="0.9" />
+          <rect x="5" y="4" width="16" height="2.4" rx="1.2" fill={color} />
+        </svg>
+      );
+    case 'knowledge_base':
+      return (
+        <svg {...common} fill="none">
+          <circle cx="12.5" cy="12.5" r="7.5" fill={color} opacity="0.15" />
+          <circle cx="12.5" cy="12.5" r="7.5" stroke={color} strokeWidth="2.2" />
+          <circle cx="12.5" cy="12.5" r="2.2" fill={color} opacity="0.5" />
+          <path d="M18.2 18.2 24 24" stroke={color} strokeWidth="3" strokeLinecap="round" />
+          <path d="M18.2 18.2 24 24" stroke="#fff" strokeWidth="1" strokeLinecap="round" opacity="0.6" />
+        </svg>
+      );
+    case 'fees_permits':
+      return (
+        <svg {...common} fill="none">
+          <rect x="5.5" y="5" width="17" height="20" rx="2" fill={color} opacity="0.15" />
+          <rect x="5.5" y="5" width="17" height="20" rx="2" stroke={color} strokeWidth="1.8" />
+          <rect x="10" y="2.8" width="8" height="4.4" rx="1.4" fill={color} />
+          <circle cx="11.2" cy="4.9" r="0.9" fill="#fff" />
+          <circle cx="16.8" cy="4.9" r="0.9" fill="#fff" />
+          <path d="M9.5 13.5l2.6 2.6 5-5.4" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M9.5 20h9" stroke={color} strokeWidth="1.6" strokeLinecap="round" opacity="0.55" />
+        </svg>
+      );
+    case 'education':
+      return (
+        <svg {...common} fill="none">
+          <path d="M14 4 2.5 9.5 14 15l9.5-3.9v5.2h2V9.5L14 4Z" fill={color} />
+          <path d="M8 14.6v3.9c0 1.4 12 1.4 12 0v-3.9l-6 2.5-6-2.5Z" fill={color} opacity="0.8" />
+          <path d="M23.5 10.5V18" stroke="#F59E0B" strokeWidth="1.8" strokeLinecap="round" />
+          <circle cx="23.5" cy="19.5" r="1.8" fill="#F59E0B" />
+        </svg>
+      );
+    case 'other':
+    default:
+      return (
+        <svg {...common} fill="none">
+          <path d="M14 3.5 24 8.7v10.6L14 24.5 4 19.3V8.7L14 3.5Z" fill={color} opacity="0.22" />
+          <path d="M14 3.5 24 8.7 14 13.9 4 8.7l10-5.2Z" fill={color} />
+          <path d="M4 8.7v10.6l10 5.2v-10.6L4 8.7Z" fill={color} opacity="0.65" />
+          <path d="M14 13.9v10.6l10-5.2V8.7L14 13.9Z" fill={color} opacity="0.4" />
+          <path d="M14 3.5 24 8.7 14 13.9 4 8.7l10-5.2Z" stroke={color} strokeWidth="1.2" strokeLinejoin="round" />
+          <path d="M12 6.2l-5 2.6 2 1 5-2.6-2-1Z" fill="#fff" opacity="0.85" />
+        </svg>
+      );
+  }
+}
+
+// Glass-tile card: near-white base, thin gray border — 1px by default,
+// 1.5px at its thickest (top + right) for a subtle refracted-glass rim.
+const GLASS_CARD_STYLE = {
+  background: 'linear-gradient(135deg, #FFFFFF 0%, #FFFFFF 60%, #FAF8FE 100%)',
+  borderStyle: 'solid',
+  borderWidth: '1.5px 1.5px 1px 1px',
+  borderColor: '#B9B9C2 #D1D5DB #DADBE1 #C6C6CE',
+  boxShadow:
+    'inset 0 1px 0 rgba(255,255,255,1), inset 1px 0 0 rgba(255,255,255,0.8), 0 1px 2px rgba(91,45,142,0.06)',
 };
 
 const SEVERITY_BORDER = {
@@ -324,8 +443,8 @@ export default function Home() {
     return (
       <main className="min-h-screen bg-ac-bg p-4 pb-24">
         <div className="max-w-md mx-auto">
-          <h1 className="text-lg font-bold text-primary">
-            {CATEGORY_ICONS[catEntry.id] || '📦'} {labelOf(catEntry.id)}
+          <h1 className="text-lg font-bold text-primary flex items-center gap-2">
+            <CategoryIcon id={catEntry.id} /> {labelOf(catEntry.id)}
           </h1>
           <form
             onSubmit={(e) => {
@@ -582,7 +701,9 @@ export default function Home() {
                           }`}
                         style={{ fontSize: active ? '24px' : '16px' }}
                       >
-                        {CATEGORY_ICONS[c.id] || '📦'} {labelOf(c.id)}
+                        <span className="inline-flex items-center gap-2">
+                          <CategoryIcon id={c.id} /> {labelOf(c.id)}
+                        </span>
                       </div>
                     );
                   })}
@@ -645,21 +766,25 @@ export default function Home() {
             )}
           </section>
         ) : (
-          /* CATEGORIES: standard 2-col grid */
-          <section aria-label={labelOf('knowledge_base')} className="mt-4">
-            <div className="grid grid-cols-2 gap-2">
-              {categories.map((c, i) => (
+          /* CATEGORIES: responsive grid — 3 per row on wide screens, 2 per row
+             on narrow, 1 per row at 300px and under so words aren't squashed */
+          <section aria-label={labelOf('knowledge_base')} className="mt-4 min-w-0">
+            <div className="grid grid-cols-1 min-[301px]:grid-cols-2 min-[380px]:grid-cols-3 gap-2.5">
+              {categories.map((c) => (
                 <Link
                   key={c.id}
                   href={`/home?cat=${c.id}&lang=${lang}`}
                   aria-label={labelOf(c.id)}
-                  className={`bg-white rounded-lg shadow-sm p-4 min-h-[80px] flex flex-col justify-center ${i === categories.length - 1 ? 'col-span-2' : ''
-                    }`}
+                  className="rounded-xl p-3 min-h-[148px] min-w-0 w-full flex flex-col items-center justify-center gap-2 text-center"
+                  style={GLASS_CARD_STYLE}
                 >
-                  <span className="text-2xl" aria-hidden="true">
-                    {CATEGORY_ICONS[c.id] || '📦'}
+                  <span aria-hidden="true" className="flex items-center justify-center">
+                    <CategoryIcon id={c.id} size={64} />
                   </span>
-                  <span className="font-bold" style={{ fontSize: '16px' }}>
+                  <span
+                    className="font-semibold text-ink leading-snug break-words text-center w-full min-w-0"
+                    style={{ fontSize: '14px', letterSpacing: '-0.5px', lineHeight: '1.25' }}
+                  >
                     {labelOf(c.id)}
                   </span>
                 </Link>
