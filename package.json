@@ -6,7 +6,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "next dev",
+    "dev": "npm install && next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
