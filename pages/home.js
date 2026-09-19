@@ -20,17 +20,25 @@ import swStrings from '../public/i18n/sw.json';
 
 const UI = { en: enStrings, lg: lgStrings, sw: swStrings };
 const LANGS = ['en', 'lg', 'sw'];
+const LANG_LABELS = { en: 'English', lg: 'Luganda', sw: 'Swahili' };
+const DISTRICTS = [
+  { code: 'kampala', label: 'Kampala' },
+  { code: 'mukono', label: 'Mukono' },
+];
+// Supported districts are selectable; the rest preview as muted,
+// non-clickable chips in the same horizontal carousel.
+const UPCOMING_DISTRICTS = [
+  { code: 'wakiso', label: 'Wakiso' },
+  { code: 'jinja', label: 'Jinja' },
+  { code: 'gulu', label: 'Gulu' },
+  { code: 'mbarara', label: 'Mbarara' },
+];
+// Admin level is data-driven so other countries can show
+// Provinces / States instead of Districts (see geography.json).
 const ADMIN_LEVELS = ['districts', 'provinces', 'states'];
 function adminLevelKey() {
   const v = geo && geo.adminLevel;
   return ADMIN_LEVELS.includes(v) ? v : 'districts';
-}
-function getDistricts() {
-  const d = (geo && geo.districts) || {};
-  return Object.entries(d).map(([code, info]) => ({
-    code,
-    label: (info && info.label) || code,
-  }));
 }
 
 function ShieldLogo() {
@@ -114,6 +122,38 @@ function SpeakerIcon({ size = 16 }) {
   );
 }
 const TOLL_FREE = '0800-ALERT';
+
+// Magnifying-glass icon for the district label / search toggle.
+// SVG (not emoji) so it stays crisp at any size, inherits the button
+// text color, and never leaks an emoji glyph to screen readers.
+function SearchIcon({ size = 14 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 16 16"
+      role="img"
+      aria-hidden="true"
+      className="shrink-0"
+    >
+      <circle
+        cx="7"
+        cy="7"
+        r="4.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+      <path
+        d="M10.5 10.5 L14 14"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
 
 const CATEGORY_COLORS = {
   public_services: '#5B2D8E',
@@ -327,17 +367,6 @@ export default function Home() {
     };
   }, [langOpen]);
 
-  const districts = useMemo(() => getDistricts(), []);
-  const adminKey = adminLevelKey();
-  const adminLabel = t(`admin_${adminKey}`, lang, UI);
-  const adminSearchPlaceholder = t(`admin_search_${adminKey}`, lang, UI);
-  const adminNoMatch = t('admin_no_match', lang, UI);
-  const filteredDistricts = useMemo(() => {
-    const q = districtFilter.trim().toLowerCase();
-    if (!q) return districts;
-    return districts.filter((d) => d.label.toLowerCase().includes(q));
-  }, [districts, districtFilter]);
-
   // Restore persisted prefs (client only).
   useEffect(() => {
     try {
@@ -357,6 +386,25 @@ export default function Home() {
       // Ignore storage errors.
     }
   };
+
+  // Admin label (Districts / Provinces / States) + live count of areas
+  // with data. Filtering narrows both supported and upcoming chips.
+  const adminKey = adminLevelKey();
+  const adminLabel = t(`admin_${adminKey}`, lang, UI);
+  const adminSearchPlaceholder = t(`admin_search_${adminKey}`, lang, UI);
+  const adminNoMatch = t('admin_no_match', lang, UI);
+  const filteredDistricts = useMemo(() => {
+    const q = districtFilter.trim().toLowerCase();
+    if (!q) return DISTRICTS;
+    return DISTRICTS.filter((d) => d.label.toLowerCase().includes(q));
+  }, [districtFilter]);
+  const filteredUpcoming = useMemo(() => {
+    const q = districtFilter.trim().toLowerCase();
+    if (!q) return UPCOMING_DISTRICTS;
+    return UPCOMING_DISTRICTS.filter((d) =>
+      d.label.toLowerCase().includes(q),
+    );
+  }, [districtFilter]);
 
   const announcements = useMemo(
     () => getActiveAnnouncements(annData, district),
@@ -622,14 +670,30 @@ export default function Home() {
             </div>
           </div>
 
-          {/* DISTRICT CAROUSEL — small chips, horizontally scrollable,
-              scrollbar hidden */}
+          {/* DISTRICT CAROUSEL — label + chips in ONE row. The label is
+              sticky with a higher z-index, so chips slide underneath it
+              on horizontal scroll. Scrollbar hidden. */}
           <div
-            className="no-scrollbar mt-2 flex gap-2 overflow-x-auto pb-1 pt-2"
+            id="district-chips"
+            className="no-scrollbar mt-2 flex items-center gap-2 overflow-x-auto pb-1"
             role="group"
-            aria-label="District"
+            aria-labelledby="district-label"
           >
-            {DISTRICTS.map((d) => {
+            <button
+              type="button"
+              onClick={() => setShowDistrictSearch((s) => !s)}
+              aria-expanded={showDistrictSearch}
+              aria-controls="district-search district-chips"
+              aria-label={`${adminLabel} (${DISTRICTS.length})`}
+              className="sticky left-0 z-20 inline-flex shrink-0 items-center gap-1 whitespace-nowrap bg-primary-soft font-bold text-primary pr-2"
+              style={{ minHeight: '36px', fontSize: '16px', letterSpacing: '-0.5px' }}
+            >
+              <SearchIcon size={14} />
+              <span id="district-label">
+                {adminLabel} ({DISTRICTS.length})
+              </span>
+            </button>
+            {filteredDistricts.map((d) => {
               const active = district === d.code;
               return (
                 <button
@@ -647,7 +711,7 @@ export default function Home() {
                 </button>
               );
             })}
-            {UPCOMING_DISTRICTS.map((d) => (
+            {filteredUpcoming.map((d) => (
               <span
                 key={d.code}
                 aria-disabled="true"
@@ -658,7 +722,33 @@ export default function Home() {
                 {d.label}
               </span>
             ))}
+            {filteredDistricts.length === 0 &&
+              filteredUpcoming.length === 0 && (
+                <span
+                  className="shrink-0 whitespace-nowrap text-ac-muted"
+                  style={{ fontSize: '14px' }}
+                >
+                  {adminNoMatch}
+                </span>
+              )}
           </div>
+          {showDistrictSearch && (
+            <>
+              <label htmlFor="district-search" className="sr-only">
+                {adminSearchPlaceholder}
+              </label>
+              <input
+                id="district-search"
+                type="search"
+                value={districtFilter}
+                onInput={(e) => setDistrictFilter(e.target.value)}
+                placeholder={adminSearchPlaceholder}
+                autoComplete="off"
+                className="mt-2 w-full bg-white border border-gray-300 rounded-xl px-4 focus:outline-none focus-visible:outline-none"
+                style={{ minHeight: '48px', fontSize: '16px' }}
+              />
+            </>
+          )}
         </header>
 
         {/* ANNOUNCEMENTS STRIP */}
