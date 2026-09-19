@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import BottomNav from '../lib/bottom-nav';
@@ -17,9 +17,29 @@ import lgStrings from '../public/i18n/lg.json';
 import swStrings from '../public/i18n/sw.json';
 
 const UI = { en: enStrings, lg: lgStrings, sw: swStrings };
-const PWA_URL = process.env.NEXT_PUBLIC_PWA_URL || 'https://alertcitizen.github.io';
-const TOLL_FREE = '0800-225-8424';
-const FLAGS_KEY = 'ac_flags';
+
+// Council building icon for the Find-my-LC1 button (no emojis).
+function CouncilIcon({ size = 20 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      role="img"
+      aria-hidden="true"
+      className="shrink-0"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 21h18" />
+      <path d="M5 21V7l7-4 7 4v14" />
+      <path d="M9 21v-4h6v4" />
+    </svg>
+  );
+}
 
 const BANNERS = {
   DISCREPANCY: { cls: 'bg-accent', icon: '⚠️' },
@@ -46,19 +66,71 @@ function fmtDate(iso) {
   }
 }
 
-function Toast({ message }) {
-  if (!message) return null;
-  return (
-    <div
-      role="status"
-      aria-live="polite"
-      className="fixed bottom-4 left-0 right-0 mx-auto max-w-md px-4"
-    >
-      <div className="bg-secondary text-white rounded-lg p-4 text-center shadow">
-        {message}
-      </div>
-    </div>
-  );
+// Source rows use small coloured SVG icons (no emojis); the label
+// before each colon is bold.
+function SourceIcon({ kind, size = 16 }) {
+  const colors = {
+    doc: '#5B2D8E',
+    link: '#5B2D8E',
+    check: '#0E7A55',
+    calendar: '#0E7490',
+    version: '#B45309',
+  };
+  const common = {
+    width: size,
+    height: size,
+    viewBox: '0 0 24 24',
+    role: 'img',
+    'aria-hidden': 'true',
+    className: 'shrink-0',
+    fill: 'none',
+    stroke: colors[kind] || '#5B2D8E',
+    strokeWidth: '1.8',
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+  };
+  switch (kind) {
+    case 'doc':
+      return (
+        <svg {...common}>
+          <path d="M6 3h9l4 4v14H6V3Z" />
+          <path d="M9 12h7M9 15.5h5" />
+        </svg>
+      );
+    case 'link':
+      return (
+        <svg {...common}>
+          <path d="M9 4H4v16h16v-5" />
+          <path d="M14 4h6v6" />
+          <path d="M20 4l-9 9" />
+        </svg>
+      );
+    case 'check':
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="12" r="8.5" />
+          <path d="M8.5 12.5l2.5 2.5 5-6" />
+        </svg>
+      );
+    case 'calendar':
+      return (
+        <svg {...common}>
+          <rect x="4" y="5.5" width="16" height="15" rx="2" />
+          <path d="M4 10h16M8.5 3.5v4M15.5 3.5v4" />
+        </svg>
+      );
+    case 'version':
+      return (
+        <svg {...common}>
+          <path d="M4 12a8 8 0 0 1 14-5.3" />
+          <path d="M18 3v4h-4" />
+          <path d="M20 12a8 8 0 0 1-14 5.3" />
+          <path d="M6 21v-4h4" />
+        </svg>
+      );
+    default:
+      return null;
+  }
 }
 
 export default function Result() {
@@ -78,23 +150,12 @@ export default function Result() {
     [],
   );
 
-  // Report-an-error form state.
-  const [flagText, setFlagText] = useState('');
-  const [flagName, setFlagName] = useState('');
-  const [flagOpen, setFlagOpen] = useState(false);
-  const [toast, setToast] = useState('');
   // Category geo-filter state.
   const [filterSub, setFilterSub] = useState(
     typeof router.query.subcounty === 'string' ? router.query.subcounty : '',
   );
   const [filterParish, setFilterParish] = useState('');
   const [appliedParish, setAppliedParish] = useState('');
-
-  useEffect(() => {
-    if (!toast) return;
-    const t = setTimeout(() => setToast(''), 3000);
-    return () => clearTimeout(t);
-  }, [toast]);
 
   const backHref = `/home?lang=${lang}`;
 
@@ -194,7 +255,6 @@ export default function Result() {
             ))}
           </div>
         </div>
-        <Toast message={toast} />
         <BottomNav active="" lang={lang} strings={S} />
       </main>
     );
@@ -211,30 +271,42 @@ export default function Result() {
   const entry = hit ? hit.entry : null;
 
   if (!entry) {
+    // Header matches the clicked category when the query came from one
+    // (home category cards navigate with the localized category name).
+    const catIdFromQuery = q
+      ? Object.keys(UI.en.categories || {}).find((cid) =>
+          [UI.en, UI.lg, UI.sw].some(
+            (U) => U.categories && U.categories[cid] === q,
+          ),
+        )
+      : null;
+    const noEntryTitle = catIdFromQuery
+      ? S.categories[catIdFromQuery] || q
+      : S.app_name;
     return (
       <main className="min-h-screen bg-white p-4 pb-24">
         <div className="max-w-md mx-auto min-w-0">
           <PageHeader
             backHref={backHref}
             backLabel={S.back}
-            title={S.app_name}
+            title={noEntryTitle}
           />
           <div className="mt-2 bg-white rounded-lg shadow-sm p-6 text-center">
             <p className="font-bold text-lg">{S.no_match}</p>
-            <a
-              href={`/complaint?lang=${lang}`}
-              className="btn-ac mt-4 w-full inline-flex bg-primary text-white rounded-lg"
+            <Link
+              href={`/lc-initiatives?lang=${lang}`}
+              aria-label={S.find_lc1}
+              className="btn-ac mt-4 w-full inline-flex gap-2 bg-primary text-white rounded-lg"
               style={{ height: '56px' }}
             >
-              📋 {S.file_complaint}
-            </a>
-            <a
-              href={`tel:${TOLL_FREE.replace(/-/g, '')}`}
-              className="btn-ac mt-2 w-full inline-flex bg-white text-primary border-2 border-primary rounded-lg"
-              style={{ height: '56px' }}
+              <CouncilIcon size={20} /> {S.find_lc1}
+            </Link>
+            <p
+              className="mt-2 text-center text-ac-muted"
+              style={{ fontSize: '16px' }}
             >
-              📞 {S.toll_free}
-            </a>
+              {S.call_toll_free}
+            </p>
           </div>
         </div>
         <BottomNav active="" lang={lang} strings={S} />
@@ -245,55 +317,6 @@ export default function Result() {
   const verification = verify(q, entry);
   const r = composeResponse(entry, verification, lang);
   const banner = r.verification ? BANNERS[r.verification.flag] : null;
-
-  const submitFlag = (e) => {
-    e.preventDefault();
-    if (!flagText.trim()) return;
-    try {
-      const raw = localStorage.getItem(FLAGS_KEY);
-      const all = raw ? JSON.parse(raw) : {};
-      const list = Array.isArray(all[entry.id]) ? all[entry.id] : [];
-      list.push({
-        text: flagText.trim(),
-        name: flagName.trim() || null,
-        at: new Date().toISOString(),
-      });
-      all[entry.id] = list;
-      localStorage.setItem(FLAGS_KEY, JSON.stringify(all));
-    } catch {
-      // Storage unavailable — still thank the user.
-    }
-    setFlagText('');
-    setFlagName('');
-    setFlagOpen(false);
-    setToast('Thank you. Your flag has been recorded.');
-  };
-
-  const share = async () => {
-    const text =
-      `AlertCitizen: ${r.title}. ${(r.answer || '').slice(0, 200)}. ` +
-      `Source: ${r.legal_citation}. Verified: ${r.verified_by.date}. ` +
-      `${PWA_URL}/result?q=${entry.id}&lang=${lang}`;
-    try {
-      if (typeof navigator !== 'undefined' && navigator.share) {
-        await navigator.share({ title: r.title, text });
-        return;
-      }
-      throw new Error('no-share');
-    } catch {
-      try {
-        await navigator.clipboard.writeText(text);
-        setToast('Copied to clipboard.');
-      } catch {
-        setToast(text);
-      }
-    }
-  };
-
-  const complaintHref =
-    `/complaint?new=1&lang=${lang}` +
-    `&category=${encodeURIComponent(entry.category)}` +
-    `&district=${entry.district === 'national' ? district : entry.district}`;
 
   // Short home-page category title in the header (long entry titles
   // would collide with the Back link); the full title lives in the body.
@@ -406,78 +429,56 @@ export default function Result() {
         )}
 
         <section aria-label={S.source} className="mt-3 border border-ac-muted rounded p-3 bg-white">
-          <p>📄 {S.source}: {r.legal_citation}</p>
-          <p>
-            🔗{' '}
+          <p className="flex items-start gap-1.5">
+            <SourceIcon kind="doc" size={16} />
+            <span className="min-w-0 break-words">
+              <strong>{S.source}:</strong> {r.legal_citation}
+            </span>
+          </p>
+          <p className="mt-1 flex items-center gap-1.5">
+            <SourceIcon kind="link" size={16} />
             <a href={r.source_url} target="_blank" rel="noreferrer" className="text-primary underline">
               {S.source_link}
             </a>
           </p>
-          <p>
-            ✅ {S.verified_by}: {r.verified_by.name}, {r.verified_by.role}
+          <p className="mt-1 flex items-start gap-1.5">
+            <SourceIcon kind="check" size={16} />
+            <span className="min-w-0 break-words">
+              <strong>{S.verified_by}:</strong> {r.verified_by.name}, {r.verified_by.role}
+            </span>
           </p>
-          <p>📅 {S.last_updated}: {fmtDate(r.verified_by.date)}</p>
-          <p>🔄 {S.version}: {r.version}</p>
+          <p className="mt-1 flex items-center gap-1.5">
+            <SourceIcon kind="calendar" size={16} />
+            <span>
+              <strong>{S.last_updated}:</strong> {fmtDate(r.verified_by.date)}
+            </span>
+          </p>
+          <p className="mt-1 flex items-center gap-1.5">
+            <SourceIcon kind="version" size={16} />
+            <span>
+              <strong>{S.version}:</strong> {r.version}
+            </span>
+          </p>
           <button
             type="button"
-            onClick={() => setFlagOpen((v) => !v)}
-            aria-expanded={flagOpen}
-            className="mt-1 text-amber font-bold min-h-[48px]"
+            aria-disabled="true"
+            title={S.report_inactive_note}
+            onClick={() => {
+              // Report-an-error is not active yet — intentionally a no-op.
+            }}
+            className="btn-ac mt-2 w-full bg-amber text-white rounded-lg"
           >
-            ⚠️ {S.report_error}
+            {S.report_error}
           </button>
-          {flagOpen && (
-            <form onSubmit={submitFlag} className="mt-2 flex flex-col gap-2">
-              <label htmlFor="flagtext" className="font-bold" style={{ fontSize: '16px' }}>
-                What is wrong?
-              </label>
-              <input
-                id="flagtext"
-                type="text"
-                value={flagText}
-                onInput={(e) => setFlagText(e.target.value)}
-                required
-                className="btn-ac w-full bg-white border border-gray-300 rounded-lg px-4"
-              />
-              <label htmlFor="flagname" className="font-bold" style={{ fontSize: '16px' }}>
-                Your name (optional)
-              </label>
-              <input
-                id="flagname"
-                type="text"
-                value={flagName}
-                onInput={(e) => setFlagName(e.target.value)}
-                className="btn-ac w-full bg-white border border-gray-300 rounded-lg px-4"
-              />
-              <button
-                type="submit"
-                className="btn-ac w-full bg-primary text-white rounded-lg"
-              >
-                {S.search_submit}
-              </button>
-            </form>
-          )}
+          <p className="mt-1 text-center text-ac-muted" style={{ fontSize: '14px' }}>
+            {S.report_inactive_note}
+          </p>
         </section>
 
-        <div className="mt-3 flex flex-col gap-2">
-          <Link
-            href={complaintHref}
-            className="btn-ac w-full inline-flex bg-primary text-white rounded-lg"
-            style={{ height: '56px' }}
-          >
-            📋 {S.file_complaint}
-          </Link>
-          <button
-            type="button"
-            onClick={share}
-            className="btn-ac w-full bg-white text-primary border-2 border-primary rounded-lg"
-            style={{ height: '56px' }}
-          >
-            📤 {S.share_complaint}
-          </button>
-        </div>
+        <p className="mt-2 text-center text-ac-muted" style={{ fontSize: '14px' }}>
+          {S.complaints_later}
+        </p>
       </div>
-      <Toast message={toast} />
       <BottomNav active="" lang={lang} strings={S} />
     </main>
   );
