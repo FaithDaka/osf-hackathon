@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { setLang } from '../lib/i18n';
 import { encodeQr, qrToSvg } from '../lib/qr';
@@ -257,6 +258,13 @@ export default function Entry() {
         >
           {en.toll_free}
         </a>
+        <Link
+          href="/sms-sim"
+          className="mt-3 break-words underline"
+          style={{ fontSize: '13px', color: '#8b9096' }}
+        >
+          {en.sms_sim_link || 'Try the SMS simulator'}
+        </Link>
       </div>
     </main>
   );
