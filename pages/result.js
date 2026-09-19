@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import BottomNav from '../lib/bottom-nav';
+import PageHeader from '../lib/page-header';
 import { isKnownDistrict } from '../lib/district-carousel';
 import { composeResponse, match, verify } from '../lib/matcher';
 import lga from '../data/national/lga_mandates.json';
@@ -112,16 +113,13 @@ export default function Result() {
       return subOk && parOk;
     });
     return (
-      <main className="min-h-screen bg-ac-bg p-4 pb-24">
-        <div className="max-w-md mx-auto">
-          <Link
-            href={backHref}
-            aria-label={S.app_name}
-            className="inline-flex items-center min-h-[48px] text-primary font-bold"
-          >
-            ← {S.app_name}
-          </Link>
-          <h1 className="text-lg font-bold capitalize">{cat.replace(/_/g, ' ')}</h1>
+      <main className="min-h-screen bg-white p-4 pb-24">
+        <div className="max-w-md mx-auto min-w-0">
+          <PageHeader
+            backHref={backHref}
+            backLabel={S.back}
+            title={cat.replace(/_/g, ' ')}
+          />
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -213,15 +211,13 @@ export default function Result() {
 
   if (!entry) {
     return (
-      <main className="min-h-screen bg-ac-bg p-4 pb-24">
-        <div className="max-w-md mx-auto">
-          <Link
-            href={backHref}
-            aria-label={S.app_name}
-            className="inline-flex items-center min-h-[48px] text-primary font-bold"
-          >
-            ← {S.app_name}
-          </Link>
+      <main className="min-h-screen bg-white p-4 pb-24">
+        <div className="max-w-md mx-auto min-w-0">
+          <PageHeader
+            backHref={backHref}
+            backLabel={S.back}
+            title={S.app_name}
+          />
           <div className="mt-2 bg-white rounded-lg shadow-sm p-6 text-center">
             <p className="font-bold text-lg">{S.no_match}</p>
             <a
@@ -299,16 +295,13 @@ export default function Result() {
     `&district=${entry.district === 'national' ? district : entry.district}`;
 
   return (
-    <main className="min-h-screen bg-ac-bg p-4 pb-24">
-      <div className="max-w-md mx-auto">
-        <Link
-          href={backHref}
-          aria-label={S.app_name}
-          className="inline-flex items-center min-h-[48px] text-primary font-bold"
-          style={{ fontSize: '16px' }}
-        >
-          ← {S.app_name}
-        </Link>
+    <main className="min-h-screen bg-white p-4 pb-24">
+      <div className="max-w-md mx-auto min-w-0">
+        <PageHeader
+          backHref={backHref}
+          backLabel={S.back}
+          title={r.title}
+        />
 
         {banner && (
           <div
@@ -320,9 +313,6 @@ export default function Result() {
         )}
 
         <article className="mt-2 bg-white rounded-lg shadow-sm p-5">
-          <h1 className="font-bold" style={{ fontSize: '20px' }}>
-            {r.title}
-          </h1>
           <p className="mt-2" style={{ fontSize: '18px', lineHeight: 1.6 }}>
             {r.answer}
           </p>

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import BottomNav from '../lib/bottom-nav';
+import PageHeader from '../lib/page-header';
 import DistrictCarousel, { isKnownDistrict } from '../lib/district-carousel';
 import {
   answerQuestion,
@@ -169,9 +170,14 @@ function QuizResults({
   };
 
   return (
-    <main className="min-h-screen bg-ac-bg p-4 pb-24">
-      <div className="max-w-md mx-auto text-center">
-        <h1 className="text-lg font-bold">{title}</h1>
+    <main className="min-h-screen bg-white p-4 pb-24">
+      <div className="max-w-md mx-auto min-w-0">
+        <PageHeader
+          backHref={`/quiz?lang=${lang}`}
+          backLabel={S.back}
+          title={title}
+        />
+        <div className="text-center">
         <p className="mt-2 font-bold" style={{ fontSize: '32px' }} aria-live="polite">
           {S.quiz_score.replace('{score}', score.score).replace('{total}', score.total)}
         </p>
@@ -306,6 +312,7 @@ function QuizResults({
             </p>
           )}
         </div>
+        </div>
         {toast && (
           <div role="status" className="fixed bottom-4 left-0 right-0 mx-auto max-w-md px-4">
             <div className="bg-secondary text-white rounded-lg p-4 text-center shadow">
@@ -381,32 +388,28 @@ export default function Quiz() {
   if (!quizId) {
     const list = quizzesData.quizzes.filter((q) => !district || q.district === district);
     return (
-      <main className="min-h-screen bg-ac-bg p-4 pb-24">
-        <div className="max-w-md mx-auto">
-          <Link
-            href={`/home?lang=${lang}`}
-            aria-label={S.app_name}
-            className="inline-flex items-center min-h-[48px] text-primary font-bold"
+      <main className="min-h-screen bg-white p-4 pb-24">
+        <div className="max-w-md mx-auto min-w-0">
+          <PageHeader
+            backHref={`/home?lang=${lang}`}
+            backLabel={S.back}
+            title={S.quiz}
+            description={S.quiz_desc}
           >
-            ← {S.app_name}
-          </Link>
-          <h1 className="text-lg font-bold">{S.quiz}</h1>
-          <p className="text-ac-muted" style={{ fontSize: '16px' }}>
-            {S.quiz_desc}
-          </p>
-          <DistrictCarousel
-            district={district}
-            onPick={(d) => {
-              setDistrict(d);
-              try {
-                localStorage.setItem('ac_district', d);
-              } catch {
-                // Ignore.
-              }
-            }}
-            lang={lang}
-            UI={UI}
-          />
+            <DistrictCarousel
+              district={district}
+              onPick={(d) => {
+                setDistrict(d);
+                try {
+                  localStorage.setItem('ac_district', d);
+                } catch {
+                  // Ignore.
+                }
+              }}
+              lang={lang}
+              UI={UI}
+            />
+          </PageHeader>
           <div className="mt-3 flex flex-col gap-2">
             {list.map((q) => (
               <Link
@@ -443,9 +446,14 @@ export default function Quiz() {
 
   if (!quiz) {
     return (
-      <main className="min-h-screen bg-ac-bg p-4 pb-24">
-        <div className="max-w-md mx-auto text-center">
-          <p className="font-bold">{S.not_found.replace('{location}', quizId)}</p>
+      <main className="min-h-screen bg-white p-4 pb-24">
+        <div className="max-w-md mx-auto min-w-0 text-center">
+          <PageHeader
+            backHref={`/quiz?lang=${lang}`}
+            backLabel={S.back}
+            title={S.quiz}
+          />
+          <p className="mt-4 font-bold">{S.not_found.replace('{location}', quizId)}</p>
           <Link
             href={`/quiz?lang=${lang}`}
             className="btn-ac mt-4 w-full inline-flex bg-primary text-white rounded-lg"
@@ -500,21 +508,14 @@ export default function Quiz() {
   };
 
   return (
-    <main className="min-h-screen bg-ac-bg p-4 pb-24">
-      <div className="max-w-md mx-auto">
-        <Link
-          href={`/quiz?lang=${lang}`}
-          aria-label={S.quiz}
-          className="inline-flex items-center min-h-[48px] text-primary font-bold"
-        >
-          ← {S.quiz}
-        </Link>
-        <h1 className="font-bold" style={{ fontSize: '20px' }}>
-          {quiz.title[lang] || quiz.title.en}
-        </h1>
-        <p className="text-primary" style={{ fontSize: '14px' }} aria-live="polite">
-          Question {qIndex + 1} of {total}
-        </p>
+    <main className="min-h-screen bg-white p-4 pb-24">
+      <div className="max-w-md mx-auto min-w-0">
+        <PageHeader
+          backHref={`/quiz?lang=${lang}`}
+          backLabel={S.back}
+          title={quiz.title[lang] || quiz.title.en}
+          description={`Question ${qIndex + 1} of ${total}`}
+        />
         <div className="h-2 bg-gray-200 rounded mt-1" aria-hidden="true">
           <div
             className="h-2 rounded bg-primary"
