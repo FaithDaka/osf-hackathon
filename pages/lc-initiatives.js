@@ -2,25 +2,23 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import BottomNav from '../lib/bottom-nav';
+import PageHeader from '../lib/page-header';
 import DistrictCarousel, { isKnownDistrict } from '../lib/district-carousel';
-import { getInitiatives, rateInitiative } from '../lib/lc-initiative-store';
-import { fileComplaint } from '../lib/complaint-store';
+import {
+  REP_GROUPS,
+  getRepInitiatives,
+  getRepresentative,
+  getRepresentatives,
+} from '../lib/representatives-store';
+import repsData from '../data/representatives.json';
 import initiativesData from '../data/lc-initiatives.json';
 import enStrings from '../public/i18n/en.json';
 import lgStrings from '../public/i18n/lg.json';
 import swStrings from '../public/i18n/sw.json';
 
 const UI = { en: enStrings, lg: lgStrings, sw: swStrings };
-const COMMENTS_KEY = 'ac_initiative_comments';
 
-const CATEGORY_ICONS = {
-  infrastructure: '🏗️',
-  health: '🏥',
-  education: '🎓',
-  safety: '🛡️',
-  environment: '🌱',
-  other: '📋',
-};
+// Sample data: names and contacts are fictional placeholders for the PoC.
 
 const STATUS_BADGE = {
   announced: 'bg-primary text-white',
@@ -29,12 +27,15 @@ const STATUS_BADGE = {
   stalled: 'bg-accent text-white',
 };
 
-const RATING_BUTTONS = [
-  { key: 'low_effort', icon: '🔴', label: 'Low Effort', border: '#C22433' },
-  { key: 'poor_effort', icon: '🟠', label: 'Poor Effort', border: '#E8590C' },
-  { key: 'looking_good', icon: '🟡', label: 'Looking Good', border: '#B45309' },
-  { key: 'excellent_work', icon: '🟢', label: 'Excellent Work', border: '#0E7A55' },
-];
+const BILL_BADGE = {
+  draft: 'bg-primary text-white',
+  committee: 'bg-amber text-white',
+  passed: 'bg-secondary text-white',
+};
+
+// Initiative cards: same alternating muted tones as the home
+// announcement cards (secondary / accent), repeating down the list.
+const INITIATIVE_CARD_BG = ['bg-secondary-soft', 'bg-accent-soft'];
 
 function fmtDate(iso) {
   try {
@@ -46,31 +47,329 @@ function fmtDate(iso) {
   }
 }
 
-function readComments() {
-  try {
-    const raw = localStorage.getItem(COMMENTS_KEY);
-    const parsed = raw ? JSON.parse(raw) : null;
-    return parsed && typeof parsed === 'object' ? parsed : {};
-  } catch {
-    return {};
+function initialsOf(name) {
+  const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+// Avatar placeholder: initials in a soft circle (no photo assets bundled).
+// Colours cycle per representative so the list has more colour.
+const AVATAR_PALETTE = [
+  { bg: '#EDE7F6', ring: '#5B2D8E', text: '#5B2D8E' },
+  { bg: '#DDF0E7', ring: '#0E7A55', text: '#0E7A55' },
+  { bg: '#FDE4E7', ring: '#C22433', text: '#C22433' },
+  { bg: '#FEF3C7', ring: '#B45309', text: '#B45309' },
+];
+
+function avatarColorFor(seed) {
+  const s = String(seed || '');
+  let h = 0;
+  for (let i = 0; i < s.length; i += 1) h = (h + s.charCodeAt(i)) % 997;
+  return AVATAR_PALETTE[h % AVATAR_PALETTE.length];
+}
+
+function RepAvatar({ name, size = 56, seed }) {
+  const c = avatarColorFor(seed || name);
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 56 56"
+      role="img"
+      aria-label={name}
+      className="shrink-0"
+    >
+      <circle cx="28" cy="28" r="28" fill={c.bg} />
+      <circle cx="28" cy="28" r="27" fill="none" stroke={c.ring} strokeWidth="1.5" opacity="0.35" />
+      <text
+        x="28"
+        y="35"
+        textAnchor="middle"
+        fontSize="19"
+        fontWeight="800"
+        fill={c.text}
+        fontFamily="'Public Sans', system-ui, sans-serif"
+      >
+        {initialsOf(name)}
+      </text>
+    </svg>
+  );
+}
+
+// Group icons: inline SVG, no emojis.
+function GroupIcon({ group, size = 16 }) {
+  const common = {
+    width: size,
+    height: size,
+    viewBox: '0 0 24 24',
+    role: 'img',
+    'aria-hidden': 'true',
+    className: 'shrink-0',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: '1.8',
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+  };
+  switch (group) {
+    case 'city_council':
+      return (
+        <svg {...common}>
+          <path d="M3 21h18" />
+          <path d="M5 21V7l7-4 7 4v14" />
+          <path d="M9 21v-4h6v4" />
+        </svg>
+      );
+    case 'local_council':
+      return (
+        <svg {...common}>
+          <circle cx="9" cy="8" r="3.2" />
+          <path d="M2.5 20c0-3.6 2.9-5.8 6.5-5.8s6.5 2.2 6.5 5.8" />
+          <circle cx="17" cy="9" r="2.6" />
+          <path d="M16 14.4c3 .3 5.5 2.2 5.5 5v.6H16" />
+        </svg>
+      );
+    case 'mp':
+      return (
+        <svg {...common}>
+          <path d="M3 9l9-6 9 6" />
+          <path d="M4 9v10M20 9v10" />
+          <path d="M8 12v5M12 12v5M16 12v5" />
+          <path d="M2 21h20" />
+        </svg>
+      );
+    case 'state_minister':
+      return (
+        <svg {...common}>
+          <rect x="3" y="7" width="18" height="13" rx="2" />
+          <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+          <path d="M12 11v3" />
+        </svg>
+      );
+    default:
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="8" r="3.5" />
+          <path d="M5 21c0-4 3-6.5 7-6.5s7 2.5 7 6.5" />
+        </svg>
+      );
   }
 }
 
-export default function Initiatives() {
+function PhoneIcon({ size = 14 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      role="img"
+      aria-hidden="true"
+      className="shrink-0"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M5 4h4l2 5-2.5 1.5a12 12 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z" />
+    </svg>
+  );
+}
+
+function MailIcon({ size = 14 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      role="img"
+      aria-hidden="true"
+      className="shrink-0"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="m3 7 9 6 9-6" />
+    </svg>
+  );
+}
+
+function PinIcon({ size = 14 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      role="img"
+      aria-hidden="true"
+      className="shrink-0"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 21s-7-5.8-7-11a7 7 0 0 1 14 0c0 5.2-7 11-7 11Z" />
+      <circle cx="12" cy="10" r="2.5" />
+    </svg>
+  );
+}
+
+// Raised-fist mark for the Take Action modal (solid red, no emoji).
+function FistIcon({ size = 48 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      role="img"
+      aria-hidden="true"
+      className="shrink-0"
+      fill="#C22433"
+    >
+      <rect x="6" y="4.5" width="3.2" height="6.5" rx="1.6" />
+      <rect x="9.6" y="3.5" width="3.2" height="7.5" rx="1.6" />
+      <rect x="13.2" y="4.5" width="3.2" height="6.5" rx="1.6" />
+      <rect x="6" y="9.5" width="11" height="7.5" rx="3.2" />
+      <rect x="14.6" y="8" width="4.6" height="9" rx="2.3" transform="rotate(18 16.9 12.5)" />
+      <rect x="8" y="16.5" width="8" height="4.5" rx="1.8" />
+    </svg>
+  );
+}
+
+function CloseIcon({ size = 20 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      role="img"
+      aria-hidden="true"
+      className="shrink-0"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    >
+      <path d="M6 6l12 12M18 6 6 18" />
+    </svg>
+  );
+}
+
+// Take Action modal: red fist, title, and outlined option buttons.
+// Options are not wired to any flow yet — picking one just closes.
+function TakeActionModal({ open, S, onPick, onCancel }) {
+  if (!open) return null;
+  const options = [S.take_action_report, S.take_action_demand, S.take_action_cheer];
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={S.take_action_title}
+      onClick={onCancel}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{
+        backgroundColor: 'rgba(32, 28, 43, 0.5)',
+        backdropFilter: 'blur(3px)',
+        WebkitBackdropFilter: 'blur(3px)',
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="relative bg-white rounded-2xl shadow-lg w-full max-w-sm p-6 pt-12 text-center"
+      >
+        <button
+          type="button"
+          onClick={onCancel}
+          aria-label={S.back}
+          title={S.back}
+          className="absolute top-2 right-2 inline-flex items-center justify-center text-ac-muted"
+          style={{ width: '48px', height: '48px' }}
+        >
+          <CloseIcon size={20} />
+        </button>
+        <div className="flex justify-center" aria-hidden="true">
+          <FistIcon size={48} />
+        </div>
+        <h2
+          className="mt-3 font-bold text-ink break-words"
+          style={{ fontSize: '20px', lineHeight: 1.3 }}
+        >
+          {S.take_action_title}
+        </h2>
+        <div className="mt-4 flex flex-col gap-2">
+          {options.map((label) => (
+            <button
+              key={label}
+              type="button"
+              onClick={() => onPick(label)}
+              className="btn-ac w-full bg-white text-primary border-2 border-primary rounded-full"
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function groupLabel(group, lang, S) {
+  if (group === 'all') return (S.rep_groups && S.rep_groups.all) || 'All';
+  return (S.rep_groups && S.rep_groups[group]) || group;
+}
+
+export function RepCard({ rep, lang, S }) {
+  const role = rep.role[lang] || rep.role.en;
+  const area = rep.area[lang] || rep.area.en;
+  return (
+    <Link
+      href={`/lc-initiatives?rep=${rep.id}&lang=${lang}`}
+      aria-label={`${rep.name}, ${role}`}
+      className="bg-white rounded-lg shadow-sm p-4 flex gap-3 items-start"
+    >
+      <RepAvatar name={rep.name} size={56} seed={rep.id} />
+      <span className="min-w-0 flex-1">
+        <span className="block font-bold text-ink" style={{ fontSize: '16px' }}>
+          {rep.name}
+        </span>
+        <span className="mt-0.5 flex items-center gap-1 text-red-900" style={{ fontSize: '14px' }}>
+          <GroupIcon group={rep.group} size={14} />
+          <span className="truncate">{role}</span>
+        </span>
+        <span className="block text-ac-muted" style={{ fontSize: '14px' }}>
+          {area}
+        </span>
+        <span className="mt-1 flex items-center gap-1 text-ac-muted" style={{ fontSize: '14px' }}>
+          <PhoneIcon size={14} />
+          <span className="truncate">{rep.phone}</span>
+        </span>
+        <span className="mt-0.5 flex items-center gap-1 text-ac-muted" style={{ fontSize: '14px' }}>
+          <MailIcon size={14} />
+          <span className="truncate">{rep.email}</span>
+        </span>
+      </span>
+    </Link>
+  );
+}
+
+export default function Representatives() {
   const router = useRouter();
   const lang = ['en', 'lg', 'sw'].includes(router.query.lang)
     ? router.query.lang
     : 'en';
   const S = UI[lang];
+  const repId = typeof router.query.rep === 'string' ? router.query.rep : null;
 
   const [district, setDistrict] = useState('kampala');
+  const [group, setGroup] = useState('all');
   const [toast, setToast] = useState('');
-  const [commentOpen, setCommentOpen] = useState(null);
-  const [commentText, setCommentText] = useState('');
-  const [stalledOpen, setStalledOpen] = useState(false);
-  const [stalledId, setStalledId] = useState('');
-  const [stalledLong, setStalledLong] = useState('');
-  const [stalledTried, setStalledTried] = useState('');
+  const [actionOpen, setActionOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -95,272 +394,305 @@ export default function Initiatives() {
     }
   };
 
-  const items = getInitiatives(initiativesData, district);
-  const storedComments = readComments();
-  const inProgress = items.filter((i) => i.status === 'in_progress');
-
-  const rate = (id, rating) => {
-    // rateInitiative persists to localStorage; the toast state change below
-    // re-renders, and getInitiatives re-reads the merged counts on render.
-    rateInitiative(id, rating, initiativesData);
-    setToast('Thanks for your rating.');
-  };
-
-  const submitComment = (e, id) => {
-    e.preventDefault();
-    const text = commentText.trim().slice(0, 200);
-    if (!text) return;
-    try {
-      const all = readComments();
-      const list = Array.isArray(all[id]) ? all[id] : [];
-      list.push({ text, at: new Date().toISOString() });
-      all[id] = list;
-      localStorage.setItem(COMMENTS_KEY, JSON.stringify(all));
-    } catch {
-      // Storage unavailable.
+  // ---- DETAIL (?rep=) ----
+  if (repId) {
+    const rep = getRepresentative(repsData, repId);
+    if (!rep) {
+      return (
+        <main className="min-h-screen bg-white p-4 pb-24">
+          <div className="max-w-md mx-auto min-w-0 text-center">
+            <PageHeader
+              backHref={`/lc-initiatives?lang=${lang}`}
+              backLabel={S.back}
+              title={S.representatives}
+            />
+            <p className="mt-4 font-bold">{S.not_found.replace('{location}', repId)}</p>
+          </div>
+          <BottomNav active={router.pathname} lang={lang} strings={S} />
+        </main>
+      );
     }
-    setCommentText('');
-    setCommentOpen(null);
-    setToast('Thanks for your rating.');
-  };
+    const role = rep.role[lang] || rep.role.en;
+    const area = rep.area[lang] || rep.area.en;
+    const office = rep.office ? rep.office[lang] || rep.office.en : '';
+    const bio = rep.bio ? rep.bio[lang] || rep.bio.en : '';
+    const initiatives = getRepInitiatives(rep, initiativesData);
+    const bills = Array.isArray(rep.bills) ? rep.bills : [];
+    const funding = Array.isArray(rep.funding) ? rep.funding : [];
+    return (
+      <main className="min-h-screen bg-white p-4 pb-24">
+        <div className="max-w-md mx-auto min-w-0">
+          <PageHeader
+            backHref={`/lc-initiatives?lang=${lang}`}
+            backLabel={S.back}
+            title={S.representatives}
+          />
 
-  const submitStalled = (e) => {
-    e.preventDefault();
-    const item = items.find((i) => i.id === stalledId) || inProgress[0];
-    if (!item) return;
-    const c = fileComplaint({
-      category: 'lc_initiative_stalled',
-      description: `Stalled: ${item.title[lang] || item.title.en}. How long: ${stalledLong.trim()}. Tried: ${stalledTried.trim()}`,
-      district: item.district,
-      subcounty: item.subcounty,
-      lang,
-    });
-    router.push(`/complaint?ref=${encodeURIComponent(c.ref)}&lang=${lang}`);
-  };
+          <section aria-label={rep.name} className="mt-3 bg-white rounded-lg shadow-sm p-5">
+            <div className="flex gap-3 items-center min-w-0">
+              <RepAvatar name={rep.name} size={64} seed={rep.id} />
+              <div className="min-w-0">
+                <h2 className="font-bold text-ink break-words" style={{ fontSize: '20px', lineHeight: 1.3 }}>
+                  {rep.name}
+                </h2>
+                <p className="mt-0.5 flex items-center gap-1 text-red-900" style={{ fontSize: '14px' }}>
+                  <GroupIcon group={rep.group} size={14} />
+                  <span>{role}</span>
+                </p>
+                <p className="text-ac-muted" style={{ fontSize: '14px' }}>
+                  {area}
+                </p>
+                {office ? (
+                  <p className="mt-0.5 flex items-center gap-1 text-ac-muted" style={{ fontSize: '14px' }}>
+                    <PinIcon size={14} />
+                    <span>{S.rep_office}: {office}</span>
+                  </p>
+                ) : null}
+              </div>
+            </div>
+            <h3 className="mt-4 font-bold" style={{ fontSize: '16px' }}>
+              {S.rep_contact}
+            </h3>
+            <div className="mt-1 flex flex-col gap-2">
+              {/* Display only: contact details are sample data, not clickable. */}
+              <div className="btn-ac w-full inline-flex bg-white text-primary border-2 border-primary rounded-lg">
+                <PhoneIcon size={16} />
+                <span className="ml-2">{rep.phone}</span>
+              </div>
+              <div className="btn-ac w-full inline-flex bg-white text-primary border-2 border-primary rounded-lg">
+                <MailIcon size={16} />
+                <span className="ml-2 truncate">{rep.email}</span>
+              </div>
+            </div>
+          </section>
+
+          {bio ? (
+            <section aria-label={S.rep_about} className="mt-4 bg-white rounded-lg shadow-sm p-5">
+              <h3 className="font-bold" style={{ fontSize: '18px' }}>
+                {S.rep_about}
+              </h3>
+              <p className="mt-1" style={{ fontSize: '15px', lineHeight: 1.55 }}>
+                {bio}
+              </p>
+            </section>
+          ) : null}
+
+          <section aria-label={S.rep_initiatives} className="mt-4">
+            <h3 className="font-bold" style={{ fontSize: '18px' }}>
+              {S.rep_initiatives}
+            </h3>
+            <div className="mt-2 flex flex-col gap-2">
+              {initiatives.length === 0 && (
+                <p className="bg-white rounded-lg p-4 text-center text-ac-muted" style={{ fontSize: '14px' }}>
+                  {S.not_found.replace('{location}', rep.name)}
+                </p>
+              )}
+              {initiatives.map((item, idx) => (
+                <article
+                  key={item.id}
+                  className={`rounded-lg shadow-sm p-4 ${INITIATIVE_CARD_BG[idx % INITIATIVE_CARD_BG.length]}`}
+                >
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h4 className="font-bold text-ink" style={{ fontSize: '16px' }}>
+                      {item.title[lang] || item.title.en}
+                    </h4>
+                    <span
+                      className={`px-2 py-0.5 rounded ${STATUS_BADGE[item.status] || 'bg-primary text-white'}`}
+                      style={{ fontSize: '12px' }}
+                    >
+                      {item.status}
+                    </span>
+                  </div>
+                  <p className="mt-1" style={{ fontSize: '15px', lineHeight: 1.5 }}>
+                    {item.description[lang] || item.description.en}
+                  </p>
+                  <dl className="mt-2 text-ac-muted" style={{ fontSize: '14px' }}>
+                    <div className="flex gap-2">
+                      <dt className="font-bold shrink-0">{S.rep_led_by}:</dt>
+                      <dd>{rep.name}</dd>
+                    </div>
+                    <div className="flex gap-2">
+                      <dt className="font-bold shrink-0">{S.source}:</dt>
+                      <dd className="min-w-0">
+                        <a
+                          href={item.source_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-primary underline break-words"
+                        >
+                          {S.source_link}
+                        </a>
+                      </dd>
+                    </div>
+                    <div className="flex gap-2">
+                      <dt className="font-bold shrink-0">{S.rep_announced}:</dt>
+                      <dd>{fmtDate(item.announced)}</dd>
+                    </div>
+                  </dl>
+                </article>
+                ))}
+              </div>
+            </section>
+
+          <section aria-label={S.rep_bills} className="mt-4">
+            <h3 className="font-bold" style={{ fontSize: '18px' }}>
+              {S.rep_bills}
+            </h3>
+            <div className="mt-2 flex flex-col gap-2">
+              {bills.length === 0 && (
+                <p className="bg-white rounded-lg p-4 text-center text-ac-muted" style={{ fontSize: '14px' }}>
+                  {S.not_found.replace('{location}', rep.name)}
+                </p>
+              )}
+              {bills.map((b, i) => (
+                <div key={i} className="bg-white rounded-lg shadow-sm p-4">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-bold text-ink" style={{ fontSize: '15px' }}>
+                      {b.title[lang] || b.title.en}
+                    </span>
+                    <span
+                      className={`px-2 py-0.5 rounded ${BILL_BADGE[b.status] || 'bg-primary text-white'}`}
+                      style={{ fontSize: '12px' }}
+                    >
+                      {b.status}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-ac-muted" style={{ fontSize: '14px' }}>
+                    {b.year}
+                  </p>
+                </div>
+                ))}
+              </div>
+            </section>
+
+          <section aria-label={S.rep_funding} className="mt-4">
+            <h3 className="font-bold" style={{ fontSize: '18px' }}>
+              {S.rep_funding}
+            </h3>
+            <div className="mt-2 flex flex-col gap-2">
+              {funding.length === 0 && (
+                <p className="bg-white rounded-lg p-4 text-center text-ac-muted" style={{ fontSize: '14px' }}>
+                  {S.not_found.replace('{location}', rep.name)}
+                </p>
+              )}
+              {funding.map((f, i) => (
+                <div key={i} className="bg-white rounded-lg shadow-sm p-4 flex items-center justify-between gap-2">
+                  <span className="font-bold text-ink" style={{ fontSize: '15px' }}>
+                    {f.label[lang] || f.label.en}
+                  </span>
+                  <span className="font-bold text-secondary shrink-0" style={{ fontSize: '15px' }}>
+                    {f.amount}
+                  </span>
+                </div>
+                ))}
+              </div>
+            </section>
+
+          {rep.mandate ? (
+            <Link
+              href={`/result?q=${rep.mandate}&lang=${lang}&district=${rep.district}`}
+              aria-label={`${S.rep_know_role}: ${rep.name}`}
+              className="btn-ac mt-4 w-full inline-flex bg-amber text-white rounded-lg"
+            >
+              {S.rep_know_role}
+            </Link>
+          ) : (
+            <button
+              type="button"
+              aria-disabled="true"
+              title={S.rep_know_role}
+              onClick={() => {
+                // No mandate page for this title yet — intentionally a no-op.
+              }}
+              className="btn-ac mt-4 w-full bg-amber text-white rounded-lg"
+            >
+              {S.rep_know_role}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setActionOpen(true)}
+            aria-label={S.rep_take_action}
+            className="btn-ac mt-2 w-full bg-accent text-white rounded-lg"
+          >
+            {S.rep_take_action}
+          </button>
+          <TakeActionModal
+            open={actionOpen}
+            S={S}
+            onPick={() => setActionOpen(false)}
+            onCancel={() => setActionOpen(false)}
+          />
+        </div>
+        {toast && (
+          <div role="status" className="fixed bottom-4 left-0 right-0 mx-auto max-w-md px-4">
+            <div className="bg-secondary text-white rounded-lg p-4 text-center shadow">
+              {toast}
+            </div>
+          </div>
+        )}
+        <BottomNav active={router.pathname} lang={lang} strings={S} />
+      </main>
+    );
+  }
+
+  // ---- LIST ----
+  const reps = getRepresentatives(repsData, district, group);
+  const filters = ['all', ...REP_GROUPS];
 
   return (
-    <main className="min-h-screen bg-ac-bg p-4 pb-24">
-      <div className="max-w-md mx-auto">
-        <Link
-          href={`/home?lang=${lang}`}
-          aria-label={S.app_name}
-          className="inline-flex items-center min-h-[48px] text-primary font-bold"
+    <main className="min-h-screen bg-white p-4 pb-24">
+      <div className="max-w-md mx-auto min-w-0">
+        <PageHeader
+          backHref={`/home?lang=${lang}`}
+          backLabel={S.back}
+          title={S.representatives}
+          description={S.representatives_desc}
         >
-          ← {S.app_name}
-        </Link>
-        <h1 className="text-lg font-bold">{S.lc_initiatives}</h1>
-        <p className="text-ac-muted" style={{ fontSize: '16px' }}>
-          {S.lc_initiatives_desc}. Rate the effort.
-        </p>
-        <DistrictCarousel
-          district={district}
-          onPick={pickDistrict}
-          lang={lang}
-          UI={UI}
-        />
+          <DistrictCarousel
+            district={district}
+            onPick={pickDistrict}
+            lang={lang}
+            UI={UI}
+          />
+          <div
+            className="no-scrollbar mt-2 flex gap-2 overflow-x-auto pb-1"
+            role="group"
+            aria-label={S.representatives}
+          >
+            {filters.map((g) => {
+              const active = group === g;
+              return (
+                <button
+                  key={g}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setGroup(g)}
+                  className={`shrink-0 inline-flex items-center gap-1 whitespace-nowrap rounded-full px-4 font-semibold ${
+                    active
+                      ? 'bg-primary text-white'
+                      : 'bg-white text-primary border border-primary'
+                  }`}
+                  style={{ minHeight: '36px', fontSize: '14px' }}
+                >
+                  {g !== 'all' && <GroupIcon group={g} size={14} />}
+                  {groupLabel(g, lang, S)}
+                </button>
+              );
+            })}
+          </div>
+        </PageHeader>
 
-        <div className="mt-3 flex flex-col gap-3">
-          {items.map((item) => {
-            const title = item.title[lang] || item.title.en;
-            const desc = item.description[lang] || item.description.en;
-            const counts = item.community_rating;
-            const total = Object.values(counts).reduce((a, b) => a + b, 0);
-            const leader = RATING_BUTTONS.reduce((a, b) =>
-              counts[b.key] > counts[a.key] ? b : a,
-            );
-            const baseComments = Array.isArray(item.comments) ? item.comments : [];
-            const extra = Array.isArray(storedComments[item.id])
-              ? storedComments[item.id]
-              : [];
-            return (
-              <article key={item.id} className="bg-white rounded-lg shadow-sm p-5">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-xl" aria-hidden="true">
-                    {CATEGORY_ICONS[item.category] || '📋'}
-                  </span>
-                  <h2 className="font-bold" style={{ fontSize: '18px' }}>
-                    {title}
-                  </h2>
-                </div>
-                <div className="mt-1 flex gap-2">
-                  <span
-                    className="px-2 py-0.5 rounded bg-primary text-white"
-                    style={{ fontSize: '12px' }}
-                  >
-                    {item.lc_level}
-                  </span>
-                  <span
-                    className={`px-2 py-0.5 rounded ${
-                      STATUS_BADGE[item.status] || 'bg-ac-muted text-white'
-                    }`}
-                    style={{ fontSize: '12px' }}
-                  >
-                    {item.status}
-                  </span>
-                </div>
-                <p className="mt-2" style={{ fontSize: '16px', lineHeight: 1.5 }}>
-                  {desc}
-                </p>
-                <p className="mt-1 text-ac-muted" style={{ fontSize: '14px' }}>
-                  {item.district === 'kampala' ? 'Kampala' : 'Mukono'} {'>'}{' '}
-                  {item.subcounty} Sub-county {'>'} {item.parish} Parish
-                </p>
-                <p className="text-ac-muted" style={{ fontSize: '14px' }}>
-                  Announced: {fmtDate(item.announced)}
-                </p>
-                <p style={{ fontSize: '14px' }}>
-                  🔗{' '}
-                  <a
-                    href={item.source_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-primary underline"
-                  >
-                    {S.source_link}
-                  </a>
-                </p>
-
-                <h3 className="mt-3 font-bold" style={{ fontSize: '16px' }}>
-                  Community Rating:
-                </h3>
-                <div className="mt-1 grid grid-cols-4 gap-1" role="group" aria-label="Rate effort">
-                  {RATING_BUTTONS.map((b) => {
-                    const isLeader = total > 0 && b.key === leader.key;
-                    return (
-                      <button
-                        key={b.key}
-                        type="button"
-                        onClick={() => rate(item.id, b.key)}
-                        aria-label={`${b.label}: ${counts[b.key]} votes`}
-                        aria-pressed={isLeader}
-                        className="bg-white rounded"
-                        style={{
-                          width: '100%',
-                          maxWidth: '72px',
-                          height: '48px',
-                          fontSize: '12px',
-                          border: isLeader ? `2px solid ${b.border}` : '1px solid #BDBDBD',
-                        }}
-                      >
-                        {b.icon} {b.label}
-                        <span className="block font-bold">{counts[b.key]}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-                <p className="text-ac-muted" style={{ fontSize: '14px' }}>
-                  Total votes: {total}
-                </p>
-
-                <h3 className="mt-2 font-bold" style={{ fontSize: '16px' }}>
-                  Community Comments:
-                </h3>
-                {[...baseComments, ...extra].map((c, i) => (
-                  <p key={i} className="text-ac-muted" style={{ fontSize: '14px' }}>
-                    {c.name || 'Anonymous'}
-                    {c.at || c.date ? `, ${fmtDate(c.at || c.date)}` : ''}:{' '}
-                    {c.text}
-                  </p>
-                ))}
-                {commentOpen === item.id ? (
-                  <form onSubmit={(e) => submitComment(e, item.id)} className="mt-1">
-                    <label htmlFor={`c-${item.id}`} className="sr-only">
-                      Add comment
-                    </label>
-                    <input
-                      id={`c-${item.id}`}
-                      type="text"
-                      value={commentText}
-                      onInput={(e) => setCommentText(e.target.value)}
-                      maxLength={200}
-                      placeholder="Your comment (max 200)"
-                      className="btn-ac w-full bg-white border border-gray-300 rounded-lg px-4"
-                    />
-                    <p className="text-ac-muted" style={{ fontSize: '14px' }}>
-                      Your name is NOT stored. You are anonymous.
-                    </p>
-                    <button
-                      type="submit"
-                      className="btn-ac mt-1 w-full bg-primary text-white rounded-lg"
-                    >
-                      {S.search_submit}
-                    </button>
-                  </form>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCommentText('');
-                      setCommentOpen(item.id);
-                    }}
-                    className="btn-ac mt-1 w-full bg-white text-primary border border-primary rounded-lg"
-                  >
-                    ADD COMMENT
-                  </button>
-                )}
-              </article>
-            );
-          })}
+        <div className="mt-3 flex flex-col gap-2" aria-live="polite">
+          {reps.length === 0 && (
+            <p className="bg-white rounded-lg p-4 text-center text-ac-muted">
+              {S.rep_no_reps.replace('{location}', district)}
+            </p>
+          )}
+          {reps.map((rep) => (
+            <RepCard key={rep.id} rep={rep} lang={lang} S={S} />
+          ))}
         </div>
-
-        <button
-          type="button"
-          onClick={() => {
-            setStalledOpen((v) => !v);
-            if (inProgress[0] && !stalledId) setStalledId(inProgress[0].id);
-          }}
-          aria-expanded={stalledOpen}
-          className="btn-ac mt-4 w-full bg-white text-accent border-2 border-accent rounded-lg"
-        >
-          Report a Stalled Initiative
-        </button>
-        {stalledOpen && (
-          <form onSubmit={submitStalled} className="mt-2 bg-white rounded-lg shadow-sm p-4 flex flex-col gap-2">
-            <label htmlFor="stalled-which" className="block font-bold" style={{ fontSize: '16px' }}>
-              Which initiative is stalled?
-            </label>
-            <select
-              id="stalled-which"
-              value={stalledId}
-              onChange={(e) => setStalledId(e.target.value)}
-              className="btn-ac w-full bg-white border border-gray-300 rounded-lg px-4"
-            >
-              {inProgress.map((i) => (
-                <option key={i.id} value={i.id}>
-                  {i.title[lang] || i.title.en}
-                </option>
-              ))}
-            </select>
-            <label htmlFor="stalled-long" className="block font-bold" style={{ fontSize: '16px' }}>
-              How long has it been stalled?
-            </label>
-            <input
-              id="stalled-long"
-              type="text"
-              value={stalledLong}
-              onInput={(e) => setStalledLong(e.target.value)}
-              required
-              className="btn-ac w-full bg-white border border-gray-300 rounded-lg px-4"
-            />
-            <label htmlFor="stalled-tried" className="block font-bold" style={{ fontSize: '16px' }}>
-              What have you tried?
-            </label>
-            <input
-              id="stalled-tried"
-              type="text"
-              value={stalledTried}
-              onInput={(e) => setStalledTried(e.target.value)}
-              required
-              className="btn-ac w-full bg-white border border-gray-300 rounded-lg px-4"
-            />
-            <button
-              type="submit"
-              className="btn-ac w-full bg-accent text-white rounded-lg"
-            >
-              {S.file_complaint}
-            </button>
-          </form>
-        )}
       </div>
       {toast && (
         <div role="status" className="fixed bottom-4 left-0 right-0 mx-auto max-w-md px-4">

@@ -5,8 +5,34 @@ import Link from 'next/link';
 // App Router fallback (which crashes on preact/compat: React.cache missing).
 export default function NotFound() {
   return (
-    <main className="min-h-screen bg-ac-bg p-4">
-      <div className="max-w-md mx-auto text-center pt-12">
+    <main className="min-h-screen bg-white p-4">
+      <div className="max-w-md mx-auto min-w-0">
+        <header className="bg-primary-soft -mx-4 -mt-4 px-4 pt-4 pb-3">
+          <div
+            className="grid items-center min-h-[48px] min-w-0"
+            style={{ gridTemplateColumns: 'minmax(0, 1fr) auto minmax(0, 1fr)' }}
+          >
+            <div className="flex justify-start min-w-0">
+              <Link
+                href="/"
+                aria-label="Back"
+                className="inline-flex items-center min-h-[48px] text-primary font-bold shrink-0 min-w-0 max-w-full"
+                style={{ fontSize: '16px' }}
+              >
+                <span aria-hidden="true" className="shrink-0">←&nbsp;</span>
+                <span className="truncate">Back</span>
+              </Link>
+            </div>
+            <h1
+              className="min-w-0 max-w-full text-center font-bold text-ink break-words px-2"
+              style={{ fontSize: 'clamp(17px, 5.5vw, 20px)', lineHeight: '1.3', overflowWrap: 'anywhere' }}
+            >
+              404
+            </h1>
+            <div aria-hidden="true" className="min-w-0" />
+          </div>
+        </header>
+        <div className="text-center pt-12">
         <svg
           width="56"
           height="56"
@@ -32,7 +58,7 @@ export default function NotFound() {
             strokeLinejoin="round"
           />
         </svg>
-        <h1 className="mt-4 text-2xl font-bold">404</h1>
+        <h2 className="mt-4 text-2xl font-bold">404</h2>
         <p className="mt-2 text-ac-muted">
           This page does not exist yet.
         </p>
@@ -42,6 +68,7 @@ export default function NotFound() {
         >
           ← AlertCitizen
         </Link>
+        </div>
       </div>
     </main>
   );

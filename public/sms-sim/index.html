@@ -34,7 +34,7 @@ body{background:#0f0f1a;display:flex;justify-content:center;align-items:center;m
 </div>
 <script>
 var MANDATE_URL = "http://YOUR-LAPTOP-IP:3000";
-var TOLL_FREE = "0800-225-8424";
+  var TOLL_FREE = "0800-ALERT";
 // Phrase lists mirror data/sms-phrases.json (single source of truth — keep
 // in sync by hand; this file must also work opened straight from disk).
 // Served over http(s), the link targets this same device automatically so it
@@ -42,8 +42,32 @@ var TOLL_FREE = "0800-225-8424";
 var BASE_URL = (location.protocol.indexOf("http") === 0) ? location.origin : MANDATE_URL;
 var LANGUAGE_MAP = {
 en: ["I NEED HELP", "HELP", "I NEED ASSISTANCE", "NEED HELP", "HELP ME", "PLEASE HELP", "EMERGENCY", "ASSISTANCE"],
-lg: ["NSOLA", "NTEEGAMWA", "NSOLA BYAMASO", "NTEEGAMWA BYAMASO", "NETAAGA", "OBUYAMBI", "BUYAMBI", "NNEETA OBUYAMBI", "NNEETA OKUYAMBIBWA", "MPA OBUYAMBI", "YAMBA"],
-sw: ["NITAHITAJA MSAADA", "MSAADA", "NITAHITAJA", "NAHITAJI MSAADA", "NINAHITAJI MSAADA", "NINAHITAJI USAIDIZI", "NISAIDIE", "SAIDIA"]
+lg: ["NYAMBA",
+      "BUYAMBI",
+      "NSAABA BUYAMBI",
+      "HULLO",
+      "NETAAGA",
+      "OBUYAMBI",
+      "BUYAMBI",
+      "NNEETA OKUYAMBIBWA",
+      "MPA OBUYAMBI",
+      "YAMBA",
+      "BAMBI",
+      "NKULAMUSIZA",
+      "NKU",
+      "KIKI",
+      "NGAMBA"],
+sw: ["NITAHITAJA MSAADA",
+      "MSAADA",
+      "NITAHITAJA",
+      "NAHITAJI MSAADA",
+      "NINAHITAJI MSAADA",
+      "NINAHITAJI USAIDIZI",
+      "NISAIDIE",
+      "SAIDIE",
+      "SAIDIA",
+      "JAMBO",
+      "POTEA"]
 };
 function detectLanguage(text) {
 var n = String(text || "").toUpperCase().trim();
@@ -57,9 +81,9 @@ return "en";
 }
 function buildResponse(lang) {
 var R = {
-en: "Hello! Welcome to AlertCitizen.\n\nTap this link to get started:\n" + BASE_URL + "?lang=en\n\nNo data? Call toll-free: " + TOLL_FREE + "\n\nWe are here to help you with:\n- Public services\n- Local council info\n- Fees & permits\n- Land disputes\n- Safety & protection\n\nInformation you can trust.",
-lg: "Teegeka! Wakulinda mu AlertCitizen.\n\nKolaaki ku linkino eyo okutandika:\n" + BASE_URL + "?lang=lg\n\nOsi na data? Sooka: " + TOLL_FREE + "\n\nTukuyambako ku:\n- Emirimu gy'abantu bonna\n- Omukulembeze wo mu kibuga\n- Omutindo n'ebitegeeza\n- Emisaasaana y'ensi\n- Obulamu n'obukuumi\n\nEbikwata by'okusobola okwetegeka.",
-sw: "Karibu! Karibu kwenye AlertCitizen.\n\nBonyeza hii link ili uanze:\n" + BASE_URL + "?lang=sw\n\nHuna data? Piga bure: " + TOLL_FREE + "\n\nTutakusaidia na:\n- Huduma za umma\n- Taarifa za mamliko\n- Ada na vyeti\n- Migogoro ya nchi\n- Usalama na ulinzi\n\nTaarifa unaweza kuamini."
+en: "Hello! Welcome to AlertCitizen.\n\nTap this link to get started:\n" + BASE_URL + "/home?lang=en\n\nNo data? Call toll-free: " + TOLL_FREE + "\n\nWe are here to help you with:\n- Public services\n- Local council info\n- Fees and permits\n- Land disputes\n- Safety and protection\n\nInformation you can trust.\n\nText back the word ALERT to receive citizen alerts via SMS.",
+lg: "Teegeka! Wakulinda mu AlertCitizen.\n\nKolaaki ku linkino eyo okutandika:\n" + BASE_URL + "/home?lang=lg\n\nOsi na data? Sooka: " + TOLL_FREE + "\n\nTukuyambako ku:\n- Emirimu gy'abantu bonna\n- Omukulembeze wo mu kibuga\n- Omutindo n'ebitegeeza\n- Emisaasaana y'ensi\n- Obulamu n'obukuumi\n\nEbikwata by'okusobola okwetegeka.\n\nWeereza ekigambo ALERT ofune obubaka bw'obunnansi ku SMS.",
+sw: "Karibu! Karibu kwenye AlertCitizen.\n\nBonyeza hii link ili uanze:\n" + BASE_URL + "/home?lang=sw\n\nHuna data? Piga bure: " + TOLL_FREE + "\n\nTutakusaidia na:\n- Huduma za umma\n- Taarifa za mamliko\n- Ada na vyeti\n- Migogoro ya nchi\n- Usalama na ulinzi\n\nTaarifa unaweza kuamini.\n\nTuma neno ALERT kupokea arifa za uraia kwa SMS."
 };
 return R[lang] || R.en;
 }

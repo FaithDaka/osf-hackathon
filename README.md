@@ -1,61 +1,88 @@
-# AlertCitizen
+<p align="center">
+  <img src="public/icons/shield.svg" width="72" height="72" alt="AlertCitizen logo: a purple shield with a checkmark" />
+</p>
 
-**Information you can trust. In your language. On your phone.**
+<h1 align="center">AlertCitizen</h1>
 
-AlertCitizen is a lightweight, offline-capable PWA that delivers verified
-civic information to citizens in Uganda. It answers
-questions about local government mandates, statutory fees, land disputes,
-inheritance, permits, public services, and safety pathways using a
-deterministic keyword-matching engine against a versioned, community-verified
-JSON knowledge base.
+<p>
+  <img src="docs/screenshots/home.png" width="320" alt="AlertCitizen home screen with alert cards and topic shortcuts" />
+  <img src="docs/screenshots/alerts.png" width="320" alt="Alerts page with a power outage announcement" />
+  <img src="docs/screenshots/representatives.png" width="320" alt="Your Representatives page with local leader cards" />
+  <img src="docs/screenshots/quiz.png" width="320" alt="Civic Quiz page" />
+</p>
 
-**No LLM runs at runtime. No API calls. No hallucination.**
+## What is AlertCitizen?
 
-## The Problem
+Imagine you are told you must pay 200,000 shillings for an official stamp
+— but the law says it costs 10,000. Or you are evicted from your home
+because you don't know how the law protects you. Or the power company announces
+an outage on a social network you never use, so your food goes bad and nobody
+warned you.
 
-Citizens in Kampala and Mukono do not know what their local council
-leaders can legally do. LC1 chairmen demand 200,000 UGX for a stamp
-that costs 10,000 by law. Women are evicted from their deceased
-husbands' land because they don't know the Succession Amendment Act
-2022. Power outages and road closures are announced on Twitter where
-they are invisible to 90% of the population. Misinformation spreads
-on WhatsApp groups faster than any correction.
+AlertCitizen exists for moments like these. It is a small, fast phone app
+that gives ordinary citizens **verified answers about civic life**: what
+your local leaders are legally allowed to do, what official fees really
+cost, where to go with a land dispute, how to stay safe — plus **alerts**
+about power outages, road closures, and community events in your district.
+Every answer shows its source, who verified it, and when it was last
+updated. It works in **English, Luganda, and Swahili**, reads answers aloud
+for people who prefer listening, and keeps working with **no internet**
+once installed.
 
-The people who need information the most have the least access to it.
+## What you can do in the app
 
-## The Solution
+- **Get alerts.** Power outages, water shutdowns, road works, and
+  community events in your district, grouped by month with the exact
+  times highlighted. Listen to any alert, share it, or copy it.
+- **Ask questions.** Type a question or tap a shortcut (Land, Fees,
+  Safety, Permits, Education). Answers come with the legal fee, the
+  correct office to visit, warnings about illegal demands, and next steps.
+  A guided chatbot helps you browse the knowledge base topic by topic.
+- **Know your local council.** Pick your sub-county and see your
+  actual local representatives, then open a profile for their duties,
+  office location, contact details, initiatives, bills, and funding.
+- **Meet your representatives.** Filter leaders by City Council, Local
+  Council, MPs, and State Ministers, and take action from their profiles.
+- **Take quizzes.** Short multiple-choice quizzes on local governance
+  with an instant score. Rankings and leaderboards arrive in a later
+  version.
+- **Listen instead of reading.** Voice mode reads each topic aloud and
+  lets you answer "Yes, continue", "Next", or "Stop Listening" — built
+  for low-literacy users and anyone who prefers audio.
+- **Enter by SMS.** Text `I NEED HELP` and get a link in your language.
+  No app store, no account, no data needed to start.
+- **Stay private.** Your data never leaves your phone. A "Delete all
+  your data" button wipes everything locally.
 
-AlertCitizen is a civic ledger, not a social feed.
+## How it works (stack)
 
-- **SMS-first entry.** Text "I NEED HELP" (or "NYAMBA" or "NITAHITAJA
-  MSAADA") to our code. The system detects your language and sends
-  a corresponding link. No app install to get in.
-- **Deterministic matching.** Your question is matched against a
-  versioned JSON knowledge base using keyword scoring. No LLM. No
-  hallucination. If the system doesn't know, it says so.
-- **In-place verification.** If you were told a fee that contradicts
-  the law, the system flags it before you pay. "You mentioned 200,000
-  UGX. The legal fee is 10,000 UGX."
-- **Escalation by design.** A complaint gets a reference number, a
-  deadline, and an automatic escalation path: LC1 → LC2 → LC3 →
-  District. You don't need to go viral. The system makes you visible
-  by structure.
-- **Community-verified.** Every entry has a named verifier, a legal
-  citation, a source URL, a date, and a version. Community members
-  can flag errors. The change log is public.
-- **Announcements.** Power outages, water disruptions, road closures,
-  community events, and policy changes are pushed to users in their
-  district. Not gated by Twitter engagement.
-- **LC Initiatives with community rating.** See what your local
-  council is doing. Rate the effort: Low Effort, Poor Effort,
-  Looking Good, or Excellent Work.
-- **Civic quizzes with parish ranking.** Test your knowledge. See
-  how your parish ranks. Gamified civic education.
-- **Screen reader mode.** Audio-guided navigation. The app reads aloud for increased accessibility. You tap Yes or No. No reading required.
-- **Multilingual.** English, Luganda, Swahili. UI, answers,
-  flashcards, and voice prompts in all three languages.
+- **Next.js 14 static export** (`output: 'export'`) — the whole app
+  compiles to plain HTML/CSS/JS in `out/`, so it can be hosted anywhere
+  static files work. No servers, no databases, no API calls at runtime.
+- **Preact on the client** (`react`/`react-dom` → `preact/compat`) plus
+  **Tailwind CSS v3** and hand-rolled i18n — first-load JS is ~52–92KB
+  per page, small enough for slow connections and basic phones.
+- **Deterministic knowledge engine.** Questions are matched against a
+  versioned JSON knowledge base (`data/` — laws, fees, mandates,
+  districts) with keyword scoring. There is no generative model at
+  runtime, so the app cannot invent fees, offices, or laws: if it
+  doesn't know, it says so and points you to your LC1 or a toll-free
+  line.
+- **Offline-first PWA.** A hand-rolled service worker caches the app
+  shell, the knowledge base, and your recent answers, with an offline
+  fallback page.
 
-## Quick Start
+## How AI was used
+
+No generative AI runs inside the app — answers are retrieved, never
+generated, which is exactly what makes them trustworthy. AI was used the
+way a senior pair-programmer would be: to help design the information
+architecture, draft and translate the trilingual interface and knowledge
+content, build the UI components, and test flows across languages.
+Every AI-assisted piece was reviewed, built, and verified by a human
+before shipping.
+
+## Run it locally
 
 ```bash
 # Requires Node.js 22+
@@ -70,25 +97,27 @@ npm run dev
 # Production static export (outputs to out/)
 npm run build
 
+# Preview the export
+npx serve out
+
 # Lint
 npm run lint
 ```
 
-Serve the static export with any static file server, or deploy `out/`
-to GitHub Pages (a workflow is included under `.github/workflows/`).
-
 ## Demo in 5 minutes
 
-1. **SMS entry.** Open `/sms-sim` (or `public/sms-sim/index.html`
-   directly — set `MANDATE_URL` to your laptop IP first). Send
-   `I NEED HELP`, `NETAAGA BUYAMBI`, or `NITAHITAJA MSAADA` and tap
-   the reply link to open the PWA in the matching language.
+1. **SMS entry.** Open `/sms-sim`, text `I NEED HELP` (or `NETAAGA
+   OBUYAMBI`, or `SAIDIE`) and tap the reply link — it opens the app
+   in the matching language.
 2. **Ask.** On home, search `LC1 stamp fee asked 200000 UGX` and watch
    the red discrepancy banner fire on the result screen.
-3. **Complain.** File a complaint from the result screen, then check
-   its status with the reference number.
-4. **Quiz.** Take a civic quiz, see the parish ranking, share the score.
-5. **Rate.** Open LC Initiatives, rate an effort badge, add a comment.
+3. **Alerts.** Open Alerts, filter by Power, listen to an announcement,
+   copy it with the copy button.
+4. **Reps.** Open Your Representatives (or Know Your Local Council),
+   filter by group, open a profile, check what the office can do.
+5. **Quiz.** Take the Local Council quiz and see your score.
+6. **Voice.** Flip the Voice toggle and let the app read the topics
+   to you.
 
 ## Project structure
 
@@ -97,41 +126,30 @@ pages/          Entry, home, result, complaint, announcements, quiz,
                 lc-initiatives, sms-sim, 404 (+ _app shell)
 lib/            matcher, i18n, sms-detect, speech, voice-walkthrough,
                 complaint-store, version-check, quiz-engine,
-                announcement-store, lc-initiative-store, qr
-data/           version.json + national/*.json + districts/*.json +
-                announcements, lc-initiatives, quizzes, rules,
-                escalation, voice-tree, geography (all bundled at build)
-public/         manifest.json, sw.js (ac-v1), icons, i18n/*.json,
+                announcement-store, representatives-store,
+                district-carousel, page-header, confirm-modal, qr
+data/           national/*.json + districts/*.json + announcements,
+                representatives, quizzes, rules, escalation,
+                voice-tree, geography, sms-phrases (bundled at build)
+public/         manifest.json, sw.js, icons, i18n/*.json,
                 sms-sim/index.html, audio/manifest.json, offline.html
+docs/           screenshots used above
 scripts/        make-icons.mjs, generate-audio.mjs
 ```
 
-## Stack and budgets
-
-- Next.js 14 static export (`output: 'export'`) + Preact on the
-  client (`react`/`react-dom` → `preact/compat`, client bundles only)
-  + Tailwind CSS v3 (purged) + hand-rolled i18n, hooks-only state.
-- First Load JS ~52–88KB per route (budget: 500KB).
-- CSS ~9.5KB (budget: 15KB). Base font 18px, 48px touch targets,
-  no animations.
-- `data/` JSON ~148KB (budget: 150KB). Everything ships offline via
-  the hand-rolled service worker (shell + JSON-in-bundles + audio
-  cache + last-10 result queries + offline fallback page).
-
 ## Notes and known limits (PoC)
 
-- `next dev` full page loads don't hydrate URL query params under
-  Preact (client-side navigation and the production export handle
-  them correctly). Edits trigger full reloads instead of hot swaps.
-- Unknown URLs in `next dev` fall into Next's App Router fallback,
-  which crashes on `React.cache` (unimplemented by preact/compat).
-  The shipped static export serves `404.html` and is unaffected.
-- Luganda/Swahili audio files await native-speaker recordings
-  (`node scripts/generate-audio.mjs` prints the manifest + recipes);
-  the app falls back to English speech meanwhile.
-- Verify district/ministry source URLs and the FIDA helpline
-  (`0800-XXX-XXX` placeholder) before production.
+- Filing complaints from result pages, representative ratings, and the
+  report-an-error form are stubbed for later versions (their buttons
+  say so and trigger no action).
+- Luganda/Swahili audio falls back to an English "Language not
+  available yet" line until native-speaker recordings land
+  (`node scripts/generate-audio.mjs` prints the manifest + recipes).
+- Sample representative contacts and demo quiz scores are placeholder
+  data. Verify district/ministry source URLs and the `0800-ALERT`
+  line before production.
 - Luganda/Swahili copy is colloquial-draft quality — get a
   native-speaker pass before launch.
-
-OSF Hackathon proof of concept. Information you can trust.
+- `next dev` full page loads don't hydrate URL query params under
+  Preact (client-side navigation and the production export handle
+  them correctly).

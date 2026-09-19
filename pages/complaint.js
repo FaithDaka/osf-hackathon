@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import BottomNav from '../lib/bottom-nav';
+import PageHeader from '../lib/page-header';
 import DistrictCarousel, { isKnownDistrict } from '../lib/district-carousel';
 import {
   fileComplaint,
@@ -161,9 +162,14 @@ export default function Complaint() {
     const c = getComplaint(refParam);
     if (!c) {
       return (
-        <main className="min-h-screen bg-ac-bg p-4 pb-24">
-          <div className="max-w-md mx-auto text-center">
-            <p className="font-bold">{S.not_found.replace('{location}', refParam)}</p>
+        <main className="min-h-screen bg-white p-4 pb-24">
+          <div className="max-w-md mx-auto min-w-0 text-center">
+            <PageHeader
+              backHref={`/complaint?lang=${lang}`}
+              backLabel={S.back}
+              title={S.file_complaint}
+            />
+            <p className="mt-4 font-bold">{S.not_found.replace('{location}', refParam)}</p>
             <Link
               href={`/complaint?lang=${lang}`}
               className="btn-ac mt-4 w-full inline-flex bg-primary text-white rounded-lg"
@@ -212,16 +218,14 @@ export default function Complaint() {
     };
 
     return (
-      <main className="min-h-screen bg-ac-bg p-4 pb-24">
-        <div className="max-w-md mx-auto">
-          <Link
-            href={`/complaint?lang=${lang}`}
-            aria-label={S.file_complaint}
-            className="inline-flex items-center min-h-[48px] text-primary font-bold"
-          >
-            ← {S.file_complaint}
-          </Link>
-          <p className="font-mono font-bold" style={{ fontSize: '24px' }}>
+      <main className="min-h-screen bg-white p-4 pb-24">
+        <div className="max-w-md mx-auto min-w-0">
+          <PageHeader
+            backHref={`/complaint?lang=${lang}`}
+            backLabel={S.back}
+            title={S.file_complaint}
+          />
+          <p className="mt-4 font-mono font-bold" style={{ fontSize: '24px' }}>
             {c.ref}
           </p>
           <span
@@ -304,16 +308,13 @@ export default function Complaint() {
 
   // ---------------- LIST + FORM ----------------
   return (
-    <main className="min-h-screen bg-ac-bg p-4 pb-24">
-      <div className="max-w-md mx-auto">
-        <Link
-          href={`/home?lang=${lang}`}
-          aria-label={S.app_name}
-          className="inline-flex items-center min-h-[48px] text-primary font-bold"
-        >
-          ← {S.app_name}
-        </Link>
-        <h1 className="text-lg font-bold">{S.file_complaint}</h1>
+    <main className="min-h-screen bg-white p-4 pb-24">
+      <div className="max-w-md mx-auto min-w-0">
+        <PageHeader
+          backHref={`/home?lang=${lang}`}
+          backLabel={S.back}
+          title={S.file_complaint}
+        />
 
         <div className="mt-2 flex gap-2" role="group" aria-label={S.file_complaint}>
           <button

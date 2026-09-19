@@ -9,7 +9,7 @@ import sw from '../public/i18n/sw.json';
 // PWA entry screen. Works offline (all strings + QR bundled).
 // ?lang=xx skips selection and goes straight to /home?lang=xx.
 const PWA_URL = process.env.NEXT_PUBLIC_PWA_URL || 'https://alertcitizen.github.io';
-const TOLL_FREE = '0800-225-8424';
+  const TOLL_FREE = '0800-ALERT';
 
 function ShieldLogo() {
   return (
@@ -157,7 +157,7 @@ export default function Entry() {
   };
 
   return (
-    <main className="min-h-screen ac-pattern p-3 min-[360px]:p-4">
+    <main className="min-h-screen ac-pattern p-3 min-[360px]:p-4 mt-14">
       <div className="w-full max-w-md mx-auto flex flex-col items-center text-center min-w-0">
         <div className="flex flex-row items-center gap-2 ">
           <ShieldLogo />
@@ -165,61 +165,10 @@ export default function Entry() {
             {en.app_name}
           </h1>
         </div>
-        {/* <p className="text-ac-muted break-words" style={{ fontSize: '16px' }}>
-          {en.tagline}
-        </p> */}
-
-        {/* Accessibility card FIRST, with speaking-user icon to signal speech select.
-            Icon + (text + toggle) wrap: on narrow screens the icon sits on top,
-            centered; text and toggle stay joined. Text column has a fixed
-            min-height so rotating translations never resize the card. */}
-        <div className="w-full max-w-full mt-6 bg-white rounded-lg shadow-sm p-3 min-[360px]:p-4 text-left min-w-0">
-          <label className="flex flex-wrap items-center justify-center gap-3 min-h-[48px] min-w-0">
-            <SpeakingUserIcon />
-            <span className="flex items-center justify-center gap-3 min-[360px]:gap-4 min-w-0 flex-1 basis-56">
-              <span className="min-w-0 flex-1 min-h-[192px] min-[480px]:min-h-[88px] flex flex-col justify-center text-left">
-                <span
-                  key={`mode-${flashIdx}`}
-                  className="block font-bold ac-fade break-words"
-                  style={{ fontSize: '18px', lineHeight: '1.2' }}
-                  aria-live="polite"
-                >
-                  {flash.accessibility_mode}
-                </span>
-                <span
-                  key={`desc-${flashIdx}`}
-                  className="block text-ac-muted ac-fade break-words"
-                  style={{ fontSize: '16px' }}
-                  aria-live="polite"
-                >
-                  {flash.accessibility_desc}
-                </span>
-              </span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={accessible}
-                aria-label={en.accessibility_mode}
-                onClick={toggleAccessibility}
-                className={`relative rounded-full border-2 border-ac-muted shrink-0 ${
-                  accessible ? 'bg-secondary border-white' : 'bg-white'
-                }`}
-                style={{ width: '64px', height: '48px' }}
-              >
-                <span
-                  className={`absolute top-1 rounded-full bg-white border border-ac-muted ${
-                    accessible ? 'right-1 border-secondary' : 'left-1'
-                  }`}
-                  style={{ width: '36px', height: '36px' }}
-                />
-              </button>
-            </span>
-          </label>
-        </div>
 
         <h2
           key={`select-${flashIdx}`}
-          className="mt-2 mb-2 font-extrabold ac-fade break-words px-2 min-h-[78px] flex items-center justify-center"
+          className="mt-12 mb-2 font-extrabold ac-fade break-words px-2 min-h-[78px] flex items-center justify-center"
           style={{ fontSize: '32px', lineHeight: '1.3' }}
           aria-live="polite"
         >
@@ -253,6 +202,51 @@ export default function Entry() {
             );
           })}
         </div>
+        {/* Accessibility card FIRST, with speaking-user icon to signal speech select.
+            Icon + (text + toggle) wrap: on narrow screens the icon sits on top,
+            centered; text and toggle stay joined. Text column has a fixed
+            min-height so rotating translations never resize the card. */}
+        <div className="w-full max-w-full mt-6 bg-white rounded-lg shadow-sm p-3 min-[360px]:p-4 text-left min-w-0">
+          <label className="flex flex-wrap items-center justify-center gap-3 min-h-[48px] min-w-0">
+            <SpeakingUserIcon />
+            <span className="flex items-center justify-center gap-3 min-[360px]:gap-4 min-w-0 flex-1 basis-56">
+              <span className="min-w-0 flex-1 min-h-[192px] min-[480px]:min-h-[88px] flex flex-col justify-center text-left">
+                <span
+                  key={`mode-${flashIdx}`}
+                  className="block font-bold ac-fade break-words"
+                  style={{ fontSize: '18px', lineHeight: '1.2' }}
+                  aria-live="polite"
+                >
+                  {flash.accessibility_mode}
+                </span>
+                <span
+                  key={`desc-${flashIdx}`}
+                  className="block text-ac-muted ac-fade break-words"
+                  style={{ fontSize: '16px' }}
+                  aria-live="polite"
+                >
+                  {flash.accessibility_desc}
+                </span>
+              </span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={accessible}
+                aria-label={en.accessibility_mode}
+                onClick={toggleAccessibility}
+                className={`relative rounded-full border-2 border-ac-muted shrink-0 ${accessible ? 'bg-secondary border-white' : 'bg-white'
+                  }`}
+                style={{ width: '64px', height: '48px' }}
+              >
+                <span
+                  className={`absolute top-1 rounded-full bg-white border border-ac-muted ${accessible ? 'right-1 border-secondary' : 'left-1'
+                    }`}
+                  style={{ width: '36px', height: '36px' }}
+                />
+              </button>
+            </span>
+          </label>
+        </div>
 
         <hr className="w-full my-6 border-gray-300" />
         {/* <p className="text-base break-words">{en.or_text}</p> */}
@@ -263,26 +257,6 @@ export default function Entry() {
         >
           {en.toll_free}
         </a>
-
-        {qrSvg && (
-          <div className="mt-6 flex flex-col items-center max-w-full min-w-0">
-            <div
-              className="bg-white p-2 rounded-lg shadow-sm max-w-full overflow-hidden"
-              // QR pixels are decorative; URL is announced below.
-              dangerouslySetInnerHTML={{ __html: qrSvg }}
-            />
-            <p className="mt-1 text-ac-muted break-words" style={{ fontSize: '16px' }}>
-              Scan to open
-            </p>
-            <p
-              className="text-ac-muted break-all max-w-full w-7/12"
-              style={{ fontSize: '14px' }}
-            >
-              {/* {PWA_URL} */}
-              Or send a text to 0800-ALERT to receive the link. Standard SMS rates may apply.
-            </p>
-          </div>
-        )}
       </div>
     </main>
   );

@@ -13,17 +13,21 @@
       "ASSISTANCE"
     ],
     "lg": [
-      "NSOLA",
-      "NTEEGAMWA",
-      "NSOLA BYAMASO",
-      "NTEEGAMWA BYAMASO",
+      "NYAMBA",
+      "BUYAMBI",
+      "NSAABA BUYAMBI",
+      "HULLO",
       "NETAAGA",
       "OBUYAMBI",
       "BUYAMBI",
-      "NNEETA OBUYAMBI",
       "NNEETA OKUYAMBIBWA",
       "MPA OBUYAMBI",
-      "YAMBA"
+      "YAMBA",
+      "BAMBI",
+      "NKULAMUSIZA",
+      "NKU",
+      "KIKI",
+      "NGAMBA"
     ],
     "sw": [
       "NITAHITAJA MSAADA",
@@ -33,7 +37,10 @@
       "NINAHITAJI MSAADA",
       "NINAHITAJI USAIDIZI",
       "NISAIDIE",
-      "SAIDIA"
+      "SAIDIE",
+      "SAIDIA",
+      "JAMBO",
+      "POTEA"
     ]
   }
 }

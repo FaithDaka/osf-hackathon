@@ -48,7 +48,7 @@
         "file": "subcounty_prompt.mp3"
       },
       "all_no": {
-        "text": "I don't have information on that yet. Contact your LC1 or call 0800-225-8424.",
+        "text": "I don't have information on that yet. Contact your LC1 or call 0800-ALERT.",
         "file": "all_no.mp3"
       },
       "ann_ann-001": {
@@ -118,7 +118,7 @@
         "file": "subcounty_prompt.mp3"
       },
       "all_no": {
-        "text": "Sinina mawulire ku ekyo. Tuukirira LC1 yo oba okubire 0800-225-8424.",
+        "text": "Sinina mawulire ku ekyo. Tuukirira LC1 yo oba okubire 0800-ALERT.",
         "file": "all_no.mp3"
       },
       "ann_ann-001": {
@@ -188,7 +188,7 @@
         "file": "subcounty_prompt.mp3"
       },
       "all_no": {
-        "text": "Sina taarifa kuhusu hilo bado. Wasiliana na LC1 wako au pigia 0800-225-8424.",
+        "text": "Sina taarifa kuhusu hilo bado. Wasiliana na LC1 wako au pigia 0800-ALERT.",
         "file": "all_no.mp3"
       },
       "ann_ann-001": {

@@ -3,14 +3,18 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { setLang, t } from '../lib/i18n';
 import BottomNav from '../lib/bottom-nav';
+import ConfirmModal from '../lib/confirm-modal';
+import PageHeader from '../lib/page-header';
 import DistrictCarousel, { isKnownDistrict } from '../lib/district-carousel';
 import { getActiveAnnouncements } from '../lib/announcement-store';
+import { getLocalReps } from '../lib/representatives-store';
+import { RepCard } from './lc-initiatives';
+import repsData from '../data/representatives.json';
 import {
   advanceWalkthrough,
   createWalkthroughState,
   getAudioFile,
   getCurrentCategory,
-  selectCategory,
 } from '../lib/voice-walkthrough';
 import annData from '../data/announcements.json';
 import voiceTree from '../data/voice-tree.json';
@@ -69,6 +73,154 @@ function ChevronDownIcon({ size = 12 }) {
   );
 }
 
+// Magnifier for the search input (decorative — the input carries the name).
+function SearchIcon({ size = 18 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      role="img"
+      aria-hidden="true"
+      className="shrink-0"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    >
+      <circle cx="11" cy="11" r="6.5" />
+      <path d="M15.8 15.8 21 21" />
+    </svg>
+  );
+}
+
+// Stop-square icon for the "Stop Listening" exit button.
+function StopIcon({ size = 18 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      role="img"
+      aria-hidden="true"
+      className="shrink-0"
+      fill="currentColor"
+    >
+      <rect x="6" y="6" width="12" height="12" rx="2" />
+    </svg>
+  );
+}
+
+// Microphone inside the search input. Voice search is not ready yet, so
+// the button intentionally does nothing on click.
+function MicIcon({ size = 18 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      role="img"
+      aria-hidden="true"
+      className="shrink-0"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="9" y="3" width="6" height="11" rx="3" />
+      <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0" />
+      <path d="M12 18v3" />
+    </svg>
+  );
+}
+
+// Coloured quick-topic icons (no emojis).
+function QuickTopicIcon({ kind, size = 20 }) {
+  const colors = {
+    land: '#0E7A55',
+    fees: '#B45309',
+    safety: '#C22433',
+    permits: '#5B2D8E',
+    education: '#0E7490',
+  };
+  const color = colors[kind] || '#5B2D8E';
+  const common = {
+    width: size,
+    height: size,
+    viewBox: '0 0 24 24',
+    role: 'img',
+    'aria-hidden': 'true',
+    className: 'shrink-0',
+    fill: 'none',
+    stroke: color,
+    strokeWidth: '1.8',
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+  };
+  switch (kind) {
+    case 'land':
+      return (
+        <svg {...common}>
+          <rect x="4" y="5" width="16" height="14" rx="2" />
+          <path d="M12 5v14M4 12h16" />
+        </svg>
+      );
+    case 'fees':
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="12" r="8" />
+          <path d="M12 8.5v7M9.5 10.5h5" />
+        </svg>
+      );
+    case 'safety':
+      return (
+        <svg {...common}>
+          <path d="M12 3l7 2.8v5.4c0 4.8-3.4 7.7-7 8.8-3.6-1.1-7-4-7-8.8V5.8L12 3Z" />
+          <path d="M9.3 12l2 2 3.6-4" />
+        </svg>
+      );
+    case 'permits':
+      return (
+        <svg {...common}>
+          <path d="M6 3h9l4 4v14H6V3Z" />
+          <path d="M9 12h7M9 15.5h5" />
+        </svg>
+      );
+    case 'education':
+      return (
+        <svg {...common}>
+          <path d="M12 4 2.5 9.5 12 15l9.5-5.5L12 4Z" />
+          <path d="M6.5 11.5V16c0 1.6 11 1.6 11 0v-4.5" />
+        </svg>
+      );
+    default:
+      return null;
+  }
+}
+
+// Right-arrow icon for the "See all" link.
+function ArrowRightIcon({ size = 14 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 16 16"
+      role="img"
+      aria-hidden="true"
+      className="shrink-0"
+    >
+      <path
+        d="M2.5 8h10M8.5 4.5 12 8l-3.5 3.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 // Speaker icon for the accessibility toggle: person silhouette + speech
 // sound waves, matching the intro page. Compact size fits the toggle knob.
 function SpeakerIcon({ size = 16 }) {
@@ -103,8 +255,6 @@ function SpeakerIcon({ size = 16 }) {
     </svg>
   );
 }
-const TOLL_FREE = '0800-ALERT';
-
 const CATEGORY_COLORS = {
   public_services: '#5B2D8E',
   know_your_lc: '#2563EB',
@@ -242,6 +392,22 @@ const SEVERITY_BORDER = {
   info: 'border-primary',
 };
 
+// Home announcement cards: two alternating muted tones (secondary / accent)
+// that repeat down the strip. Maps to secondary-soft / accent-soft.
+const ANNOUNCEMENT_CARD_BG = ['bg-secondary-soft', 'bg-accent-soft'];
+
+// Short date for home cards, e.g. "Sep 25" / "Aug 31".
+function formatShortDate(dateStr, lang) {
+  try {
+    return new Date(dateStr).toLocaleDateString(
+      lang === 'lg' ? 'en-UG' : lang,
+      { month: 'short', day: 'numeric' },
+    );
+  } catch {
+    return dateStr;
+  }
+}
+
 const TYPE_ICON = {
   power_outage: '⚡',
   water_outage: '💧',
@@ -252,14 +418,324 @@ const TYPE_ICON = {
   policy_change: '📜',
 };
 
-const VOICE_PROMPTS = [
-  { label: 'Land', query: 'land dispute' },
-  { label: 'Fees', query: 'LC1 stamp fee' },
-  { label: 'Safety', query: 'domestic violence' },
-  { label: 'Permits', query: 'business permit' },
-  { label: 'Education', query: 'school enrollment' },
-  { label: 'Other', query: 'help' },
+const QUICK_TOPICS = [
+  { key: 'land', label: 'Land', query: 'land dispute' },
+  { key: 'fees', label: 'Fees', query: 'LC1 stamp fee' },
+  { key: 'safety', label: 'Safety', query: 'domestic violence' },
+  { key: 'permits', label: 'Permits', query: 'business permit' },
+  { key: 'education', label: 'Education', query: 'school enrollment' },
 ];
+
+// Searchable sub-county dropdown: white panel, black text, scrollable
+// list with minimal item padding. Custom-built so the option list stays
+// compact (native selects render an unstyled full-height list).
+function SubcountyDropdown({
+  labelId,
+  value,
+  options,
+  onChange,
+  searchPlaceholder,
+  searchLabel,
+  noMatchLabel,
+}) {
+  const [open, setOpen] = useState(false);
+  const [filter, setFilter] = useState('');
+  const wrapRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointer = (e) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) {
+        setOpen(false);
+        setFilter('');
+      }
+    };
+    const onKey = (e) => {
+      if (e.key === 'Escape') {
+        setOpen(false);
+        setFilter('');
+      }
+    };
+    document.addEventListener('pointerdown', onPointer);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', onPointer);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open ]);
+
+  const q = filter.trim().toLowerCase();
+  const visible = q
+    ? options.filter((o) => o.toLowerCase().includes(q))
+    : options;
+
+  return (
+    <span ref={wrapRef} className="relative block mt-2 min-w-0">
+      <button
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-labelledby={labelId}
+        onClick={() => setOpen((o) => !o)}
+        className="btn-ac w-full bg-white border border-gray-300 rounded-lg px-4 inline-flex items-center justify-between gap-2 focus:outline-none focus-visible:outline-none"
+      >
+        <span className="truncate" style={{ color: '#000' }}>
+          {value || options[0] || ''}
+        </span>
+        <ChevronDownIcon size={14} />
+      </button>
+      {open && (
+        <span className="absolute left-0 right-0 top-full mt-1 z-50 block bg-white border border-gray-300 rounded-xl shadow-lg overflow-hidden">
+          <span className="block p-2">
+            <label htmlFor="subcounty-search" className="sr-only">
+              {searchLabel}
+            </label>
+            <input
+              id="subcounty-search"
+              type="search"
+              value={filter}
+              onInput={(e) => setFilter(e.target.value)}
+              placeholder={searchPlaceholder}
+              autoComplete="off"
+              className="w-full bg-white border border-gray-300 rounded-lg px-3 focus:outline-none focus-visible:outline-none"
+              style={{ minHeight: '44px', fontSize: '16px', color: '#000' }}
+            />
+          </span>
+          <span
+            role="listbox"
+            aria-labelledby={labelId}
+            className="block overflow-y-auto"
+            style={{ maxHeight: '224px' }}
+          >
+            {visible.map((o) => {
+              const selected = o === value;
+              return (
+                <button
+                  key={o}
+                  type="button"
+                  role="option"
+                  aria-selected={selected}
+                  onClick={() => {
+                    onChange(o);
+                    setOpen(false);
+                    setFilter('');
+                  }}
+                  className={`flex items-center gap-2 w-full text-left px-4 py-1 focus:outline-none focus-visible:outline-none ${
+                    selected ? 'font-bold bg-primary-soft' : ''
+                  }`}
+                  style={{ fontSize: '16px', minHeight: '40px', color: '#000' }}
+                >
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      width: '20px',
+                      visibility: selected ? 'visible' : 'hidden',
+                    }}
+                  >
+                    ✓
+                  </span>
+                  {o}
+                </button>
+              );
+            })}
+            {visible.length === 0 && (
+              <span
+                className="block px-4 py-1 text-ac-muted"
+                style={{ fontSize: '14px' }}
+              >
+                {noMatchLabel}
+              </span>
+            )}
+          </span>
+        </span>
+      )}
+    </span>
+  );
+}
+
+// Paper-plane send icon for the knowledge-base chat input.
+function SendIcon({ size = 20 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      role="img"
+      aria-hidden="true"
+      className="shrink-0"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21 3 10.5 13.5" />
+      <path d="M21 3 14 21l-3.5-7.5L3 10 21 3Z" />
+    </svg>
+  );
+}
+
+// Guided knowledge-base chat: the system offers numbered topics and the
+// user picks one (tap or type the number) instead of free typing.
+// Free text falls back to normal search via onSearch.
+const KB_TOPICS = [
+  { key: 'land', kb: 'land' },
+  { key: 'permits', kb: 'fees_permits' },
+  { key: 'safety', kb: 'safety' },
+  { key: 'education', kb: 'education' },
+];
+
+function KnowledgeChat({ lang, S, district, onSearch }) {
+  const menuOptions = KB_TOPICS.map((t, i) => ({ code: String(i + 1), topic: t.key }));
+  const [messages, setMessages] = useState([{ from: 'sys', kind: 'menu' }]);
+  const [options, setOptions] = useState(menuOptions);
+  const [draft, setDraft] = useState('');
+  const bottomRef = useRef(null);
+
+  useEffect(() => {
+    if (bottomRef.current) {
+      bottomRef.current.scrollIntoView({ block: 'end' });
+    }
+  }, [messages]);
+
+  const topicLabel = (key) => (S.kb_topics && S.kb_topics[key]) || key;
+  const topicInfo = (key) => (S.kb_info && S.kb_info[key]) || '';
+  const kbOf = (key) => (KB_TOPICS.find((t) => t.key === key) || {}).kb || key;
+
+  const sendChoice = (raw) => {
+    const text = String(raw || '').trim();
+    if (!text) return;
+    const opt = options.find((o) => o.code === text);
+    if (!opt) {
+      onSearch(text);
+      return;
+    }
+    setMessages((m) => [...m, { from: 'user', kind: 'text', text }]);
+    if (opt.back) {
+      setMessages((m) => [...m, { from: 'sys', kind: 'menu' }]);
+      setOptions(menuOptions);
+      return;
+    }
+    setMessages((m) => [...m, { from: 'sys', kind: 'topic', topic: opt.topic }]);
+    setOptions([{ code: '0', back: true }]);
+  };
+
+  const submit = (e) => {
+    if (e) e.preventDefault();
+    const text = draft.trim();
+    if (!text) return;
+    setDraft('');
+    const opt = options.find((o) => o.code === text);
+    if (opt) {
+      sendChoice(text);
+      return;
+    }
+    if (/^[0-9]+$/.test(text)) {
+      setMessages((m) => [
+        ...m,
+        { from: 'user', kind: 'text', text },
+        { from: 'sys', kind: 'unknown' },
+      ]);
+      return;
+    }
+    setMessages((m) => [...m, { from: 'user', kind: 'text', text }]);
+    onSearch(text);
+  };
+
+  return (
+    <div className="mt-2 min-w-0">
+      <div
+        aria-live="polite"
+        className="flex flex-col gap-2 overflow-y-auto"
+        style={{ maxHeight: '52vh' }}
+      >
+        {messages.map((m, i) => {
+          if (m.from === 'user') {
+            return (
+              <div key={i} className="flex justify-end">
+                <div
+                  className="bg-primary text-white rounded-2xl rounded-br-sm px-4 py-2 max-w-[85%] break-words"
+                  style={{ fontSize: '16px' }}
+                >
+                  {m.text}
+                </div>
+              </div>
+            );
+          }
+          return (
+            <div key={i} className="flex justify-start">
+              <div
+                className="bg-primary-soft text-ink rounded-2xl rounded-bl-sm px-4 py-2 max-w-[90%] min-w-0 break-words"
+                style={{ fontSize: '16px' }}
+              >
+                {m.kind === 'menu' && <span>{S.kb_chat_hello}</span>}
+                {m.kind === 'unknown' && <span>{S.kb_chat_unknown}</span>}
+                {m.kind === 'topic' && (
+                  <span>
+                    <span className="block font-bold">
+                      {S.kb_chat_found.replace('{topic}', topicLabel(m.topic))}
+                    </span>
+                    <span className="block mt-1">{topicInfo(m.topic)}</span>
+                    <Link
+                      href={`/result?cat=${kbOf(m.topic)}&lang=${lang}&district=${district}`}
+                      className="mt-2 inline-flex items-center gap-1 text-primary font-bold underline"
+                      style={{ fontSize: '15px' }}
+                    >
+                      {S.kb_chat_view} →
+                    </Link>
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+        <div ref={bottomRef} aria-hidden="true" />
+      </div>
+      {options.length > 0 && (
+        <div className="mt-1 flex flex-col gap-2 max-w-[90%]" role="group" aria-label={S.kb_chat_hello}>
+          {options.map((o) => (
+            <button
+              key={o.code}
+              type="button"
+              onClick={() => sendChoice(o.code)}
+              className="bg-white border border-primary text-primary rounded-full px-4 w-full"
+              style={{ minHeight: '44px', fontSize: '14px' }}
+            >
+              {o.code}. {o.back ? S.kb_chat_back : topicLabel(o.topic)}
+            </button>
+          ))}
+        </div>
+      )}
+      <form
+        onSubmit={submit}
+        className="fixed left-0 right-0 z-30 bg-white border-t border-gray-200"
+        style={{ bottom: 'calc(64px + env(safe-area-inset-bottom, 0px) + 8px)' }}
+      >
+        <div className="max-w-md mx-auto px-4 pt-2 flex gap-2 min-w-0">
+          <label htmlFor="kb-input" className="sr-only">
+            {S.search_kb_placeholder}
+          </label>
+          <input
+            id="kb-input"
+            type="text"
+            value={draft}
+            onInput={(e) => setDraft(e.target.value)}
+            placeholder={S.search_kb_placeholder}
+            autoComplete="off"
+            className="btn-ac flex-1 min-w-0 bg-white border border-gray-300 rounded-lg px-4"
+          />
+          <button
+            type="submit"
+            aria-label={S.search_submit}
+            className="btn-ac bg-primary text-white rounded-lg shrink-0 px-4 inline-flex items-center justify-center"
+          >
+            <SendIcon size={20} />
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
 
 function validLang(q) {
   return LANGS.includes(q) ? q : 'en';
@@ -293,6 +769,7 @@ export default function Home() {
   const [subcounty, setSubcounty] = useState('');
   const [walk, setWalk] = useState(() => createWalkthroughState());
   const [langOpen, setLangOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const announcedRef = useRef('');
   const langRef = useRef(null);
 
@@ -343,7 +820,9 @@ export default function Home() {
 
   const labelOf = (id) => t(`categories.${id}`, lang, UI);
 
-  // Screen-reader narration follows the highlight.
+  // Screen-reader narration follows the highlight. Non-English
+  // languages have no bundled voice yet, so the fallback line is
+  // announced in English instead of staying silent.
   const current = getCurrentCategory(walk, categories);
   // Auto-start the walkthrough when accessible mode is on.
   useEffect(() => {
@@ -357,12 +836,28 @@ export default function Home() {
     const key = `${walk.currentIndex}`;
     if (announcedRef.current === key) return;
     announcedRef.current = key;
-    speak(labelOf(current.id), lang, getAudioFile(walk, categories, lang));
+    if (lang === 'en') {
+      speak(labelOf(current.id), lang, getAudioFile(walk, categories, lang));
+    } else {
+      speak(S.voice_unavailable, 'en', null);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessible, walk.currentIndex, walk.finished, lang]);
 
   const toggleAccessibility = () => {
     const next = !accessible;
+    if (next) {
+      // Fresh start on every entry: no redundant finished state, and the
+      // first card is announced again.
+      announcedRef.current = '';
+      setWalk(advanceWalkthrough(createWalkthroughState(), categories));
+    } else {
+      try {
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      } catch {
+        // Audio unavailable — exiting anyway.
+      }
+    }
     setAccessible(next);
     try {
       localStorage.setItem('ac_accessibility', next ? 'true' : 'false');
@@ -405,14 +900,63 @@ export default function Home() {
     if (query.trim()) goResult(query.trim(), '');
   };
 
-  const answerNo = () => setWalk((s) => advanceWalkthrough(s, categories));
-  const answerYes = () =>
-    setWalk((s) => selectCategory(s, s.currentIndex, categories));
+  const confirmDeleteData = () => setDeleteOpen(true);
+  const cancelDeleteData = () => {
+    setDeleteOpen(false);
+    router.push(`/home?lang=${lang}`);
+  };
+  const doDeleteData = () => {
+    try {
+      localStorage.clear();
+    } catch {
+      // Storage unavailable — navigation still resets in-memory state.
+    }
+    setDeleteOpen(false);
+    window.location.href = `/home?lang=${lang}`;
+  };
 
-  const replay = () => {
-    if (!current) return;
+  // Next wraps past the last category back to the first — there is no
+  // dead-end screen.
+  const answerNo = () =>
+    setWalk((s) => {
+      if (!s || !s.started || s.finished) return s;
+      const total = categories.length;
+      const next = s.currentIndex >= total - 1 ? 0 : s.currentIndex + 1;
+      return { ...s, currentIndex: next };
+    });
+  const answerPrev = () =>
+    setWalk((s) => {
+      if (!s || !s.started || s.finished) return s;
+      const total = categories.length;
+      const prev = s.currentIndex <= 0 ? total - 1 : s.currentIndex - 1;
+      return { ...s, currentIndex: prev };
+    });
+  // Yes routes straight to the topic page — no intermediate step.
+  const answerYes = () => {
+    const chosen = categories[walk.currentIndex];
+    if (!chosen) return;
+    try {
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    } catch {
+      // Audio unavailable — navigating anyway.
+    }
+    router.push(`/home?cat=${chosen.id}&lang=${lang}`);
+  };
+
+  // Leaving accessibility mode: stop any speech and persist the pref.
+  const stopListening = () => {
+    try {
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    } catch {
+      // Audio unavailable — exiting anyway.
+    }
     announcedRef.current = '';
-    speak(labelOf(current.id), lang, getAudioFile(walk, categories, lang));
+    setAccessible(false);
+    try {
+      localStorage.setItem('ac_accessibility', 'false');
+    } catch {
+      // Ignore storage errors.
+    }
   };
 
   // Bottom tabs live in lib/bottom-nav.js (shared dark bar).
@@ -428,13 +972,47 @@ export default function Home() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [district, cat]);
+  // Know-Your-LC shows the area's local council representatives once a
+  // sub-county is chosen (district-wide holders + sub-county postings).
+  const localReps =
+    catEntry && catEntry.id === 'know_your_lc'
+      ? getLocalReps(repsData, district, subcounty)
+      : [];
   if (catEntry) {
+    if (catEntry.id === 'knowledge_base') {
+      return (
+        <main className="min-h-screen bg-white p-4 pb-24">
+          <div className="max-w-md mx-auto min-w-0">
+            <PageHeader
+              backHref={`/home?lang=${lang}`}
+              backLabel={S.back}
+              title={labelOf(catEntry.id)}
+            />
+            <div className="mt-2 flex justify-center" aria-hidden="true">
+              <CategoryIcon id={catEntry.id} size={72} />
+            </div>
+            <KnowledgeChat
+              lang={lang}
+              S={S}
+              district={district}
+              onSearch={(text) => goResult(text, '')}
+            />
+          </div>
+          <BottomNav active={router.pathname} lang={lang} strings={S} />
+        </main>
+      );
+    }
     return (
-      <main className="min-h-screen bg-ac-bg p-4 pb-24">
-        <div className="max-w-md mx-auto">
-          <h1 className="text-lg font-bold text-primary flex items-center gap-2">
-            <CategoryIcon id={catEntry.id} /> {labelOf(catEntry.id)}
-          </h1>
+      <main className="min-h-screen bg-white p-4 pb-24">
+        <div className="max-w-md mx-auto min-w-0">
+          <PageHeader
+            backHref={`/home?lang=${lang}`}
+            backLabel={S.back}
+            title={labelOf(catEntry.id)}
+          />
+          <div className="mt-2 flex justify-center" aria-hidden="true">
+            <CategoryIcon id={catEntry.id} size={72} />
+          </div>
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -442,35 +1020,47 @@ export default function Home() {
             }}
             className="mt-4"
           >
-            <label htmlFor="subcounty" className="block font-bold">
+            <label id="subcounty-label" htmlFor="subcounty-search" className="block font-bold">
               {S.subcounty_prompt}
             </label>
-            <select
-              id="subcounty"
+            <SubcountyDropdown
+              labelId="subcounty-label"
               value={subcounty}
-              onChange={(e) => setSubcounty(e.target.value)}
-              aria-label={S.subcounty_prompt}
-              className="btn-ac mt-2 w-full bg-white border border-gray-300 rounded-lg px-4"
-            >
-              {subcountyOptions.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-            <button
-              type="submit"
-              className="btn-ac mt-3 w-full bg-primary text-white rounded-lg"
-            >
-              {S.yes} →
-            </button>
+              options={subcountyOptions}
+              onChange={setSubcounty}
+              searchPlaceholder={S.subcounty_search}
+              searchLabel={S.subcounty_search}
+              noMatchLabel={S.admin_no_match}
+            />
+            {catEntry.id !== 'know_your_lc' && (
+              <button
+                type="submit"
+                className="btn-ac mt-3 w-full bg-primary text-white rounded-lg"
+              >
+                {S.yes} →
+              </button>
+            )}
           </form>
-          <Link
-            href={`/home?lang=${lang}`}
-            className="btn-ac mt-2 w-full inline-flex bg-white text-primary border border-primary rounded-lg"
-          >
-            ← {S.no}
-          </Link>
+          {catEntry.id === 'know_your_lc' && (
+            <section aria-label={labelOf(catEntry.id)} className="mt-4 min-w-0">
+              <div className="flex flex-col gap-2" aria-live="polite">
+                {localReps.length === 0 && (
+                  <p className="bg-white rounded-lg p-4 text-center text-ac-muted">
+                    {S.rep_no_reps.replace('{location}', subcounty || district)}
+                  </p>
+                )}
+                {localReps.map((rep) => (
+                  <RepCard key={rep.id} rep={rep} lang={lang} S={S} />
+                ))}
+              </div>
+              <p
+                className="mt-2 text-center text-ac-muted"
+                style={{ fontSize: '14px' }}
+              >
+                {S.rep_rate_later}
+              </p>
+            </section>
+          )}
         </div>
         <BottomNav active={router.pathname} lang={lang} strings={S} />
       </main>
@@ -478,16 +1068,20 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-ac-bg p-4 pb-24">
+    <main className="min-h-screen bg-white p-4 pb-24">
       <div className="max-w-md mx-auto">
         {/* HEADER — darker than the page, no unnecessary borders */}
-        <header className="bg-primary-soft -mx-4 -mt-4 px-4 pt-4 pb-3">
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex items-start gap-1 min-w-0 flex-1 mt-2">
+        <header className="bg-primary-soft -mx-4 -mt-4 px-4 pt-8 pb-3">
+          <div className="flex items-center justify-between gap-2">
+            <Link
+              href="/"
+              aria-label={S.app_name}
+              className="flex items-end gap-1 min-w-0 flex-1 mt-2"
+            >
               <ShieldLogo />
               <span className="relative min-w-0 w-fit max-w-full">
                 <span
-                  className="block truncate text-ink font-bold"
+                  className="block text-ink font-bold"
                   style={{ fontSize: '24px', lineHeight: '1.2', letterSpacing: '-0.5px' }}
                 >
                   {S.app_name}
@@ -506,9 +1100,17 @@ export default function Home() {
                   PoC
                 </span>
               </span>
-            </div>
+            </Link>
             <div className="flex items-center gap-2 shrink-0">
-              <div className="flex flex-col justify-end items-end"><button
+              <div className="flex flex-col justify-end items-end">
+                <span className="inline-flex items-center gap-1.5">
+                  <span
+                    className="text-primary font-semibold"
+                    style={{ fontSize: '14px' }}
+                  >
+                    {S.voice}
+                  </span>
+                  <button
                 type="button"
                 role="switch"
                 aria-checked={accessible}
@@ -530,9 +1132,10 @@ export default function Home() {
                     left: accessible ? '23px' : '2px',
                   }}
                 >
-                  <SpeakerIcon size={16} />
+                  <SpeakerIcon size={20} />
                 </span>
               </button>
+                </span>
                 <span ref={langRef} className="relative inline-flex items-center">
                   <button
                     type="button"
@@ -594,8 +1197,8 @@ export default function Home() {
                       })}
                     </span>
                   )}
-                </span></div>
-
+                </span>
+              </div>
             </div>
           </div>
 
@@ -608,33 +1211,60 @@ export default function Home() {
           />
         </header>
 
-        {/* ANNOUNCEMENTS STRIP */}
+        {/* ANNOUNCEMENTS STRIP — white page, muted alternating cards */}
         {announcements.length > 0 && (
-          <section aria-label={S.announcements} className="mt-4">
-            <h2 className="font-bold">{S.announcements}</h2>
+          <section aria-label={S.announcements} className="mt-2">
+            <div className="flex items-center justify-between mb-2">
+              <h2
+                className="font-bold text-ink"
+                style={{ fontSize: '22px', lineHeight: '1.25' }}
+              >
+                {S.announcements}
+              </h2>
+              <Link
+                href={`/announcements?lang=${lang}`}
+                aria-label={`See all ${S.announcements}`}
+                className="inline-flex items-center gap-1 text-primary font-semibold shrink-0"
+                style={{ fontSize: '15px', minHeight: '48px' }}
+              >
+                See all <ArrowRightIcon size={14} />
+              </Link>
+            </div>
             <div
               aria-live="polite"
-              className="mt-1 flex gap-2 overflow-x-auto pb-2"
+              className="no-scrollbar flex gap-3 overflow-x-auto pb-2"
             >
-              {announcements.map((a) => (
+              {announcements.slice(0, 3).map((a, i) => (
                 <Link
                   key={a.id}
-                  href={`/announcements?id=${a.id}&lang=${lang}`}
+                  href={`/announcements?lang=${lang}`}
                   aria-label={a.title[lang] || a.title.en}
-                  className={`shrink-0 w-56 bg-white rounded-lg shadow-sm p-3 border-l-4 text-left ${SEVERITY_BORDER[a.severity] || SEVERITY_BORDER.info
+                  className={`shrink-0 w-64 rounded-xl p-4 text-left ${ANNOUNCEMENT_CARD_BG[i % ANNOUNCEMENT_CARD_BG.length]
                     }`}
                 >
-                  <div className="text-lg" aria-hidden="true">
-                    {TYPE_ICON[a.type] || '📢'}
+                  <div
+                    className="font-medium text-ac-muted"
+                    style={{ fontSize: '14px' }}
+                  >
+                    {formatShortDate(a.start, lang)}
                   </div>
                   <div
-                    className="font-bold truncate"
-                    style={{ fontSize: '14px' }}
+                    className="mt-1 font-bold text-ink leading-snug"
+                    style={{ fontSize: '16px' }}
                   >
                     {a.title[lang] || a.title.en}
                   </div>
-                  <div className="text-ac-muted" style={{ fontSize: '14px' }}>
-                    {new Date(a.start).toLocaleDateString()}
+                  <div
+                    className="mt-1 text-ac-muted leading-snug line-clamp-2"
+                    style={{
+                      fontSize: '14px',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {a.description[lang] || a.description.en}
                   </div>
                 </Link>
               ))}
@@ -642,99 +1272,156 @@ export default function Home() {
           </section>
         )}
 
-        {/* CATEGORIES: screen-reader vertical list */}
+        {/* QUICK KNOWLEDGE — shortcuts below the topics */}
+        <section aria-label={S.quick_knowledge} className="mt-2 mb-6 min-w-0">
+          <h2
+            className="font-bold text-ink"
+            style={{ fontSize: '20px', lineHeight: '1.3' }}
+          >
+            {S.quick_knowledge}
+          </h2>
+          <div className="mt-4 grid grid-cols-2 min-[400px]:grid-cols-3 gap-2">
+            {QUICK_TOPICS.map((p) => (
+              <button
+                key={p.key}
+                type="button"
+                aria-label={p.label}
+                onClick={() => {
+                  setQuery(p.query);
+                  goResult(p.query, '');
+                }}
+                className="bg-white border border-primary text-primary rounded-lg inline-flex items-center justify-center gap-1.5 min-w-0 px-2"
+                style={{ minHeight: '48px', fontSize: '14px' }}
+              >
+                <QuickTopicIcon kind={p.key} size={20} />
+                <span className="truncate">{p.label}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* SEARCH — input + button in one row, above the topics */}
+        <section aria-label="Search" className="mt-4 min-w-0">
+          <form onSubmit={submitSearch} className="flex gap-2 min-w-0">
+            <div className="relative flex-1 min-w-0">
+              <label htmlFor="q" className="sr-only">
+                {S.search_kb_placeholder}
+              </label>
+              <span
+                aria-hidden="true"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-ac-muted pointer-events-none flex"
+              >
+                <SearchIcon size={18} />
+              </span>
+              <input
+                id="q"
+                type="text"
+                value={query}
+                onInput={(e) => setQuery(e.target.value)}
+                placeholder={S.search_kb_placeholder}
+                autoComplete="off"
+                className="btn-ac w-full min-w-0 bg-white border border-gray-300 rounded-lg focus:outline-none focus-within:outline-none"
+                style={{ paddingLeft: '40px', paddingRight: '48px', fontSize: '16px', letterSpacing: '-0.5px'}}
+              />
+              <button
+                type="button"
+                aria-label={S.voice_search}
+                title={S.voice_search}
+                onClick={() => {
+                  // Voice search is not ready yet — intentionally a no-op.
+                }}
+                className="absolute right-1 top-1/2 -translate-y-1/2 inline-flex items-center justify-center text-primary shrink-0"
+                style={{ width: '40px', height: '40px' }}
+              >
+                <MicIcon size={18} />
+              </button>
+            </div>
+            <button
+              type="submit"
+              aria-label={S.search_submit}
+              className="btn-ac bg-primary text-white rounded-lg shrink-0 px-4"
+            >
+              {S.search_submit}
+            </button>
+          </form>
+        </section>
+
+        {/* CATEGORIES: screen-reader vertical list.
+            The active card keeps its coloured icon on a light tint, and
+            its options sit right underneath it so no scrolling is needed. */}
         {accessible ? (
           <section aria-label={labelOf('knowledge_base')} className="mt-4">
-            {!walk.finished ? (
-              <>
-                <div className="flex flex-col gap-2" aria-live="polite">
+            <div className="flex flex-col gap-2" aria-live="polite">
                   {categories.map((c, i) => {
                     const active = i === walk.currentIndex;
                     return (
-                      <div
-                        key={c.id}
-                        aria-current={active ? 'true' : undefined}
-                        className={`rounded-lg p-6 ${active
-                            ? 'bg-primary text-white font-bold opacity-100'
-                            : 'bg-white text-ac-muted opacity-[0.15]'
-                          }`}
-                        style={{ fontSize: active ? '24px' : '16px' }}
-                      >
-                        <span className="inline-flex items-center gap-2">
-                          <CategoryIcon id={c.id} /> {labelOf(c.id)}
-                        </span>
+                      <div key={c.id}>
+                        <div
+                          aria-current={active ? 'true' : undefined}
+                          className={`rounded-lg p-6 ${active
+                              ? 'bg-primary-soft text-ink font-bold border-2 border-primary'
+                              : 'bg-white text-ac-muted opacity-[0.15]'
+                            }`}
+                          style={{ fontSize: active ? '24px' : '16px' }}
+                        >
+                          <span className="inline-flex items-center gap-2">
+                            <CategoryIcon id={c.id} /> {labelOf(c.id)}
+                          </span>
+                        </div>
+                        {active && (
+                          <div className="mt-2 bg-white rounded-xl shadow-lg border border-line p-3 flex flex-col gap-2">
+                            <button
+                              type="button"
+                              onClick={answerYes}
+                              className="btn-ac w-full bg-primary text-white rounded-lg"
+                              style={{ height: '64px' }}
+                            >
+                              {S.yes_continue}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={answerNo}
+                              className="btn-ac w-full bg-white text-primary border-2 border-primary rounded-lg"
+                              style={{ height: '64px' }}
+                            >
+                              {S.next_category}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={answerPrev}
+                              className="btn-ac w-full bg-white text-primary border-2 border-primary rounded-lg"
+                              style={{ height: '64px' }}
+                            >
+                              {S.previous_category}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={stopListening}
+                              aria-label={S.stop_listening}
+                              className="btn-ac w-full inline-flex gap-2 bg-white text-accent border-2 border-accent rounded-lg"
+                              style={{ height: '64px' }}
+                            >
+                              <StopIcon size={18} /> {S.stop_listening}
+                            </button>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
                 </div>
-                <button
-                  type="button"
-                  onClick={replay}
-                  aria-label={S.listen}
-                  className="btn-ac mt-2 w-full bg-white text-primary border border-primary rounded-lg"
-                >
-                  🔊 {S.listen}
-                </button>
-                <button
-                  type="button"
-                  onClick={answerYes}
-                  className="btn-ac mt-2 w-full bg-primary text-white rounded-lg"
-                  style={{ height: '64px' }}
-                >
-                  {S.yes}
-                </button>
-                <button
-                  type="button"
-                  onClick={answerNo}
-                  className="btn-ac mt-2 w-full bg-white text-primary border-2 border-primary rounded-lg"
-                  style={{ height: '64px' }}
-                >
-                  {S.no}
-                </button>
-              </>
-            ) : walk.allNo ? (
-              <div className="bg-white rounded-lg shadow-sm p-6 text-center">
-                <p className="font-bold">{S.no_match}</p>
-                <Link
-                  href={`/complaint?lang=${lang}`}
-                  className="btn-ac mt-3 w-full inline-flex bg-primary text-white rounded-lg"
-                >
-                  {S.file_complaint}
-                </Link>
-                <a
-                  href={`tel:${TOLL_FREE.replace(/-/g, '')}`}
-                  className="btn-ac mt-2 w-full inline-flex bg-white text-primary border-2 border-primary rounded-lg"
-                >
-                  {S.toll_free}
-                </a>
-              </div>
-            ) : (
-              walk.selectedCategory && (
-                <div className="bg-white rounded-lg shadow-sm p-6 text-center">
-                  <p className="font-bold">
-                    {labelOf(walk.selectedCategory)}
-                  </p>
-                  <Link
-                    href={`/home?cat=${walk.selectedCategory}&lang=${lang}`}
-                    className="btn-ac mt-3 w-full inline-flex bg-primary text-white rounded-lg"
-                  >
-                    {S.yes} →
-                  </Link>
-                </div>
-              )
-            )}
           </section>
         ) : (
+          
           /* CATEGORIES: responsive grid — 3 per row on wide screens, 2 per row
              on narrow, 1 per row at 300px and under so words aren't squashed */
           <section aria-label={labelOf('knowledge_base')} className="mt-4 min-w-0">
-            <div className="grid grid-cols-1 min-[301px]:grid-cols-2 min-[380px]:grid-cols-3 gap-2.5">
+            <div className="grid grid-cols-1 min-[319px]:grid-cols-2 min-[429px]:grid-cols-3 gap-2.5">
               {categories.map((c) => (
                 <Link
                   key={c.id}
                   href={`/home?cat=${c.id}&lang=${lang}`}
                   aria-label={labelOf(c.id)}
-                  className="rounded-xl p-3 min-h-[148px] min-w-0 w-full flex flex-col items-center justify-center gap-2 text-center"
+                  className="rounded-xl p-3 min-h-[132px] min-w-0 w-full flex flex-col items-center justify-center gap-2 text-center"
                   style={GLASS_CARD_STYLE}
                 >
                   <span aria-hidden="true" className="flex items-center justify-center">
@@ -749,57 +1436,26 @@ export default function Home() {
                 </Link>
               ))}
             </div>
+              <button
+                type="button"
+                onClick={confirmDeleteData}
+                className="btn-ac mt-12 w-full bg-accent text-white rounded-lg"
+              >
+                {S.delete_data}
+              </button>
           </section>
         )}
-
-        {/* SEARCH */}
-        <section aria-label="Search" className="mt-4">
-          <form onSubmit={submitSearch}>
-            <label htmlFor="q" className="sr-only">
-              {S.search_placeholder}
-            </label>
-            <input
-              id="q"
-              type="text"
-              value={query}
-              onInput={(e) => setQuery(e.target.value)}
-              placeholder={S.search_placeholder}
-              className="btn-ac w-full bg-white border border-gray-300 rounded-lg px-4"
-            />
-            <button
-              type="submit"
-              aria-label={S.search_submit}
-              className="btn-ac mt-2 w-full bg-primary text-white rounded-lg"
-            >
-              🔍 {S.search_submit}
-            </button>
-          </form>
-          <div className="mt-2 grid grid-cols-3 gap-2">
-            {VOICE_PROMPTS.map((p) => (
-              <button
-                key={p.label}
-                type="button"
-                aria-label={`${S.listen}: ${p.label}`}
-                onClick={() => {
-                  setQuery(p.query);
-                  goResult(p.query, '');
-                }}
-                className="bg-white border border-primary text-primary rounded-lg"
-                style={{ height: '40px', fontSize: '14px' }}
-              >
-                🔊 {p.label}
-              </button>
-            ))}
-          </div>
-          <Link
-            href={`/lc-initiatives?lang=${lang}`}
-            aria-label={S.lc_initiatives}
-            className="btn-ac mt-2 w-full inline-flex bg-white text-primary border border-primary rounded-lg"
-          >
-            🏗️ {S.lc_initiatives} →
-          </Link>
-        </section>
       </div>
+
+      <ConfirmModal
+        open={deleteOpen}
+        title={S.delete_data_title}
+        description={S.delete_data_desc}
+        yesLabel={S.delete_data_yes}
+        cancelLabel={S.delete_data_cancel}
+        onYes={doDeleteData}
+        onCancel={cancelDeleteData}
+      />
 
       {/* BOTTOM NAV */}
       <BottomNav active={router.pathname} lang={lang} strings={S} />
