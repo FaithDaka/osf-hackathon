@@ -29,7 +29,7 @@ const LANG_LABELS = { en: 'English', lg: 'Luganda', sw: 'Swahili' };
 
 function ShieldLogo() {
   return (
-    <svg width="32" height="32" viewBox="0 0 512 512" role="img" aria-label="AlertCitizen logo">
+    <svg width="36" height="36" viewBox="0 0 512 512" role="img" aria-label="AlertCitizen logo">
       <rect width="512" height="512" rx="96" fill="#5B2D8E" />
       <path
         d="M256 72 L408 136 V264 C408 356 336 420 256 448 C176 420 104 356 104 264 V136 Z"
@@ -462,7 +462,7 @@ function SubcountyDropdown({
       document.removeEventListener('pointerdown', onPointer);
       document.removeEventListener('keydown', onKey);
     };
-  }, [open ]);
+  }, [open]);
 
   const q = filter.trim().toLowerCase();
   const visible = q
@@ -520,9 +520,8 @@ function SubcountyDropdown({
                     setOpen(false);
                     setFilter('');
                   }}
-                  className={`flex items-center gap-2 w-full text-left px-4 py-1 focus:outline-none focus-visible:outline-none ${
-                    selected ? 'font-bold bg-primary-soft' : ''
-                  }`}
+                  className={`flex items-center gap-2 w-full text-left px-4 py-1 focus:outline-none focus-visible:outline-none ${selected ? 'font-bold bg-primary-soft' : ''
+                    }`}
                   style={{ fontSize: '16px', minHeight: '40px', color: '#000' }}
                 >
                   <span
@@ -1072,17 +1071,17 @@ export default function Home() {
       <div className="max-w-md mx-auto">
         {/* HEADER — darker than the page, no unnecessary borders */}
         <header className="bg-primary-soft -mx-4 -mt-4 px-4 pt-4 pb-3">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex items-start justify-between gap-2 mb-6">
             <Link
               href="/"
               aria-label={S.app_name}
-              className="flex items-end gap-1 min-w-0 flex-1 mt-2"
+              className="flex items-center gap-1 min-w-0 flex-1 mt-2"
             >
               <ShieldLogo />
               <span className="relative min-w-0 w-fit max-w-full">
                 <span
                   className="block text-ink font-bold"
-                  style={{ fontSize: '24px', lineHeight: '1.2', letterSpacing: '-0.5px' }}
+                  style={{ fontSize: '20px', lineHeight: '1.2', letterSpacing: '-0.5px' }}
                 >
                   {S.app_name}
                 </span>
@@ -1101,40 +1100,41 @@ export default function Home() {
                 </span>
               </span>
             </Link>
-            <div className="flex items-center gap-2 shrink-0">
-              <div className="flex flex-col justify-end items-end">
-                <span className="inline-flex items-center gap-1.5">
+            <div className="flex items-center shrink-0">
+              <div className="flex justify-end items-center gap-2.5 shrink-0">
+                <span className="inline-flex items-center gap-0.5">
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={accessible}
+                    aria-label={S.accessibility_mode}
+                    title={S.accessibility_mode}
+                    onClick={toggleAccessibility}
+                    className={`relative rounded-full outline-2 focus:outline-none focus-visible:outline-none border border-line ${accessible
+                      ? 'bg-secondary'
+                      : 'bg-white border border-line shadow-sm'
+                      }`}
+                    style={{ width: '52px', height: '32px' }}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="absolute top-[2px] rounded-full bg-white shadow-sm flex items-center justify-center"
+                      style={{
+                        width: '26px',
+                        height: '26px',
+                        left: accessible ? '23px' : '2px',
+                      }}
+                    >
+                      <SpeakerIcon size={20} />
+                    </span>
+                  </button>
                   <span
                     className="text-primary font-semibold"
-                    style={{ fontSize: '14px' }}
+                    style={{ fontSize: '15px' }}
                   >
                     {S.voice}
                   </span>
-                  <button
-                type="button"
-                role="switch"
-                aria-checked={accessible}
-                aria-label={S.accessibility_mode}
-                title={S.accessibility_mode}
-                onClick={toggleAccessibility}
-                className={`relative rounded-full outline-none focus:outline-none focus-visible:outline-none border border-line ${accessible
-                  ? 'bg-secondary'
-                  : 'bg-white border border-line shadow-sm'
-                  }`}
-                style={{ width: '52px', height: '32px' }}
-              >
-                <span
-                  aria-hidden="true"
-                  className="absolute top-[2px] rounded-full bg-white shadow-sm flex items-center justify-center"
-                  style={{
-                    width: '26px',
-                    height: '26px',
-                    left: accessible ? '23px' : '2px',
-                  }}
-                >
-                  <SpeakerIcon size={20} />
-                </span>
-              </button>
+
                 </span>
                 <span ref={langRef} className="relative inline-flex items-center">
                   <button
@@ -1146,11 +1146,11 @@ export default function Home() {
                     className="inline-flex items-center bg-transparent border-0 outline-none focus:outline-none focus-visible:outline-none text-primary font-semibold rounded-full cursor-pointer"
                     style={{ fontSize: '14px', minHeight: '48px' }}
                   >
-                    <span aria-hidden="true" style={{ fontSize: '14px' }}>
+                    <span aria-hidden="true" style={{ fontSize: '20px' }}>
                       🌐
                     </span>
                     <span style={{ paddingLeft: '4px', paddingRight: '4px' }}>
-                      {lang.toUpperCase()} · {LANG_LABELS[lang]}
+                      {lang.toUpperCase()}
                     </span>
                     <ChevronDownIcon size={12} />
                   </button>
@@ -1217,7 +1217,7 @@ export default function Home() {
             <div className="flex items-center justify-between mb-2">
               <h2
                 className="font-bold text-ink"
-                style={{ fontSize: '22px', lineHeight: '1.25' }}
+                style={{ fontSize: '24px', lineHeight: '1.25' }}
               >
                 {S.announcements}
               </h2>
@@ -1272,8 +1272,100 @@ export default function Home() {
           </section>
         )}
 
+        {/* CATEGORIES: screen-reader vertical list.
+            The active card keeps its coloured icon on a light tint, and
+            its options sit right underneath it so no scrolling is needed. */}
+        {accessible ? (
+          <section aria-label={labelOf('knowledge_base')} className="mt-4">
+            <div className="flex flex-col gap-2" aria-live="polite">
+              {categories.map((c, i) => {
+                const active = i === walk.currentIndex;
+                return (
+                  <div key={c.id}>
+                    <div
+                      aria-current={active ? 'true' : undefined}
+                      className={`rounded-lg p-6 ${active
+                        ? 'bg-primary-soft text-ink font-bold border-2 border-primary'
+                        : 'bg-white text-ac-muted opacity-[0.15]'
+                        }`}
+                      style={{ fontSize: active ? '24px' : '16px' }}
+                    >
+                      <span className="inline-flex items-center gap-2">
+                        <CategoryIcon id={c.id} /> {labelOf(c.id)}
+                      </span>
+                    </div>
+                    {active && (
+                      <div className="mt-2 bg-white rounded-xl shadow-lg border border-line p-3 flex flex-col gap-2">
+                        <button
+                          type="button"
+                          onClick={answerYes}
+                          className="btn-ac w-full bg-primary text-white rounded-lg"
+                          style={{ height: '64px' }}
+                        >
+                          {S.yes_continue}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={answerNo}
+                          className="btn-ac w-full bg-white text-primary border-2 border-primary rounded-lg"
+                          style={{ height: '64px' }}
+                        >
+                          {S.next_category}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={answerPrev}
+                          className="btn-ac w-full bg-white text-primary border-2 border-primary rounded-lg"
+                          style={{ height: '64px' }}
+                        >
+                          {S.previous_category}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={stopListening}
+                          aria-label={S.stop_listening}
+                          className="btn-ac w-full inline-flex gap-2 bg-white text-accent border-2 border-accent rounded-lg"
+                          style={{ height: '64px' }}
+                        >
+                          <StopIcon size={18} /> {S.stop_listening}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        ) : (
+
+          /* CATEGORIES: responsive grid — 3 per row on wide screens, 2 per row
+             on narrow, 1 per row at 300px and under so words aren't squashed */
+          <section aria-label={labelOf('knowledge_base')} className="mt-4 min-w-0">
+            <div className="grid grid-cols-1 min-[319px]:grid-cols-2 min-[429px]:grid-cols-3 gap-2.5">
+              {categories.map((c) => (
+                <Link
+                  key={c.id}
+                  href={`/home?cat=${c.id}&lang=${lang}`}
+                  aria-label={labelOf(c.id)}
+                  className="rounded-xl p-3 min-h-[132px] min-w-0 w-full flex flex-col items-center justify-center gap-2 text-center"
+                  style={GLASS_CARD_STYLE}
+                >
+                  <span aria-hidden="true" className="flex items-center justify-center">
+                    <CategoryIcon id={c.id} size={64} />
+                  </span>
+                  <span
+                    className="font-semibold text-ink leading-snug break-words text-center w-full min-w-0"
+                    style={{ fontSize: '14px', letterSpacing: '-0.5px', lineHeight: '1.25' }}
+                  >
+                    {labelOf(c.id)}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
         {/* QUICK KNOWLEDGE — shortcuts below the topics */}
-        <section aria-label={S.quick_knowledge} className="mt-2 mb-6 min-w-0">
+        <section aria-label={S.quick_knowledge} className="mt-8 mb-6 min-w-0">
           <h2
             className="font-bold text-ink"
             style={{ fontSize: '20px', lineHeight: '1.3' }}
@@ -1300,151 +1392,13 @@ export default function Home() {
           </div>
         </section>
 
-        {/* SEARCH — input + button in one row, above the topics */}
-        <section aria-label="Search" className="mt-4 min-w-0">
-          <form onSubmit={submitSearch} className="flex gap-2 min-w-0">
-            <div className="relative flex-1 min-w-0">
-              <label htmlFor="q" className="sr-only">
-                {S.search_kb_placeholder}
-              </label>
-              <span
-                aria-hidden="true"
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-ac-muted pointer-events-none flex"
-              >
-                <SearchIcon size={18} />
-              </span>
-              <input
-                id="q"
-                type="text"
-                value={query}
-                onInput={(e) => setQuery(e.target.value)}
-                placeholder={S.search_kb_placeholder}
-                autoComplete="off"
-                className="btn-ac w-full min-w-0 bg-white border border-gray-300 rounded-lg focus:outline-none focus-within:outline-none"
-                style={{ paddingLeft: '40px', paddingRight: '48px', fontSize: '16px', letterSpacing: '-0.5px'}}
-              />
-              <button
-                type="button"
-                aria-label={S.voice_search}
-                title={S.voice_search}
-                onClick={() => {
-                  // Voice search is not ready yet — intentionally a no-op.
-                }}
-                className="absolute right-1 top-1/2 -translate-y-1/2 inline-flex items-center justify-center text-primary shrink-0"
-                style={{ width: '40px', height: '40px' }}
-              >
-                <MicIcon size={18} />
-              </button>
-            </div>
-            <button
-              type="submit"
-              aria-label={S.search_submit}
-              className="btn-ac bg-primary text-white rounded-lg shrink-0 px-4"
-            >
-              {S.search_submit}
-            </button>
-          </form>
-        </section>
-
-        {/* CATEGORIES: screen-reader vertical list.
-            The active card keeps its coloured icon on a light tint, and
-            its options sit right underneath it so no scrolling is needed. */}
-        {accessible ? (
-          <section aria-label={labelOf('knowledge_base')} className="mt-4">
-            <div className="flex flex-col gap-2" aria-live="polite">
-                  {categories.map((c, i) => {
-                    const active = i === walk.currentIndex;
-                    return (
-                      <div key={c.id}>
-                        <div
-                          aria-current={active ? 'true' : undefined}
-                          className={`rounded-lg p-6 ${active
-                              ? 'bg-primary-soft text-ink font-bold border-2 border-primary'
-                              : 'bg-white text-ac-muted opacity-[0.15]'
-                            }`}
-                          style={{ fontSize: active ? '24px' : '16px' }}
-                        >
-                          <span className="inline-flex items-center gap-2">
-                            <CategoryIcon id={c.id} /> {labelOf(c.id)}
-                          </span>
-                        </div>
-                        {active && (
-                          <div className="mt-2 bg-white rounded-xl shadow-lg border border-line p-3 flex flex-col gap-2">
-                            <button
-                              type="button"
-                              onClick={answerYes}
-                              className="btn-ac w-full bg-primary text-white rounded-lg"
-                              style={{ height: '64px' }}
-                            >
-                              {S.yes_continue}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={answerNo}
-                              className="btn-ac w-full bg-white text-primary border-2 border-primary rounded-lg"
-                              style={{ height: '64px' }}
-                            >
-                              {S.next_category}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={answerPrev}
-                              className="btn-ac w-full bg-white text-primary border-2 border-primary rounded-lg"
-                              style={{ height: '64px' }}
-                            >
-                              {S.previous_category}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={stopListening}
-                              aria-label={S.stop_listening}
-                              className="btn-ac w-full inline-flex gap-2 bg-white text-accent border-2 border-accent rounded-lg"
-                              style={{ height: '64px' }}
-                            >
-                              <StopIcon size={18} /> {S.stop_listening}
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-          </section>
-        ) : (
-          
-          /* CATEGORIES: responsive grid — 3 per row on wide screens, 2 per row
-             on narrow, 1 per row at 300px and under so words aren't squashed */
-          <section aria-label={labelOf('knowledge_base')} className="mt-4 min-w-0">
-            <div className="grid grid-cols-1 min-[319px]:grid-cols-2 min-[429px]:grid-cols-3 gap-2.5">
-              {categories.map((c) => (
-                <Link
-                  key={c.id}
-                  href={`/home?cat=${c.id}&lang=${lang}`}
-                  aria-label={labelOf(c.id)}
-                  className="rounded-xl p-3 min-h-[132px] min-w-0 w-full flex flex-col items-center justify-center gap-2 text-center"
-                  style={GLASS_CARD_STYLE}
-                >
-                  <span aria-hidden="true" className="flex items-center justify-center">
-                    <CategoryIcon id={c.id} size={64} />
-                  </span>
-                  <span
-                    className="font-semibold text-ink leading-snug break-words text-center w-full min-w-0"
-                    style={{ fontSize: '14px', letterSpacing: '-0.5px', lineHeight: '1.25' }}
-                  >
-                    {labelOf(c.id)}
-                  </span>
-                </Link>
-              ))}
-            </div>
-              <button
-                type="button"
-                onClick={confirmDeleteData}
-                className="btn-ac mt-12 w-full bg-accent text-white rounded-lg"
-              >
-                {S.delete_data}
-              </button>
-          </section>
-        )}
+        <button
+          type="button"
+          onClick={confirmDeleteData}
+          className="btn-ac mt-12 w-full bg-accent text-white rounded-lg"
+        >
+          {S.delete_data}
+        </button>
       </div>
 
       <ConfirmModal
