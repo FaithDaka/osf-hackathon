@@ -44,6 +44,13 @@
   "escalation_path": "Escalation Path",
   "announcements": "Announcements",
   "announcements_desc": "Power outages, road closures, events, and updates",
+  "admin_districts": "Districts",
+  "admin_provinces": "Provinces",
+  "admin_states": "States",
+  "admin_search_districts": "Search districts...",
+  "admin_search_provinces": "Search provinces...",
+  "admin_search_states": "Search states...",
+  "admin_no_match": "No matching area found.",
   "lc_initiatives": "LC Initiatives",
   "lc_initiatives_desc": "What your local council is doing",
   "effort_badges": {

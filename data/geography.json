@@ -1,5 +1,7 @@
 {
   "version": "2026.01.15",
+  "country": "Uganda",
+  "adminLevel": "districts",
   "districts": {
     "kampala": {
       "label": "Kampala",

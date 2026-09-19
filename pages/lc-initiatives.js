@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import BottomNav from '../lib/bottom-nav';
+import DistrictCarousel, { isKnownDistrict } from '../lib/district-carousel';
 import { getInitiatives, rateInitiative } from '../lib/lc-initiative-store';
 import { fileComplaint } from '../lib/complaint-store';
 import initiativesData from '../data/lc-initiatives.json';
@@ -74,7 +75,7 @@ export default function Initiatives() {
   useEffect(() => {
     try {
       const d = localStorage.getItem('ac_district');
-      if (d === 'kampala' || d === 'mukono') setDistrict(d);
+      if (isKnownDistrict(d)) setDistrict(d);
     } catch {
       // Defaults apply.
     }
@@ -151,23 +152,12 @@ export default function Initiatives() {
         <p className="text-ac-muted" style={{ fontSize: '16px' }}>
           {S.lc_initiatives_desc}. Rate the effort.
         </p>
-        <div className="mt-2 flex gap-2" role="group" aria-label="District">
-          {['kampala', 'mukono'].map((d) => (
-            <button
-              key={d}
-              type="button"
-              aria-pressed={district === d}
-              onClick={() => pickDistrict(d)}
-              className={`btn-ac flex-1 rounded-lg border-2 capitalize ${
-                district === d
-                  ? 'bg-primary text-white border-primary'
-                  : 'bg-white text-primary border-primary'
-              }`}
-            >
-              {d}
-            </button>
-          ))}
-        </div>
+        <DistrictCarousel
+          district={district}
+          onPick={pickDistrict}
+          lang={lang}
+          UI={UI}
+        />
 
         <div className="mt-3 flex flex-col gap-3">
           {items.map((item) => {

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import BottomNav from '../lib/bottom-nav';
+import DistrictCarousel, { isKnownDistrict } from '../lib/district-carousel';
 import {
   fileComplaint,
   getAllComplaints,
@@ -66,7 +67,10 @@ export default function Complaint() {
     typeof router.query.category === 'string' && CATEGORIES.includes(router.query.category)
       ? router.query.category
       : 'land';
-  const preDistrict = router.query.district === 'mukono' ? 'mukono' : 'kampala';
+  const preDistrict =
+    typeof router.query.district === 'string' && isKnownDistrict(router.query.district)
+      ? router.query.district
+      : 'kampala';
 
   const [view, setView] = useState(newParam ? 'new' : 'list'); // list | new
   const [all, setAll] = useState([]);
@@ -95,7 +99,7 @@ export default function Complaint() {
     if (!newParam) {
       try {
         const d = localStorage.getItem('ac_district');
-        if (d === 'kampala' || d === 'mukono') setDistrict(d);
+        if (isKnownDistrict(d)) setDistrict(d);
       } catch {
         // Defaults apply.
       }
@@ -464,23 +468,12 @@ export default function Complaint() {
                 ))}
               </div>
             </div>
-            <div className="flex gap-2" role="group" aria-label="District">
-              {['kampala', 'mukono'].map((d) => (
-                <button
-                  key={d}
-                  type="button"
-                  aria-pressed={district === d}
-                  onClick={() => setDistrict(d)}
-                  className={`btn-ac flex-1 rounded-lg border-2 capitalize ${
-                    district === d
-                      ? 'bg-primary text-white border-primary'
-                      : 'bg-white text-primary border-primary'
-                  }`}
-                >
-                  {d}
-                </button>
-              ))}
-            </div>
+            <DistrictCarousel
+              district={district}
+              onPick={setDistrict}
+              lang={lang}
+              UI={UI}
+            />
             <div>
               <label htmlFor="csub" className="block font-bold">
                 {S.subcounty_prompt}

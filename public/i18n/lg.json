@@ -44,6 +44,13 @@
   "escalation_path": "Ekkubo ly'Okweyongerayo",
   "announcements": "Amalangirizi",
   "announcements_desc": "Amasannyalaze, enguudo, ebikujja n'ebipya",
+  "admin_districts": "Disitulikiti",
+  "admin_provinces": "Pulovinsi",
+  "admin_states": "Masteti",
+  "admin_search_districts": "Noonya disitulikiti...",
+  "admin_search_provinces": "Noonya pulovinsi...",
+  "admin_search_states": "Noonya masteti...",
+  "admin_no_match": "Tewali kitundu kituukana.",
   "lc_initiatives": "Emirimu gya LC",
   "lc_initiatives_desc": "Kye kitongole kyo ekya LC kikola",
   "effort_badges": {

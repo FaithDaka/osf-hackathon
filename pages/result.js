@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import BottomNav from '../lib/bottom-nav';
+import { isKnownDistrict } from '../lib/district-carousel';
 import { composeResponse, match, verify } from '../lib/matcher';
 import lga from '../data/national/lga_mandates.json';
 import landAct from '../data/national/land_act.json';
@@ -66,10 +67,9 @@ export default function Result() {
     : 'en';
   const S = UI[lang];
   const q = typeof router.query.q === 'string' ? router.query.q : '';
-  const district =
-    router.query.district === 'mukono' || router.query.district === 'kampala'
-      ? router.query.district
-      : 'kampala';
+  const district = isKnownDistrict(router.query.district)
+    ? router.query.district
+    : 'kampala';
   const cat = typeof router.query.cat === 'string' ? router.query.cat : null;
 
   const kb = useMemo(
