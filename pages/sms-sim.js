@@ -7,7 +7,7 @@ import { detectSmsLanguage } from '../lib/sms-detect';
 // Difference: the link uses this device's own origin, so it needs no IP
 // editing before the demo. The standalone file keeps an inline copy of the
 // map because it must also work opened straight from disk (file://).
-const TOLL_FREE = '0800-225-8424';
+const TOLL_FREE = '0800-ALERT';
 
 function replies(base) {
   return {

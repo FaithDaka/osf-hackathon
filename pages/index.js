@@ -9,7 +9,7 @@ import sw from '../public/i18n/sw.json';
 // PWA entry screen. Works offline (all strings + QR bundled).
 // ?lang=xx skips selection and goes straight to /home?lang=xx.
 const PWA_URL = process.env.NEXT_PUBLIC_PWA_URL || 'https://alertcitizen.github.io';
-const TOLL_FREE = '0800-225-8424';
+  const TOLL_FREE = '0800-ALERT';
 
 function ShieldLogo() {
   return (
