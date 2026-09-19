@@ -1,15 +1,9 @@
 <p align="center">
   <img src="public/icons/shield.svg" width="72" height="72" alt="AlertCitizen logo: a purple shield with a checkmark" />
 </p>
-
 <h1 align="center">AlertCitizen</h1>
 
-<p>
-  <img src="docs/screenshots/home.png" width="320" alt="AlertCitizen home screen with alert cards and topic shortcuts" />
-  <img src="docs/screenshots/alerts.png" width="320" alt="Alerts page with a power outage announcement" />
-  <img src="docs/screenshots/representatives.png" width="320" alt="Your Representatives page with local leader cards" />
-  <img src="docs/screenshots/quiz.png" width="320" alt="Civic Quiz page" />
-</p>
+<img width="480" src="docs/screenshots/home.png" />  <img width="480" src="docs/screenshots/alerts.png"/> <img width="480" src="docs/screenshots/representatives.png" />  <img width="480" src="docs/screenshots/quiz.png"/>
 
 ## What is AlertCitizen?
 
