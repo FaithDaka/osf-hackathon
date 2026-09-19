@@ -645,12 +645,12 @@ export default function Home() {
       <div className="max-w-md mx-auto">
         {/* HEADER — darker than the page, no unnecessary borders */}
         <header className="bg-primary-soft -mx-4 -mt-4 px-4 pt-4 pb-3">
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex items-start gap-1 min-w-0 flex-1 mt-2">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-end gap-1 min-w-0 flex-1 mt-2">
               <ShieldLogo />
               <span className="relative min-w-0 w-fit max-w-full">
                 <span
-                  className="block truncate text-ink font-bold"
+                  className="block text-ink font-bold"
                   style={{ fontSize: '24px', lineHeight: '1.2', letterSpacing: '-0.5px' }}
                 >
                   {S.app_name}
@@ -671,7 +671,8 @@ export default function Home() {
               </span>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <div className="flex flex-col justify-end items-end"><button
+              <div className="flex flex-col justify-end items-end">
+                <button
                 type="button"
                 role="switch"
                 aria-checked={accessible}
@@ -693,7 +694,7 @@ export default function Home() {
                     left: accessible ? '23px' : '2px',
                   }}
                 >
-                  <SpeakerIcon size={16} />
+                  <SpeakerIcon size={20} />
                 </span>
               </button>
                 <span ref={langRef} className="relative inline-flex items-center">
@@ -757,8 +758,8 @@ export default function Home() {
                       })}
                     </span>
                   )}
-                </span></div>
-
+                </span>
+              </div>
             </div>
           </div>
 
@@ -832,6 +833,34 @@ export default function Home() {
           </section>
         )}
 
+        {/* QUICK KNOWLEDGE — shortcuts below the topics */}
+        <section aria-label={S.quick_knowledge} className="mt-2 mb-6 min-w-0">
+          <h2
+            className="font-bold text-ink"
+            style={{ fontSize: '20px', lineHeight: '1.3' }}
+          >
+            {S.quick_knowledge}
+          </h2>
+          <div className="mt-4 grid grid-cols-2 min-[400px]:grid-cols-3 gap-2">
+            {QUICK_TOPICS.map((p) => (
+              <button
+                key={p.key}
+                type="button"
+                aria-label={p.label}
+                onClick={() => {
+                  setQuery(p.query);
+                  goResult(p.query, '');
+                }}
+                className="bg-white border border-primary text-primary rounded-lg inline-flex items-center justify-center gap-1.5 min-w-0 px-2"
+                style={{ minHeight: '48px', fontSize: '14px' }}
+              >
+                <QuickTopicIcon kind={p.key} size={20} />
+                <span className="truncate">{p.label}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+
         {/* SEARCH — input + button in one row, above the topics */}
         <section aria-label="Search" className="mt-4 min-w-0">
           <form onSubmit={submitSearch} className="flex gap-2 min-w-0">
@@ -853,7 +882,7 @@ export default function Home() {
                 placeholder={S.search_kb_placeholder}
                 autoComplete="off"
                 className="btn-ac w-full min-w-0 bg-white border border-gray-300 rounded-lg focus:outline-none focus-within:outline-none"
-                style={{ paddingLeft: '40px', paddingRight: '48px' }}
+                style={{ paddingLeft: '40px', paddingRight: '48px', fontSize: '16px', letterSpacing: '-0.5px'}}
               />
               <button
                 type="button"
@@ -961,6 +990,7 @@ export default function Home() {
             )}
           </section>
         ) : (
+          
           /* CATEGORIES: responsive grid — 3 per row on wide screens, 2 per row
              on narrow, 1 per row at 300px and under so words aren't squashed */
           <section aria-label={labelOf('knowledge_base')} className="mt-4 min-w-0">
@@ -985,43 +1015,15 @@ export default function Home() {
                 </Link>
               ))}
             </div>
+              <button
+                type="button"
+                onClick={confirmDeleteData}
+                className="btn-ac mt-12 w-full bg-accent text-white rounded-lg"
+              >
+                {S.delete_data}
+              </button>
           </section>
         )}
-
-        {/* QUICK KNOWLEDGE — shortcuts below the topics */}
-        <section aria-label={S.quick_knowledge} className="mt-6 min-w-0">
-          <h2
-            className="font-bold text-ink"
-            style={{ fontSize: '20px', lineHeight: '1.3' }}
-          >
-            {S.quick_knowledge}
-          </h2>
-          <div className="mt-2 grid grid-cols-2 min-[400px]:grid-cols-3 gap-2">
-            {QUICK_TOPICS.map((p) => (
-              <button
-                key={p.key}
-                type="button"
-                aria-label={p.label}
-                onClick={() => {
-                  setQuery(p.query);
-                  goResult(p.query, '');
-                }}
-                className="bg-white border border-primary text-primary rounded-lg inline-flex items-center justify-center gap-1.5 min-w-0 px-2"
-                style={{ minHeight: '48px', fontSize: '14px' }}
-              >
-                <QuickTopicIcon kind={p.key} size={20} />
-                <span className="truncate">{p.label}</span>
-              </button>
-            ))}
-          </div>
-          <button
-            type="button"
-            onClick={confirmDeleteData}
-            className="btn-ac mt-2 w-full bg-accent text-white rounded-lg"
-          >
-            {S.delete_data}
-          </button>
-        </section>
       </div>
 
       <ConfirmModal
