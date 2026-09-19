@@ -69,6 +69,29 @@ function ChevronDownIcon({ size = 12 }) {
   );
 }
 
+// Council building icon for the representatives link (no emojis).
+function RepsLinkIcon({ size = 20 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      role="img"
+      aria-hidden="true"
+      className="shrink-0"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 21h18" />
+      <path d="M5 21V7l7-4 7 4v14" />
+      <path d="M9 21v-4h6v4" />
+    </svg>
+  );
+}
+
 // Right-arrow icon for the "See all" link.
 function ArrowRightIcon({ size = 14 }) {
   return (
@@ -672,7 +695,7 @@ export default function Home() {
               {announcements.slice(0, 3).map((a, i) => (
                 <Link
                   key={a.id}
-                  href={`/announcements?id=${a.id}&lang=${lang}`}
+                  href={`/announcements?lang=${lang}`}
                   aria-label={a.title[lang] || a.title.en}
                   className={`shrink-0 w-64 rounded-xl p-4 text-left ${ANNOUNCEMENT_CARD_BG[i % ANNOUNCEMENT_CARD_BG.length]
                     }`}
@@ -858,10 +881,10 @@ export default function Home() {
           </div>
           <Link
             href={`/lc-initiatives?lang=${lang}`}
-            aria-label={S.lc_initiatives}
-            className="btn-ac mt-2 w-full inline-flex bg-white text-primary border border-primary rounded-lg"
+            aria-label={S.representatives}
+            className="btn-ac mt-2 w-full inline-flex gap-2 bg-white text-primary border border-primary rounded-lg"
           >
-            🏗️ {S.lc_initiatives} →
+            <RepsLinkIcon size={20} /> {S.representatives} →
           </Link>
         </section>
       </div>
