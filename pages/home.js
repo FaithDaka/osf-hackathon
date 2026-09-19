@@ -1071,7 +1071,7 @@ export default function Home() {
       <div className="max-w-md mx-auto">
         {/* HEADER — darker than the page, no unnecessary borders */}
         <header className="bg-primary-soft -mx-4 -mt-4 px-4 pt-4 pb-3">
-          <div className="flex items-start justify-between gap-2 mb-6">
+          <div className="flex items-start justify-between gap-1.5 mb-6">
             <Link
               href="/"
               aria-label={S.app_name}
@@ -1088,7 +1088,7 @@ export default function Home() {
                 <span
                   aria-label="Proof of concept"
                   title="Proof of concept"
-                  className="absolute -top-2 left-24 ml-1 whitespace-nowrap rounded-full bg-amber-soft text-amber font-extrabold uppercase"
+                  className="absolute -top-2 left-20 ml-1 whitespace-nowrap rounded-full bg-amber-soft text-amber font-extrabold uppercase"
                   style={{
                     fontSize: '10px',
                     letterSpacing: '0.06em',
@@ -1101,7 +1101,7 @@ export default function Home() {
               </span>
             </Link>
             <div className="flex items-center shrink-0">
-              <div className="flex justify-end items-center gap-2.5 shrink-0">
+              <div className="flex justify-end items-center gap-1.5 shrink-0">
                 <span className="inline-flex items-center gap-0.5">
                   <button
                     type="button"
