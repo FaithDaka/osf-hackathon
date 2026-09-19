@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import BottomNav from '../lib/bottom-nav';
+import DistrictCarousel, { isKnownDistrict } from '../lib/district-carousel';
 import { getAnnouncements } from '../lib/announcement-store';
 import { speakText, stopSpeaking } from '../lib/speech';
 import annData from '../data/announcements.json';
@@ -71,14 +72,14 @@ export default function Announcements() {
   const S = UI[lang];
   const id = typeof router.query.id === 'string' ? router.query.id : null;
 
-  const [district, setDistrict] = useState('kampala'); // kampala | mukono | all
+  const [district, setDistrict] = useState('kampala'); // kampala | mukono 
   const [typeFilter, setTypeFilter] = useState('all');
   const [toast, setToast] = useState('');
 
   useEffect(() => {
     try {
       const d = localStorage.getItem('ac_district');
-      if (d === 'kampala' || d === 'mukono') setDistrict(d);
+      if (isKnownDistrict(d)) setDistrict(d);
     } catch {
       // Defaults apply.
     }
@@ -92,7 +93,7 @@ export default function Announcements() {
 
   const pickDistrict = (code) => {
     setDistrict(code);
-    if (code === 'kampala' || code === 'mukono') {
+    if (isKnownDistrict(code)) {
       try {
         localStorage.setItem('ac_district', code);
       } catch {
@@ -266,23 +267,13 @@ export default function Announcements() {
         <p className="text-ac-muted" style={{ fontSize: '16px' }}>
           {S.announcements_desc}
         </p>
-        <div className="mt-2 flex gap-2" role="group" aria-label="District">
-          {['kampala', 'mukono', 'all'].map((d) => (
-            <button
-              key={d}
-              type="button"
-              aria-pressed={district === d}
-              onClick={() => pickDistrict(d)}
-              className={`btn-ac flex-1 rounded-lg border-2 capitalize ${
-                district === d
-                  ? 'bg-primary text-white border-primary'
-                  : 'bg-white text-primary border-primary'
-              }`}
-            >
-              {d}
-            </button>
-          ))}
-        </div>
+        <DistrictCarousel
+          district={district}
+          onPick={pickDistrict}
+          lang={lang}
+          UI={UI}
+          // extraOptions={[{ code: 'all', label: 'All' }]}
+        />
         <div className="mt-2 flex gap-2 overflow-x-auto pb-1" role="group" aria-label="Type">
           {TYPE_FILTERS.map((f) => (
             <button

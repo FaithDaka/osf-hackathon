@@ -44,6 +44,13 @@
   "escalation_path": "Njia ya Rufaa",
   "announcements": "Matangazo",
   "announcements_desc": "Umeme, barabara, matukio na taarifa",
+  "admin_districts": "Wilaya",
+  "admin_provinces": "Mikoa",
+  "admin_states": "Majimbo",
+  "admin_search_districts": "Tafuta wilaya...",
+  "admin_search_provinces": "Tafuta mkoa...",
+  "admin_search_states": "Tafuta jimbo...",
+  "admin_no_match": "Hakuna eneo linalolingana.",
   "lc_initiatives": "Miradi ya LC",
   "lc_initiatives_desc": "LC yako inafanya nini",
   "effort_badges": {

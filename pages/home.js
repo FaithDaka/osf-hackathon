@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { setLang, t } from '../lib/i18n';
 import BottomNav from '../lib/bottom-nav';
+import DistrictCarousel, { isKnownDistrict } from '../lib/district-carousel';
 import { getActiveAnnouncements } from '../lib/announcement-store';
 import {
   advanceWalkthrough,
@@ -21,18 +22,6 @@ import swStrings from '../public/i18n/sw.json';
 const UI = { en: enStrings, lg: lgStrings, sw: swStrings };
 const LANGS = ['en', 'lg', 'sw'];
 const LANG_LABELS = { en: 'English', lg: 'Luganda', sw: 'Swahili' };
-const DISTRICTS = [
-  { code: 'kampala', label: 'Kampala' },
-  { code: 'mukono', label: 'Mukono' },
-];
-// Supported districts are selectable; the rest preview as muted,
-// non-clickable chips in the same horizontal carousel.
-const UPCOMING_DISTRICTS = [
-  { code: 'wakiso', label: 'Wakiso' },
-  { code: 'jinja', label: 'Jinja' },
-  { code: 'gulu', label: 'Gulu' },
-  { code: 'mbarara', label: 'Mbarara' },
-];
 
 function ShieldLogo() {
   return (
@@ -368,7 +357,7 @@ export default function Home() {
   useEffect(() => {
     try {
       const d = localStorage.getItem('ac_district');
-      if (d === 'kampala' || d === 'mukono') setDistrict(d);
+      if (isKnownDistrict(d)) setDistrict(d);
       setAccessible(localStorage.getItem('ac_accessibility') === 'true');
     } catch {
       // Storage unavailable — defaults apply.
@@ -648,43 +637,13 @@ export default function Home() {
             </div>
           </div>
 
-          {/* DISTRICT CAROUSEL — small chips, horizontally scrollable,
-              scrollbar hidden */}
-          <div
-            className="no-scrollbar mt-2 flex gap-2 overflow-x-auto pb-1 pt-2"
-            role="group"
-            aria-label="District"
-          >
-            {DISTRICTS.map((d) => {
-              const active = district === d.code;
-              return (
-                <button
-                  key={d.code}
-                  type="button"
-                  aria-pressed={active}
-                  onClick={() => pickDistrict(d.code)}
-                  className={`shrink-0 whitespace-nowrap rounded-full px-4 font-semibold ${active
-                      ? 'bg-primary text-white'
-                      : 'bg-white text-primary border border-primary'
-                    }`}
-                  style={{ minHeight: '36px', fontSize: '14px' }}
-                >
-                  {d.label}
-                </button>
-              );
-            })}
-            {UPCOMING_DISTRICTS.map((d) => (
-              <span
-                key={d.code}
-                aria-disabled="true"
-                title={`${d.label} — coming soon`}
-                className="shrink-0 whitespace-nowrap rounded-full px-4 bg-black/5 text-ac-muted opacity-60 cursor-not-allowed inline-flex items-center"
-                style={{ minHeight: '36px', fontSize: '14px' }}
-              >
-                {d.label}
-              </span>
-            ))}
-          </div>
+          {/* DISTRICT CAROUSEL — shared component, same on every page. */}
+          <DistrictCarousel
+            district={district}
+            onPick={pickDistrict}
+            lang={lang}
+            UI={UI}
+          />
         </header>
 
         {/* ANNOUNCEMENTS STRIP — white page, muted alternating cards */}
