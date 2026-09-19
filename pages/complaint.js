@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import BottomNav from '../lib/bottom-nav';
 import {
   fileComplaint,
   getAllComplaints,
@@ -28,10 +29,10 @@ const VOICE_PROMPTS = [
 ];
 
 const STATUS_STYLE = {
-  OPEN: 'bg-ac-blue text-white',
-  UNDER_REVIEW: 'bg-ac-amber text-white',
-  ESCALATED: 'bg-ac-red text-white',
-  RESOLVED: 'bg-ac-green text-white',
+  OPEN: 'bg-primary text-white',
+  UNDER_REVIEW: 'bg-amber text-white',
+  ESCALATED: 'bg-accent text-white',
+  RESOLVED: 'bg-secondary text-white',
 };
 
 function statusLabel(status, S) {
@@ -46,7 +47,7 @@ function Toast({ message }) {
   if (!message) return null;
   return (
     <div role="status" aria-live="polite" className="fixed bottom-4 left-0 right-0 mx-auto max-w-md px-4">
-      <div className="bg-ac-green text-white rounded-lg p-4 text-center shadow">
+      <div className="bg-secondary text-white rounded-lg p-4 text-center shadow">
         {message}
       </div>
     </div>
@@ -156,17 +157,18 @@ export default function Complaint() {
     const c = getComplaint(refParam);
     if (!c) {
       return (
-        <main className="min-h-screen bg-ac-bg p-4">
+        <main className="min-h-screen bg-ac-bg p-4 pb-24">
           <div className="max-w-md mx-auto text-center">
             <p className="font-bold">{S.not_found.replace('{location}', refParam)}</p>
             <Link
               href={`/complaint?lang=${lang}`}
-              className="btn-ac mt-4 w-full inline-flex bg-ac-green text-white rounded-lg"
+              className="btn-ac mt-4 w-full inline-flex bg-primary text-white rounded-lg"
             >
               ← {S.file_complaint}
             </Link>
           </div>
           <Toast message={toast} />
+          <BottomNav active={router.pathname} lang={lang} strings={S} />
         </main>
       );
     }
@@ -206,12 +208,12 @@ export default function Complaint() {
     };
 
     return (
-      <main className="min-h-screen bg-ac-bg p-4">
+      <main className="min-h-screen bg-ac-bg p-4 pb-24">
         <div className="max-w-md mx-auto">
           <Link
             href={`/complaint?lang=${lang}`}
             aria-label={S.file_complaint}
-            className="inline-flex items-center min-h-[48px] text-ac-green font-bold"
+            className="inline-flex items-center min-h-[48px] text-primary font-bold"
           >
             ← {S.file_complaint}
           </Link>
@@ -253,12 +255,12 @@ export default function Complaint() {
                 <li key={i} className="flex gap-3">
                   <div className="flex flex-col items-center" aria-hidden="true">
                     <span
-                      className={`w-4 h-4 rounded-full border-2 border-ac-green ${
-                        lv.done ? 'bg-ac-green' : 'bg-white'
+                      className={`w-4 h-4 rounded-full border-2 border-primary ${
+                        lv.done ? 'bg-primary' : 'bg-white'
                       }`}
                     />
                     {i < levels.length - 1 && (
-                      <span className="w-0.5 flex-1 bg-ac-green" style={{ minHeight: '20px' }} />
+                      <span className="w-0.5 flex-1 bg-primary" style={{ minHeight: '20px' }} />
                     )}
                   </div>
                   <div className="pb-4">
@@ -274,7 +276,7 @@ export default function Complaint() {
             <button
               type="button"
               onClick={() => shareRef(c)}
-              className="btn-ac w-full bg-white text-ac-green border-2 border-ac-green rounded-lg"
+              className="btn-ac w-full bg-white text-primary border-2 border-primary rounded-lg"
             >
               📤 {S.share_complaint}
             </button>
@@ -284,25 +286,26 @@ export default function Complaint() {
                 if (simTimers) simTimers.forEach(clearTimeout);
                 setSimTimers(simulate());
               }}
-              className="btn-ac w-full bg-ac-green text-white rounded-lg"
+              className="btn-ac w-full bg-primary text-white rounded-lg"
             >
               🔄 {S.check_status}
             </button>
           </div>
         </div>
         <Toast message={toast} />
+        <BottomNav active={router.pathname} lang={lang} strings={S} />
       </main>
     );
   }
 
   // ---------------- LIST + FORM ----------------
   return (
-    <main className="min-h-screen bg-ac-bg p-4">
+    <main className="min-h-screen bg-ac-bg p-4 pb-24">
       <div className="max-w-md mx-auto">
         <Link
           href={`/home?lang=${lang}`}
           aria-label={S.app_name}
-          className="inline-flex items-center min-h-[48px] text-ac-green font-bold"
+          className="inline-flex items-center min-h-[48px] text-primary font-bold"
         >
           ← {S.app_name}
         </Link>
@@ -315,8 +318,8 @@ export default function Complaint() {
             onClick={() => setView('list')}
             className={`btn-ac flex-1 rounded-lg border-2 ${
               view === 'list'
-                ? 'bg-ac-green text-white border-ac-green'
-                : 'bg-white text-ac-green border-ac-green'
+                ? 'bg-primary text-white border-primary'
+                : 'bg-white text-primary border-primary'
             }`}
           >
             {S.check_status}
@@ -327,8 +330,8 @@ export default function Complaint() {
             onClick={() => setView('new')}
             className={`btn-ac flex-1 rounded-lg border-2 ${
               view === 'new'
-                ? 'bg-ac-green text-white border-ac-green'
-                : 'bg-white text-ac-green border-ac-green'
+                ? 'bg-primary text-white border-primary'
+                : 'bg-white text-primary border-primary'
             }`}
           >
             + {S.file_complaint}
@@ -352,7 +355,7 @@ export default function Complaint() {
               />
               <button
                 type="submit"
-                className="btn-ac bg-ac-green text-white rounded-lg px-4"
+                className="btn-ac bg-primary text-white rounded-lg px-4"
               >
                 {S.search_submit}
               </button>
@@ -361,7 +364,7 @@ export default function Complaint() {
               <div className="mt-2 bg-white rounded-lg shadow-sm p-4" aria-live="polite">
                 <Link
                   href={`/complaint?ref=${encodeURIComponent(checkRef.trim().toUpperCase())}&lang=${lang}`}
-                  className="font-bold font-mono text-ac-green underline"
+                  className="font-bold font-mono text-primary underline"
                 >
                   {checkRef.trim().toUpperCase()}
                 </Link>
@@ -384,7 +387,7 @@ export default function Complaint() {
                   <button
                     type="button"
                     onClick={() => setView('new')}
-                    className="btn-ac mt-2 w-full bg-ac-green text-white rounded-lg"
+                    className="btn-ac mt-2 w-full bg-primary text-white rounded-lg"
                   >
                     {S.file_complaint}
                   </button>
@@ -453,7 +456,7 @@ export default function Complaint() {
                     key={p}
                     type="button"
                     onClick={() => setDescription((d) => (d ? `${d} ${p}` : p))}
-                    className="bg-white border border-ac-green text-ac-green rounded-lg min-h-[48px]"
+                    className="bg-white border border-primary text-primary rounded-lg min-h-[48px]"
                     style={{ fontSize: '14px' }}
                   >
                     🔊 {p}
@@ -470,8 +473,8 @@ export default function Complaint() {
                   onClick={() => setDistrict(d)}
                   className={`btn-ac flex-1 rounded-lg border-2 capitalize ${
                     district === d
-                      ? 'bg-ac-green text-white border-ac-green'
-                      : 'bg-white text-ac-green border-ac-green'
+                      ? 'bg-primary text-white border-primary'
+                      : 'bg-white text-primary border-primary'
                   }`}
                 >
                   {d}
@@ -509,7 +512,7 @@ export default function Complaint() {
             </div>
             <button
               type="submit"
-              className="btn-ac w-full bg-ac-green text-white rounded-lg"
+              className="btn-ac w-full bg-primary text-white rounded-lg"
             >
               {S.file_complaint}
             </button>
@@ -517,6 +520,7 @@ export default function Complaint() {
         )}
       </div>
       <Toast message={toast} />
+      <BottomNav active={router.pathname} lang={lang} strings={S} />
     </main>
   );
 }

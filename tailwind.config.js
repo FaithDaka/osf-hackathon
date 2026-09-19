@@ -11,17 +11,62 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'ac-green': '#1B5E20',
-        'ac-amber': '#F57F17',
-        'ac-red': '#B71C1C',
-        'ac-blue': '#0D47A1',
-        'ac-bg': '#FAFAFA',
+        // ── AlertCitizen design system (single source of truth) ──
+        // Three-hue civic palette: vibrant but trustworthy.
+        //   PRIMARY (civic purple) #5B2D8E — brand, primary actions,
+        //     nav-active, links, info badges, quiz progress.
+        //   SECONDARY (civic emerald) #0E7A55 — success, completed,
+        //     resolved, high scores. Vivid, not the bland #1B5E20.
+        //   ACCENT (civic coral) #C22433 — alerts, escalated/stalled,
+        //     low scores, energy CTAs.
+        // Amber #B45309 is FUNCTIONAL ONLY (warning / under-review /
+        // in-progress) so severity keeps 3 distinguishable levels.
+        // Neutrals: lavender-tinted bg ties the purple brand.
+        primary: {
+          DEFAULT: '#5B2D8E',
+          dark: '#3D1D60',
+          soft: '#EDE7F6',
+        },
+        secondary: {
+          DEFAULT: '#0E7A55',
+          dark: '#095C41',
+          soft: '#DDF0E7',
+        },
+        accent: {
+          DEFAULT: '#C22433',
+          dark: '#8E1622',
+          soft: '#FDE4E7',
+        },
+        amber: {
+          DEFAULT: '#B45309',
+          soft: '#FEF3C7',
+        },
+        ink: '#201C2B',
+        line: '#E3DDF0',
+        // ── Neutral aliases (kept so existing layout classes keep working).
+        // They point at the new system — do NOT introduce new hex here.
+        'ac-bg': '#F5F1FA',
         'ac-card': '#FFFFFF',
-        'ac-muted': '#757575',
+        'ac-muted': '#5F5B6B',
       },
       fontSize: {
         // 18px base for low-vision users (not the 16px default).
         base: '18px',
+      },
+      fontFamily: {
+        // Global brand font — self-hosted Public Sans variable (see
+        // styles/globals.css @font-face). System stack is the fallback for
+        // first paint (font-display: swap) and offline edge cases.
+        sans: [
+          '"Public Sans"',
+          'system-ui',
+          '-apple-system',
+          '"Segoe UI"',
+          'Roboto',
+          '"Helvetica Neue"',
+          'Arial',
+          'sans-serif',
+        ],
       },
     },
   },

@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="AlertCitizen shield with checkmark">
-  <rect width="512" height="512" rx="96" fill="#1B5E20"/>
+  <rect width="512" height="512" rx="96" fill="#5B2D8E"/>
   <!-- Shield -->
-  <path d="M256 72 L408 136 V264 C408 356 336 420 256 448 C176 420 104 356 104 264 V136 Z" fill="none" stroke="#FAFAFA" stroke-width="28" stroke-linejoin="round"/>
+  <path d="M256 72 L408 136 V264 C408 356 336 420 256 448 C176 420 104 356 104 264 V136 Z" fill="none" stroke="#F5F1FA" stroke-width="28" stroke-linejoin="round"/>
   <!-- Checkmark -->
-  <path d="M186 262 L238 314 L330 210" fill="none" stroke="#FAFAFA" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M186 262 L238 314 L330 210" fill="none" stroke="#F5F1FA" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
 <!-- SUPERSEDED: public/icons/icon.svg (person holding a microphone) is now
      the source of truth for icons/icon-192.png and icons/icon-512.png.

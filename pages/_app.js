@@ -37,7 +37,7 @@ export default function App({ Component, pageProps }) {
     <>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content="#1B5E20" />
+        <meta name="theme-color" content="#5B2D8E" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta
@@ -48,6 +48,22 @@ export default function App({ Component, pageProps }) {
         <link rel="manifest" href="/manifest.json" />
         <link rel="icon" href="/icons/icon-192.png" />
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+        {/* Public Sans variable (self-hosted) — preload the latin subset so
+            first paint uses the brand font; latin-ext loads on demand. */}
+        <link
+          rel="preload"
+          href="/fonts/public-sans-latin-wght-normal.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/public-sans-latin-ext-wght-normal.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
       </Head>
       <Component {...pageProps} />
     </>

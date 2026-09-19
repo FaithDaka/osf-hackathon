@@ -10,8 +10,8 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const outDir = join(root, 'public', 'icons');
 mkdirSync(outDir, { recursive: true });
 
-const BG = [27, 94, 32, 255]; // #1B5E20
-const FG = [250, 250, 250, 255]; // #FAFAFA
+const BG = [91, 45, 142, 255]; // #5B2D8E (civic purple)
+const FG = [245, 241, 250, 255]; // #F5F1FA
 
 // Design units: SVG viewBox is 512x512. Work in normalized 0..1 coords.
 const N = (v) => v / 512;

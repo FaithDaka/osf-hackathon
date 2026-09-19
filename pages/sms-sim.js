@@ -35,7 +35,7 @@ function renderRich(text) {
   const parts = esc.split(/(https?:\/\/[^\s<]+)/g);
   return parts.map((p, i) =>
     /^https?:\/\//.test(p) ? (
-      <a key={i} href={p} className="underline" style={{ color: '#0D47A1' }}>
+      <a key={i} href={p} className="underline" style={{ color: '#5B2D8E' }}>
         {p}
       </a>
     ) : (
@@ -92,12 +92,12 @@ export default function SmsSim() {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        fontFamily: 'system-ui, sans-serif',
+        fontFamily: "'Public Sans', system-ui, sans-serif",
       }}
     >
       <style>{`
-        .sim-user{align-self:flex-end;background:#075e54;color:#fff;border-radius:12px 12px 2px 12px;padding:10px 14px;max-width:80%;font-size:15px;line-height:1.4;overflow-wrap:break-word}
-        .sim-sys{align-self:flex-start;background:#fff;color:#212121;border-radius:12px 12px 12px 2px;padding:10px 14px;max-width:80%;font-size:15px;line-height:1.4;overflow-wrap:break-word}
+        .sim-user{align-self:flex-end;background:#0E7A55;color:#fff;border-radius:12px 12px 2px 12px;padding:10px 14px;max-width:80%;font-size:15px;line-height:1.4;overflow-wrap:break-word}
+        .sim-sys{align-self:flex-start;background:#fff;color:#201C2B;border-radius:12px 12px 12px 2px;padding:10px 14px;max-width:80%;font-size:15px;line-height:1.4;overflow-wrap:break-word}
       `}</style>
       <div
         style={{
@@ -217,7 +217,7 @@ export default function SmsSim() {
               width: 44,
               height: 44,
               borderRadius: '50%',
-              background: '#075e54',
+              background: '#5B2D8E',
               border: 'none',
               color: '#fff',
               fontSize: 18,

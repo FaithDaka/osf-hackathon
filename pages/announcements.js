@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import BottomNav from '../lib/bottom-nav';
 import { getAnnouncements } from '../lib/announcement-store';
 import { speakText, stopSpeaking } from '../lib/speech';
 import annData from '../data/announcements.json';
@@ -11,15 +12,15 @@ import swStrings from '../public/i18n/sw.json';
 const UI = { en: enStrings, lg: lgStrings, sw: swStrings };
 
 const SEVERITY_BORDER = {
-  critical: 'border-ac-red',
-  warning: 'border-ac-amber',
-  info: 'border-ac-blue',
+  critical: 'border-accent',
+  warning: 'border-amber',
+  info: 'border-primary',
 };
 
 const SEVERITY_BADGE = {
-  critical: 'bg-ac-red text-white',
-  warning: 'bg-ac-amber text-white',
-  info: 'bg-ac-blue text-white',
+  critical: 'bg-accent text-white',
+  warning: 'bg-amber text-white',
+  info: 'bg-primary text-white',
 };
 
 const TYPE_ICON = {
@@ -125,28 +126,29 @@ export default function Announcements() {
     const detail = annData.items.find((a) => a.id === id);
     if (!detail) {
       return (
-        <main className="min-h-screen bg-ac-bg p-4">
+        <main className="min-h-screen bg-ac-bg p-4 pb-24">
           <div className="max-w-md mx-auto text-center">
             <p className="font-bold">{S.not_found.replace('{location}', id)}</p>
             <Link
               href={`/announcements?lang=${lang}`}
-              className="btn-ac mt-4 w-full inline-flex bg-ac-green text-white rounded-lg"
+              className="btn-ac mt-4 w-full inline-flex bg-primary text-white rounded-lg"
             >
               ← {S.announcements}
             </Link>
           </div>
+          <BottomNav active={router.pathname} lang={lang} strings={S} />
         </main>
       );
     }
     const title = detail.title[lang] || detail.title.en;
     const body = detail.description[lang] || detail.description.en;
     return (
-      <main className="min-h-screen bg-ac-bg p-4">
+      <main className="min-h-screen bg-ac-bg p-4 pb-24">
         <div className="max-w-md mx-auto">
           <Link
             href={`/announcements?lang=${lang}`}
             aria-label={S.announcements}
-            className="inline-flex items-center min-h-[48px] text-ac-green font-bold"
+            className="inline-flex items-center min-h-[48px] text-primary font-bold"
           >
             ← {S.announcements}
           </Link>
@@ -203,14 +205,14 @@ export default function Announcements() {
                 type="button"
                 onClick={() => speakText(`${title}. ${body}`, lang, `ann_${detail.id}`)}
                 aria-label={S.listen}
-                className="btn-ac w-full bg-white text-ac-green border-2 border-ac-green rounded-lg"
+                className="btn-ac w-full bg-white text-primary border-2 border-primary rounded-lg"
               >
                 🔊 {S.listen}
               </button>
               <button
                 type="button"
                 onClick={() => shareItem(detail)}
-                className="btn-ac w-full bg-white text-ac-green border-2 border-ac-green rounded-lg"
+                className="btn-ac w-full bg-white text-primary border-2 border-primary rounded-lg"
               >
                 📤 {S.share}
               </button>
@@ -218,7 +220,7 @@ export default function Announcements() {
                 href={detail.source_url}
                 target="_blank"
                 rel="noreferrer"
-                className="btn-ac w-full inline-flex bg-ac-green text-white rounded-lg"
+                className="btn-ac w-full inline-flex bg-primary text-white rounded-lg"
               >
                 {S.source_link} ↗
               </a>
@@ -227,11 +229,12 @@ export default function Announcements() {
         </div>
         {toast && (
           <div role="status" className="fixed bottom-4 left-0 right-0 mx-auto max-w-md px-4">
-            <div className="bg-ac-green text-white rounded-lg p-4 text-center shadow">
+            <div className="bg-secondary text-white rounded-lg p-4 text-center shadow">
               {toast}
             </div>
           </div>
         )}
+        <BottomNav active={router.pathname} lang={lang} strings={S} />
       </main>
     );
   }
@@ -250,12 +253,12 @@ export default function Announcements() {
   });
 
   return (
-    <main className="min-h-screen bg-ac-bg p-4">
+    <main className="min-h-screen bg-ac-bg p-4 pb-24">
       <div className="max-w-md mx-auto">
         <Link
           href={`/home?lang=${lang}`}
           aria-label={S.app_name}
-          className="inline-flex items-center min-h-[48px] text-ac-green font-bold"
+          className="inline-flex items-center min-h-[48px] text-primary font-bold"
         >
           ← {S.app_name}
         </Link>
@@ -272,8 +275,8 @@ export default function Announcements() {
               onClick={() => pickDistrict(d)}
               className={`btn-ac flex-1 rounded-lg border-2 capitalize ${
                 district === d
-                  ? 'bg-ac-green text-white border-ac-green'
-                  : 'bg-white text-ac-green border-ac-green'
+                  ? 'bg-primary text-white border-primary'
+                  : 'bg-white text-primary border-primary'
               }`}
             >
               {d}
@@ -289,8 +292,8 @@ export default function Announcements() {
               onClick={() => setTypeFilter(f.code)}
               className={`shrink-0 px-3 rounded-lg border min-h-[48px] ${
                 typeFilter === f.code
-                  ? 'bg-ac-green text-white border-ac-green'
-                  : 'bg-white text-ac-green border-ac-green'
+                  ? 'bg-primary text-white border-primary'
+                  : 'bg-white text-primary border-primary'
               }`}
               style={{ fontSize: '14px' }}
             >
@@ -347,6 +350,7 @@ export default function Announcements() {
           })}
         </div>
       </div>
+      <BottomNav active={router.pathname} lang={lang} strings={S} />
     </main>
   );
 }

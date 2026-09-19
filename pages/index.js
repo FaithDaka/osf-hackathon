@@ -3,6 +3,8 @@ import { useRouter } from 'next/router';
 import { setLang } from '../lib/i18n';
 import { encodeQr, qrToSvg } from '../lib/qr';
 import en from '../public/i18n/en.json';
+import lg from '../public/i18n/lg.json';
+import sw from '../public/i18n/sw.json';
 
 // PWA entry screen. Works offline (all strings + QR bundled).
 // ?lang=xx skips selection and goes straight to /home?lang=xx.
@@ -11,22 +13,64 @@ const TOLL_FREE = '0800-225-8424';
 
 function ShieldLogo() {
   return (
-    <svg width="56" height="56" viewBox="0 0 512 512" role="img" aria-label="AlertCitizen logo">
-      <rect width="512" height="512" rx="96" fill="#1B5E20" />
+    <svg width="40" height="40" viewBox="0 0 512 512" role="img" aria-label="AlertCitizen logo">
+      <rect width="512" height="512" rx="96" fill="#5B2D8E" />
       <path
         d="M256 72 L408 136 V264 C408 356 336 420 256 448 C176 420 104 356 104 264 V136 Z"
         fill="none"
-        stroke="#FAFAFA"
+        stroke="#F5F1FA"
         strokeWidth="28"
         strokeLinejoin="round"
       />
       <path
         d="M186 262 L238 314 L330 210"
         fill="none"
-        stroke="#FAFAFA"
+        stroke="#F5F1FA"
         strokeWidth="34"
         strokeLinecap="round"
         strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+// Speaking-user icon: person silhouette + speech sound waves,
+// signalling this card is a speech / audio select.
+function SpeakingUserIcon() {
+  return (
+    <svg
+      width="40"
+      height="40"
+      viewBox="0 0 48 48"
+      role="img"
+      aria-hidden="true"
+      className="shrink-0"
+    >
+      <circle cx="17" cy="14" r="7" fill="#5B2D8E" />
+      <path
+        d="M4 40c0-8 6-13 13-13s13 5 13 13v1H4v-1z"
+        fill="#5B2D8E"
+      />
+      <path
+        d="M33 16c2.5 2.3 2.5 5.7 0 8"
+        fill="none"
+        stroke="#5B2D8E"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+      <path
+        d="M37 12c4.5 4 4.5 10 0 14"
+        fill="none"
+        stroke="#5B2D8E"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+      <path
+        d="M41 8c6.5 5.8 6.5 14.2 0 20"
+        fill="none"
+        stroke="#5B2D8E"
+        strokeWidth="2.5"
+        strokeLinecap="round"
       />
     </svg>
   );
@@ -38,9 +82,17 @@ const LANGS = [
   { code: 'sw', label: 'Swahili' },
 ];
 
+// Synced flash rotation: one index drives every flashing string so
+// "flash to Luganda" happens at the same time in the heading and in
+// the accessibility card.
+const FLASH_TABLES = [en, lg, sw];
+
 export default function Entry() {
   const router = useRouter();
   const [accessible, setAccessible] = useState(false);
+  // null = nothing saved yet → no button filled. Only a stored choice highlights.
+  const [activeLang, setActiveLang] = useState(null);
+  const [flashIdx, setFlashIdx] = useState(0);
 
   // ?lang= present → skip selection, straight to home.
   useEffect(() => {
@@ -52,14 +104,32 @@ export default function Entry() {
     }
   }, [router, router.isReady, router.query]);
 
-  // Restore accessibility toggle.
+  // Restore accessibility toggle + saved language (highlight only if saved).
   useEffect(() => {
     try {
       setAccessible(localStorage.getItem('ac_accessibility') === 'true');
     } catch {
       // Storage unavailable — default off.
     }
+    try {
+      const stored = localStorage.getItem('ac_lang');
+      if (['en', 'lg', 'sw'].includes(stored)) {
+        setActiveLang(stored);
+      }
+    } catch {
+      // No saved value — leave all buttons unfilled.
+    }
   }, []);
+
+  // Rotate flashing translations every 5 seconds, in sync.
+  useEffect(() => {
+    const id = setInterval(() => {
+      setFlashIdx((i) => (i + 1) % FLASH_TABLES.length);
+    }, 5000);
+    return () => clearInterval(id);
+  }, []);
+
+  const flash = FLASH_TABLES[flashIdx] || en;
 
   const qrSvg = useMemo(() => {
     try {
@@ -72,6 +142,7 @@ export default function Entry() {
 
   const choose = (code) => {
     setLang(code);
+    setActiveLang(code);
     router.push(`/home?lang=${code}`);
   };
 
@@ -86,87 +157,132 @@ export default function Entry() {
   };
 
   return (
-    <main className="min-h-screen bg-ac-bg p-4">
-      <div className="max-w-md mx-auto flex flex-col items-center text-center">
-        <ShieldLogo />
-        <h1 className="mt-2 text-2xl font-bold" style={{ fontSize: '24px' }}>
-          {en.app_name}
-        </h1>
-        <p className="text-ac-muted" style={{ fontSize: '16px' }}>
+    <main className="min-h-screen ac-pattern p-3 min-[360px]:p-4">
+      <div className="w-full max-w-md mx-auto flex flex-col items-center text-center min-w-0">
+        <div className="flex flex-row items-center gap-2 ">
+          <ShieldLogo />
+          <h1 className="mt-2 text-2xl font-bold break-words" style={{ fontSize: '28px' }}>
+            {en.app_name}
+          </h1>
+        </div>
+        {/* <p className="text-ac-muted break-words" style={{ fontSize: '16px' }}>
           {en.tagline}
-        </p>
+        </p> */}
 
-        <h2 className="mt-6 mb-2 text-lg font-bold">{en.select_language}</h2>
-        <div className="w-full flex flex-col gap-3">
-          {LANGS.map((l) => (
-            <button
-              key={l.code}
-              type="button"
-              aria-label={`Select ${l.label}`}
-              onClick={() => choose(l.code)}
-              className="btn-ac w-full bg-white text-ac-green border-2 border-ac-green rounded-lg shadow-sm"
-              style={{ height: '64px', fontSize: '20px' }}
-            >
-              {l.label}
-            </button>
-          ))}
+        {/* Accessibility card FIRST, with speaking-user icon to signal speech select.
+            Icon + (text + toggle) wrap: on narrow screens the icon sits on top,
+            centered; text and toggle stay joined. Text column has a fixed
+            min-height so rotating translations never resize the card. */}
+        <div className="w-full max-w-full mt-6 bg-white rounded-lg shadow-sm p-3 min-[360px]:p-4 text-left min-w-0">
+          <label className="flex flex-wrap items-center justify-center gap-3 min-h-[48px] min-w-0">
+            <SpeakingUserIcon />
+            <span className="flex items-center justify-center gap-3 min-[360px]:gap-4 min-w-0 flex-1 basis-56">
+              <span className="min-w-0 flex-1 min-h-[192px] min-[480px]:min-h-[88px] flex flex-col justify-center text-left">
+                <span
+                  key={`mode-${flashIdx}`}
+                  className="block font-bold ac-fade break-words"
+                  style={{ fontSize: '18px', lineHeight: '1.2' }}
+                  aria-live="polite"
+                >
+                  {flash.accessibility_mode}
+                </span>
+                <span
+                  key={`desc-${flashIdx}`}
+                  className="block text-ac-muted ac-fade break-words"
+                  style={{ fontSize: '16px' }}
+                  aria-live="polite"
+                >
+                  {flash.accessibility_desc}
+                </span>
+              </span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={accessible}
+                aria-label={en.accessibility_mode}
+                onClick={toggleAccessibility}
+                className={`relative rounded-full border-2 border-ac-muted shrink-0 ${
+                  accessible ? 'bg-secondary border-white' : 'bg-white'
+                }`}
+                style={{ width: '64px', height: '48px' }}
+              >
+                <span
+                  className={`absolute top-1 rounded-full bg-white border border-ac-muted ${
+                    accessible ? 'right-1 border-secondary' : 'left-1'
+                  }`}
+                  style={{ width: '36px', height: '36px' }}
+                />
+              </button>
+            </span>
+          </label>
+        </div>
+
+        <h2
+          key={`select-${flashIdx}`}
+          className="mt-2 mb-2 font-extrabold ac-fade break-words px-2 min-h-[78px] flex items-center justify-center"
+          style={{ fontSize: '32px', lineHeight: '1.3' }}
+          aria-live="polite"
+        >
+          {flash.select_language}
+        </h2>
+        <div className="w-full max-w-full flex flex-col gap-3 min-w-0">
+          {LANGS.map((l) => {
+            const isActive = activeLang === l.code;
+            return (
+              <button
+                key={l.code}
+                type="button"
+                aria-label={`Select ${l.label}`}
+                aria-pressed={isActive}
+                onClick={() => choose(l.code)}
+                className={`btn-ac w-full max-w-full rounded-lg border-2 break-words ${
+                  isActive
+                    ? 'bg-primary text-white border-primary'
+                    : 'bg-white text-primary border-primary'
+                }`}
+                style={{
+                  height: '64px',
+                  fontSize: '20px',
+                  boxShadow: isActive
+                    ? '0 4px 12px rgba(27, 94, 32, 0.35)'
+                    : '0 1px 3px rgba(0, 0, 0, 0.08)',
+                }}
+              >
+                {l.label}
+              </button>
+            );
+          })}
         </div>
 
         <hr className="w-full my-6 border-gray-300" />
-        <p className="text-base">{en.or_text}</p>
-
-        {qrSvg && (
-          <div className="mt-6 flex flex-col items-center">
-            <div
-              className="bg-white p-2 rounded-lg shadow-sm"
-              // QR pixels are decorative; URL is announced below.
-              dangerouslySetInnerHTML={{ __html: qrSvg }}
-            />
-            <p className="mt-1 text-ac-muted" style={{ fontSize: '16px' }}>
-              Scan to open
-            </p>
-            <p className="text-ac-muted break-all" style={{ fontSize: '14px' }}>
-              {PWA_URL}
-            </p>
-          </div>
-        )}
-
+        {/* <p className="text-base break-words">{en.or_text}</p> */}
         <a
           href={`tel:${TOLL_FREE.replace(/-/g, '')}`}
-          className="mt-6 text-ac-blue"
+          className="text-primary break-words text-primary"
           style={{ fontSize: '16px' }}
         >
           {en.toll_free}
         </a>
 
-        <div className="w-full mt-6 bg-white rounded-lg shadow-sm p-4 text-left">
-          <label className="flex items-center justify-between gap-4 min-h-[48px]">
-            <span>
-              <span className="block font-bold">{en.accessibility_mode}</span>
-              <span className="block text-ac-muted" style={{ fontSize: '16px' }}>
-                {en.accessibility_desc}
-              </span>
-            </span>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={accessible}
-              aria-label={en.accessibility_mode}
-              onClick={toggleAccessibility}
-              className={`relative rounded-full border-2 border-ac-green shrink-0 ${
-                accessible ? 'bg-ac-green' : 'bg-white'
-              }`}
-              style={{ width: '64px', height: '48px' }}
+        {qrSvg && (
+          <div className="mt-6 flex flex-col items-center max-w-full min-w-0">
+            <div
+              className="bg-white p-2 rounded-lg shadow-sm max-w-full overflow-hidden"
+              // QR pixels are decorative; URL is announced below.
+              dangerouslySetInnerHTML={{ __html: qrSvg }}
+            />
+            <p className="mt-1 text-ac-muted break-words" style={{ fontSize: '16px' }}>
+              Scan to open
+            </p>
+            <p
+              className="text-ac-muted break-all max-w-full w-7/12"
+              style={{ fontSize: '14px' }}
             >
-              <span
-                className={`absolute top-1 rounded-full bg-white border border-ac-green ${
-                  accessible ? 'right-1' : 'left-1'
-                }`}
-                style={{ width: '36px', height: '36px' }}
-              />
-            </button>
-          </label>
-        </div>
+              {/* {PWA_URL} */}
+              Or send a text to 0800-ALERT to receive the link. Standard SMS rates may apply.
+            </p>
+          </div>
+        )}
       </div>
     </main>
   );

@@ -4,26 +4,26 @@
       <rect width="512" height="512" rx="96"/>
     </clipPath>
   </defs>
-  <rect width="512" height="512" rx="96" fill="#1B5E20"/>
+  <rect width="512" height="512" rx="96" fill="#5B2D8E"/>
   <g clip-path="url(#bg-clip)">
     <!-- Person -->
-    <circle cx="205" cy="440" r="120" fill="#FAFAFA"/>
-    <line x1="205" y1="240" x2="205" y2="330" stroke="#FAFAFA" stroke-width="50" stroke-linecap="round"/>
-    <circle cx="205" cy="190" r="62" fill="#FAFAFA"/>
+    <circle cx="205" cy="440" r="120" fill="#F5F1FA"/>
+    <line x1="205" y1="240" x2="205" y2="330" stroke="#F5F1FA" stroke-width="50" stroke-linecap="round"/>
+    <circle cx="205" cy="190" r="62" fill="#F5F1FA"/>
     <!-- Arm reaching to the microphone -->
-    <line x1="280" y1="420" x2="330" y2="350" stroke="#FAFAFA" stroke-width="52" stroke-linecap="round"/>
+    <line x1="280" y1="420" x2="330" y2="350" stroke="#F5F1FA" stroke-width="52" stroke-linecap="round"/>
     <!-- Microphone handle -->
-    <line x1="340" y1="260" x2="340" y2="340" stroke="#FAFAFA" stroke-width="30" stroke-linecap="round"/>
+    <line x1="340" y1="260" x2="340" y2="340" stroke="#F5F1FA" stroke-width="30" stroke-linecap="round"/>
     <!-- Microphone head -->
-    <line x1="340" y1="170" x2="340" y2="260" stroke="#FAFAFA" stroke-width="84" stroke-linecap="round"/>
+    <line x1="340" y1="170" x2="340" y2="260" stroke="#F5F1FA" stroke-width="84" stroke-linecap="round"/>
     <!-- Microphone grille -->
-    <g stroke="#1B5E20" stroke-width="10" stroke-linecap="round">
+    <g stroke="#5B2D8E" stroke-width="10" stroke-linecap="round">
       <line x1="310" y1="190" x2="370" y2="190"/>
       <line x1="310" y1="212" x2="370" y2="212"/>
       <line x1="310" y1="234" x2="370" y2="234"/>
     </g>
     <!-- Hand gripping the handle -->
-    <circle cx="330" cy="345" r="30" fill="#FAFAFA"/>
+    <circle cx="330" cy="345" r="30" fill="#F5F1FA"/>
   </g>
 </svg>
 <!-- AUTHOR NOTE: this SVG is the source of truth for the PWA icons:

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import BottomNav from '../lib/bottom-nav';
 import { composeResponse, match, verify } from '../lib/matcher';
 import lga from '../data/national/lga_mandates.json';
 import landAct from '../data/national/land_act.json';
@@ -19,9 +20,9 @@ const TOLL_FREE = '0800-225-8424';
 const FLAGS_KEY = 'ac_flags';
 
 const BANNERS = {
-  DISCREPANCY: { cls: 'bg-ac-red', icon: '⚠️' },
-  WRONG_AUTHORITY: { cls: 'bg-ac-amber', icon: '⚠️' },
-  SAFETY_REDIRECT: { cls: 'bg-ac-red', icon: '🚨' },
+  DISCREPANCY: { cls: 'bg-accent', icon: '⚠️' },
+  WRONG_AUTHORITY: { cls: 'bg-amber', icon: '⚠️' },
+  SAFETY_REDIRECT: { cls: 'bg-accent', icon: '🚨' },
 };
 
 function fmtDuration(hours) {
@@ -51,7 +52,7 @@ function Toast({ message }) {
       aria-live="polite"
       className="fixed bottom-4 left-0 right-0 mx-auto max-w-md px-4"
     >
-      <div className="bg-ac-green text-white rounded-lg p-4 text-center shadow">
+      <div className="bg-secondary text-white rounded-lg p-4 text-center shadow">
         {message}
       </div>
     </div>
@@ -111,12 +112,12 @@ export default function Result() {
       return subOk && parOk;
     });
     return (
-      <main className="min-h-screen bg-ac-bg p-4">
+      <main className="min-h-screen bg-ac-bg p-4 pb-24">
         <div className="max-w-md mx-auto">
           <Link
             href={backHref}
             aria-label={S.app_name}
-            className="inline-flex items-center min-h-[48px] text-ac-green font-bold"
+            className="inline-flex items-center min-h-[48px] text-primary font-bold"
           >
             ← {S.app_name}
           </Link>
@@ -156,7 +157,7 @@ export default function Result() {
             />
             <button
               type="submit"
-              className="btn-ac mt-2 w-full bg-ac-green text-white rounded-lg"
+              className="btn-ac mt-2 w-full bg-primary text-white rounded-lg"
             >
               🔍 {S.search_submit}
             </button>
@@ -184,7 +185,7 @@ export default function Result() {
                 </div>
                 <div className="text-ac-muted" style={{ fontSize: '14px' }}>
                   {Number(e.statutory_fee) > 0 && (
-                    <span className="text-ac-green font-bold">
+                    <span className="text-secondary font-bold">
                       {e.statutory_fee} {e.currency} ·{' '}
                     </span>
                   )}
@@ -195,6 +196,7 @@ export default function Result() {
           </div>
         </div>
         <Toast message={toast} />
+        <BottomNav active="" lang={lang} strings={S} />
       </main>
     );
   }
@@ -211,12 +213,12 @@ export default function Result() {
 
   if (!entry) {
     return (
-      <main className="min-h-screen bg-ac-bg p-4">
+      <main className="min-h-screen bg-ac-bg p-4 pb-24">
         <div className="max-w-md mx-auto">
           <Link
             href={backHref}
             aria-label={S.app_name}
-            className="inline-flex items-center min-h-[48px] text-ac-green font-bold"
+            className="inline-flex items-center min-h-[48px] text-primary font-bold"
           >
             ← {S.app_name}
           </Link>
@@ -224,20 +226,21 @@ export default function Result() {
             <p className="font-bold text-lg">{S.no_match}</p>
             <a
               href={`/complaint?lang=${lang}`}
-              className="btn-ac mt-4 w-full inline-flex bg-ac-green text-white rounded-lg"
+              className="btn-ac mt-4 w-full inline-flex bg-primary text-white rounded-lg"
               style={{ height: '56px' }}
             >
               📋 {S.file_complaint}
             </a>
             <a
               href={`tel:${TOLL_FREE.replace(/-/g, '')}`}
-              className="btn-ac mt-2 w-full inline-flex bg-white text-ac-green border-2 border-ac-green rounded-lg"
+              className="btn-ac mt-2 w-full inline-flex bg-white text-primary border-2 border-primary rounded-lg"
               style={{ height: '56px' }}
             >
               📞 {S.toll_free}
             </a>
           </div>
         </div>
+        <BottomNav active="" lang={lang} strings={S} />
       </main>
     );
   }
@@ -296,12 +299,12 @@ export default function Result() {
     `&district=${entry.district === 'national' ? district : entry.district}`;
 
   return (
-    <main className="min-h-screen bg-ac-bg p-4">
+    <main className="min-h-screen bg-ac-bg p-4 pb-24">
       <div className="max-w-md mx-auto">
         <Link
           href={backHref}
           aria-label={S.app_name}
-          className="inline-flex items-center min-h-[48px] text-ac-green font-bold"
+          className="inline-flex items-center min-h-[48px] text-primary font-bold"
           style={{ fontSize: '16px' }}
         >
           ← {S.app_name}
@@ -326,7 +329,7 @@ export default function Result() {
 
           {Number(r.statutory_fee) > 0 && (
             <div className="mt-3">
-              <div className="text-ac-green font-bold" style={{ fontSize: '20px' }}>
+              <div className="text-secondary font-bold" style={{ fontSize: '20px' }}>
                 Legal fee: {r.statutory_fee} {r.currency}
               </div>
               <div className="text-ac-muted" style={{ fontSize: '14px' }}>
@@ -336,17 +339,17 @@ export default function Result() {
           )}
 
           {r.correct_authority && (
-            <p className="mt-2 text-ac-green font-bold">
+            <p className="mt-2 text-secondary font-bold">
               ✅ {S.correct_authority}: {r.correct_authority}
             </p>
           )}
           {r.wrong_authorities && r.wrong_authorities.length > 0 && (
-            <p className="mt-1 text-ac-red">
+            <p className="mt-1 text-accent">
               ❌ {S.wrong_authorities}: {r.wrong_authorities.join(', ')}
             </p>
           )}
           {r.illegal_practices && (
-            <div className="mt-2 bg-ac-amber bg-opacity-20 p-3 rounded">
+            <div className="mt-2 bg-amber bg-opacity-20 p-3 rounded">
               <span className="font-bold">⚠️ {S.illegal_practices}: </span>
               {r.illegal_practices}
             </div>
@@ -365,7 +368,7 @@ export default function Result() {
 
         {r.flashcard && r.flashcard.question && (
           <section className="mt-3 bg-white rounded-lg shadow-sm p-4">
-            <h2 className="font-bold text-ac-blue">💡 {S.flashcard}</h2>
+            <h2 className="font-bold text-primary">💡 {S.flashcard}</h2>
             <p className="mt-1 font-bold">
               {r.flashcard.question[lang] || r.flashcard.question.en}
             </p>
@@ -389,9 +392,9 @@ export default function Result() {
               {r.escalation_path.map((step, i) => (
                 <li key={i} className="flex gap-3">
                   <div className="flex flex-col items-center" aria-hidden="true">
-                    <span className="w-4 h-4 rounded-full border-2 border-ac-green bg-white" />
+                    <span className="w-4 h-4 rounded-full border-2 border-primary bg-white" />
                     {i < r.escalation_path.length - 1 && (
-                      <span className="w-0.5 flex-1 bg-ac-green" style={{ minHeight: '20px' }} />
+                      <span className="w-0.5 flex-1 bg-primary" style={{ minHeight: '20px' }} />
                     )}
                   </div>
                   <div className="pb-4">
@@ -408,7 +411,7 @@ export default function Result() {
           <p>📄 {S.source}: {r.legal_citation}</p>
           <p>
             🔗{' '}
-            <a href={r.source_url} target="_blank" rel="noreferrer" className="text-ac-blue underline">
+            <a href={r.source_url} target="_blank" rel="noreferrer" className="text-primary underline">
               {S.source_link}
             </a>
           </p>
@@ -421,7 +424,7 @@ export default function Result() {
             type="button"
             onClick={() => setFlagOpen((v) => !v)}
             aria-expanded={flagOpen}
-            className="mt-1 text-ac-amber font-bold min-h-[48px]"
+            className="mt-1 text-amber font-bold min-h-[48px]"
           >
             ⚠️ {S.report_error}
           </button>
@@ -450,7 +453,7 @@ export default function Result() {
               />
               <button
                 type="submit"
-                className="btn-ac w-full bg-ac-green text-white rounded-lg"
+                className="btn-ac w-full bg-primary text-white rounded-lg"
               >
                 {S.search_submit}
               </button>
@@ -461,7 +464,7 @@ export default function Result() {
         <div className="mt-3 flex flex-col gap-2">
           <Link
             href={complaintHref}
-            className="btn-ac w-full inline-flex bg-ac-green text-white rounded-lg"
+            className="btn-ac w-full inline-flex bg-primary text-white rounded-lg"
             style={{ height: '56px' }}
           >
             📋 {S.file_complaint}
@@ -469,7 +472,7 @@ export default function Result() {
           <button
             type="button"
             onClick={share}
-            className="btn-ac w-full bg-white text-ac-green border-2 border-ac-green rounded-lg"
+            className="btn-ac w-full bg-white text-primary border-2 border-primary rounded-lg"
             style={{ height: '56px' }}
           >
             📤 {S.share_complaint}
@@ -477,6 +480,7 @@ export default function Result() {
         </div>
       </div>
       <Toast message={toast} />
+      <BottomNav active="" lang={lang} strings={S} />
     </main>
   );
 }
