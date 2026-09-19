@@ -4,14 +4,17 @@ import Link from 'next/link';
 import { setLang, t } from '../lib/i18n';
 import BottomNav from '../lib/bottom-nav';
 import ConfirmModal from '../lib/confirm-modal';
+import PageHeader from '../lib/page-header';
 import DistrictCarousel, { isKnownDistrict } from '../lib/district-carousel';
 import { getActiveAnnouncements } from '../lib/announcement-store';
+import { getLocalReps } from '../lib/representatives-store';
+import { RepCard } from './lc-initiatives';
+import repsData from '../data/representatives.json';
 import {
   advanceWalkthrough,
   createWalkthroughState,
   getAudioFile,
   getCurrentCategory,
-  selectCategory,
 } from '../lib/voice-walkthrough';
 import annData from '../data/announcements.json';
 import voiceTree from '../data/voice-tree.json';
@@ -87,6 +90,23 @@ function SearchIcon({ size = 18 }) {
     >
       <circle cx="11" cy="11" r="6.5" />
       <path d="M15.8 15.8 21 21" />
+    </svg>
+  );
+}
+
+// Stop-square icon for the "Stop Listening" exit button.
+function StopIcon({ size = 18 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      role="img"
+      aria-hidden="true"
+      className="shrink-0"
+      fill="currentColor"
+    >
+      <rect x="6" y="6" width="12" height="12" rx="2" />
     </svg>
   );
 }
@@ -235,8 +255,6 @@ function SpeakerIcon({ size = 16 }) {
     </svg>
   );
 }
-const TOLL_FREE = '0800-ALERT';
-
 const CATEGORY_COLORS = {
   public_services: '#5B2D8E',
   know_your_lc: '#2563EB',
@@ -408,6 +426,317 @@ const QUICK_TOPICS = [
   { key: 'education', label: 'Education', query: 'school enrollment' },
 ];
 
+// Searchable sub-county dropdown: white panel, black text, scrollable
+// list with minimal item padding. Custom-built so the option list stays
+// compact (native selects render an unstyled full-height list).
+function SubcountyDropdown({
+  labelId,
+  value,
+  options,
+  onChange,
+  searchPlaceholder,
+  searchLabel,
+  noMatchLabel,
+}) {
+  const [open, setOpen] = useState(false);
+  const [filter, setFilter] = useState('');
+  const wrapRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointer = (e) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) {
+        setOpen(false);
+        setFilter('');
+      }
+    };
+    const onKey = (e) => {
+      if (e.key === 'Escape') {
+        setOpen(false);
+        setFilter('');
+      }
+    };
+    document.addEventListener('pointerdown', onPointer);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', onPointer);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open ]);
+
+  const q = filter.trim().toLowerCase();
+  const visible = q
+    ? options.filter((o) => o.toLowerCase().includes(q))
+    : options;
+
+  return (
+    <span ref={wrapRef} className="relative block mt-2 min-w-0">
+      <button
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-labelledby={labelId}
+        onClick={() => setOpen((o) => !o)}
+        className="btn-ac w-full bg-white border border-gray-300 rounded-lg px-4 inline-flex items-center justify-between gap-2 focus:outline-none focus-visible:outline-none"
+      >
+        <span className="truncate" style={{ color: '#000' }}>
+          {value || options[0] || ''}
+        </span>
+        <ChevronDownIcon size={14} />
+      </button>
+      {open && (
+        <span className="absolute left-0 right-0 top-full mt-1 z-50 block bg-white border border-gray-300 rounded-xl shadow-lg overflow-hidden">
+          <span className="block p-2">
+            <label htmlFor="subcounty-search" className="sr-only">
+              {searchLabel}
+            </label>
+            <input
+              id="subcounty-search"
+              type="search"
+              value={filter}
+              onInput={(e) => setFilter(e.target.value)}
+              placeholder={searchPlaceholder}
+              autoComplete="off"
+              className="w-full bg-white border border-gray-300 rounded-lg px-3 focus:outline-none focus-visible:outline-none"
+              style={{ minHeight: '44px', fontSize: '16px', color: '#000' }}
+            />
+          </span>
+          <span
+            role="listbox"
+            aria-labelledby={labelId}
+            className="block overflow-y-auto"
+            style={{ maxHeight: '224px' }}
+          >
+            {visible.map((o) => {
+              const selected = o === value;
+              return (
+                <button
+                  key={o}
+                  type="button"
+                  role="option"
+                  aria-selected={selected}
+                  onClick={() => {
+                    onChange(o);
+                    setOpen(false);
+                    setFilter('');
+                  }}
+                  className={`flex items-center gap-2 w-full text-left px-4 py-1 focus:outline-none focus-visible:outline-none ${
+                    selected ? 'font-bold bg-primary-soft' : ''
+                  }`}
+                  style={{ fontSize: '16px', minHeight: '40px', color: '#000' }}
+                >
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      width: '20px',
+                      visibility: selected ? 'visible' : 'hidden',
+                    }}
+                  >
+                    ✓
+                  </span>
+                  {o}
+                </button>
+              );
+            })}
+            {visible.length === 0 && (
+              <span
+                className="block px-4 py-1 text-ac-muted"
+                style={{ fontSize: '14px' }}
+              >
+                {noMatchLabel}
+              </span>
+            )}
+          </span>
+        </span>
+      )}
+    </span>
+  );
+}
+
+// Paper-plane send icon for the knowledge-base chat input.
+function SendIcon({ size = 20 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      role="img"
+      aria-hidden="true"
+      className="shrink-0"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21 3 10.5 13.5" />
+      <path d="M21 3 14 21l-3.5-7.5L3 10 21 3Z" />
+    </svg>
+  );
+}
+
+// Guided knowledge-base chat: the system offers numbered topics and the
+// user picks one (tap or type the number) instead of free typing.
+// Free text falls back to normal search via onSearch.
+const KB_TOPICS = [
+  { key: 'land', kb: 'land' },
+  { key: 'permits', kb: 'fees_permits' },
+  { key: 'safety', kb: 'safety' },
+  { key: 'education', kb: 'education' },
+];
+
+function KnowledgeChat({ lang, S, district, onSearch }) {
+  const menuOptions = KB_TOPICS.map((t, i) => ({ code: String(i + 1), topic: t.key }));
+  const [messages, setMessages] = useState([{ from: 'sys', kind: 'menu' }]);
+  const [options, setOptions] = useState(menuOptions);
+  const [draft, setDraft] = useState('');
+  const bottomRef = useRef(null);
+
+  useEffect(() => {
+    if (bottomRef.current) {
+      bottomRef.current.scrollIntoView({ block: 'end' });
+    }
+  }, [messages]);
+
+  const topicLabel = (key) => (S.kb_topics && S.kb_topics[key]) || key;
+  const topicInfo = (key) => (S.kb_info && S.kb_info[key]) || '';
+  const kbOf = (key) => (KB_TOPICS.find((t) => t.key === key) || {}).kb || key;
+
+  const sendChoice = (raw) => {
+    const text = String(raw || '').trim();
+    if (!text) return;
+    const opt = options.find((o) => o.code === text);
+    if (!opt) {
+      onSearch(text);
+      return;
+    }
+    setMessages((m) => [...m, { from: 'user', kind: 'text', text }]);
+    if (opt.back) {
+      setMessages((m) => [...m, { from: 'sys', kind: 'menu' }]);
+      setOptions(menuOptions);
+      return;
+    }
+    setMessages((m) => [...m, { from: 'sys', kind: 'topic', topic: opt.topic }]);
+    setOptions([{ code: '0', back: true }]);
+  };
+
+  const submit = (e) => {
+    if (e) e.preventDefault();
+    const text = draft.trim();
+    if (!text) return;
+    setDraft('');
+    const opt = options.find((o) => o.code === text);
+    if (opt) {
+      sendChoice(text);
+      return;
+    }
+    if (/^[0-9]+$/.test(text)) {
+      setMessages((m) => [
+        ...m,
+        { from: 'user', kind: 'text', text },
+        { from: 'sys', kind: 'unknown' },
+      ]);
+      return;
+    }
+    setMessages((m) => [...m, { from: 'user', kind: 'text', text }]);
+    onSearch(text);
+  };
+
+  return (
+    <div className="mt-2 min-w-0">
+      <div
+        aria-live="polite"
+        className="flex flex-col gap-2 overflow-y-auto"
+        style={{ maxHeight: '52vh' }}
+      >
+        {messages.map((m, i) => {
+          if (m.from === 'user') {
+            return (
+              <div key={i} className="flex justify-end">
+                <div
+                  className="bg-primary text-white rounded-2xl rounded-br-sm px-4 py-2 max-w-[85%] break-words"
+                  style={{ fontSize: '16px' }}
+                >
+                  {m.text}
+                </div>
+              </div>
+            );
+          }
+          return (
+            <div key={i} className="flex justify-start">
+              <div
+                className="bg-primary-soft text-ink rounded-2xl rounded-bl-sm px-4 py-2 max-w-[90%] min-w-0 break-words"
+                style={{ fontSize: '16px' }}
+              >
+                {m.kind === 'menu' && <span>{S.kb_chat_hello}</span>}
+                {m.kind === 'unknown' && <span>{S.kb_chat_unknown}</span>}
+                {m.kind === 'topic' && (
+                  <span>
+                    <span className="block font-bold">
+                      {S.kb_chat_found.replace('{topic}', topicLabel(m.topic))}
+                    </span>
+                    <span className="block mt-1">{topicInfo(m.topic)}</span>
+                    <Link
+                      href={`/result?cat=${kbOf(m.topic)}&lang=${lang}&district=${district}`}
+                      className="mt-2 inline-flex items-center gap-1 text-primary font-bold underline"
+                      style={{ fontSize: '15px' }}
+                    >
+                      {S.kb_chat_view} →
+                    </Link>
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+        <div ref={bottomRef} aria-hidden="true" />
+      </div>
+      {options.length > 0 && (
+        <div className="mt-1 flex flex-col gap-2 max-w-[90%]" role="group" aria-label={S.kb_chat_hello}>
+          {options.map((o) => (
+            <button
+              key={o.code}
+              type="button"
+              onClick={() => sendChoice(o.code)}
+              className="bg-white border border-primary text-primary rounded-full px-4 w-full"
+              style={{ minHeight: '44px', fontSize: '14px' }}
+            >
+              {o.code}. {o.back ? S.kb_chat_back : topicLabel(o.topic)}
+            </button>
+          ))}
+        </div>
+      )}
+      <form
+        onSubmit={submit}
+        className="fixed left-0 right-0 z-30 bg-white border-t border-gray-200"
+        style={{ bottom: 'calc(64px + env(safe-area-inset-bottom, 0px) + 8px)' }}
+      >
+        <div className="max-w-md mx-auto px-4 pt-2 flex gap-2 min-w-0">
+          <label htmlFor="kb-input" className="sr-only">
+            {S.search_kb_placeholder}
+          </label>
+          <input
+            id="kb-input"
+            type="text"
+            value={draft}
+            onInput={(e) => setDraft(e.target.value)}
+            placeholder={S.search_kb_placeholder}
+            autoComplete="off"
+            className="btn-ac flex-1 min-w-0 bg-white border border-gray-300 rounded-lg px-4"
+          />
+          <button
+            type="submit"
+            aria-label={S.search_submit}
+            className="btn-ac bg-primary text-white rounded-lg shrink-0 px-4 inline-flex items-center justify-center"
+          >
+            <SendIcon size={20} />
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
 function validLang(q) {
   return LANGS.includes(q) ? q : 'en';
 }
@@ -491,7 +820,9 @@ export default function Home() {
 
   const labelOf = (id) => t(`categories.${id}`, lang, UI);
 
-  // Screen-reader narration follows the highlight.
+  // Screen-reader narration follows the highlight. Non-English
+  // languages have no bundled voice yet, so the fallback line is
+  // announced in English instead of staying silent.
   const current = getCurrentCategory(walk, categories);
   // Auto-start the walkthrough when accessible mode is on.
   useEffect(() => {
@@ -505,12 +836,28 @@ export default function Home() {
     const key = `${walk.currentIndex}`;
     if (announcedRef.current === key) return;
     announcedRef.current = key;
-    speak(labelOf(current.id), lang, getAudioFile(walk, categories, lang));
+    if (lang === 'en') {
+      speak(labelOf(current.id), lang, getAudioFile(walk, categories, lang));
+    } else {
+      speak(S.voice_unavailable, 'en', null);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessible, walk.currentIndex, walk.finished, lang]);
 
   const toggleAccessibility = () => {
     const next = !accessible;
+    if (next) {
+      // Fresh start on every entry: no redundant finished state, and the
+      // first card is announced again.
+      announcedRef.current = '';
+      setWalk(advanceWalkthrough(createWalkthroughState(), categories));
+    } else {
+      try {
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      } catch {
+        // Audio unavailable — exiting anyway.
+      }
+    }
     setAccessible(next);
     try {
       localStorage.setItem('ac_accessibility', next ? 'true' : 'false');
@@ -568,14 +915,48 @@ export default function Home() {
     window.location.href = `/home?lang=${lang}`;
   };
 
-  const answerNo = () => setWalk((s) => advanceWalkthrough(s, categories));
-  const answerYes = () =>
-    setWalk((s) => selectCategory(s, s.currentIndex, categories));
+  // Next wraps past the last category back to the first — there is no
+  // dead-end screen.
+  const answerNo = () =>
+    setWalk((s) => {
+      if (!s || !s.started || s.finished) return s;
+      const total = categories.length;
+      const next = s.currentIndex >= total - 1 ? 0 : s.currentIndex + 1;
+      return { ...s, currentIndex: next };
+    });
+  const answerPrev = () =>
+    setWalk((s) => {
+      if (!s || !s.started || s.finished) return s;
+      const total = categories.length;
+      const prev = s.currentIndex <= 0 ? total - 1 : s.currentIndex - 1;
+      return { ...s, currentIndex: prev };
+    });
+  // Yes routes straight to the topic page — no intermediate step.
+  const answerYes = () => {
+    const chosen = categories[walk.currentIndex];
+    if (!chosen) return;
+    try {
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    } catch {
+      // Audio unavailable — navigating anyway.
+    }
+    router.push(`/home?cat=${chosen.id}&lang=${lang}`);
+  };
 
-  const replay = () => {
-    if (!current) return;
+  // Leaving accessibility mode: stop any speech and persist the pref.
+  const stopListening = () => {
+    try {
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    } catch {
+      // Audio unavailable — exiting anyway.
+    }
     announcedRef.current = '';
-    speak(labelOf(current.id), lang, getAudioFile(walk, categories, lang));
+    setAccessible(false);
+    try {
+      localStorage.setItem('ac_accessibility', 'false');
+    } catch {
+      // Ignore storage errors.
+    }
   };
 
   // Bottom tabs live in lib/bottom-nav.js (shared dark bar).
@@ -591,13 +972,47 @@ export default function Home() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [district, cat]);
+  // Know-Your-LC shows the area's local council representatives once a
+  // sub-county is chosen (district-wide holders + sub-county postings).
+  const localReps =
+    catEntry && catEntry.id === 'know_your_lc'
+      ? getLocalReps(repsData, district, subcounty)
+      : [];
   if (catEntry) {
+    if (catEntry.id === 'knowledge_base') {
+      return (
+        <main className="min-h-screen bg-white p-4 pb-24">
+          <div className="max-w-md mx-auto min-w-0">
+            <PageHeader
+              backHref={`/home?lang=${lang}`}
+              backLabel={S.back}
+              title={labelOf(catEntry.id)}
+            />
+            <div className="mt-2 flex justify-center" aria-hidden="true">
+              <CategoryIcon id={catEntry.id} size={72} />
+            </div>
+            <KnowledgeChat
+              lang={lang}
+              S={S}
+              district={district}
+              onSearch={(text) => goResult(text, '')}
+            />
+          </div>
+          <BottomNav active={router.pathname} lang={lang} strings={S} />
+        </main>
+      );
+    }
     return (
       <main className="min-h-screen bg-white p-4 pb-24">
-        <div className="max-w-md mx-auto">
-          <h1 className="text-lg font-bold text-primary flex items-center gap-2">
-            <CategoryIcon id={catEntry.id} /> {labelOf(catEntry.id)}
-          </h1>
+        <div className="max-w-md mx-auto min-w-0">
+          <PageHeader
+            backHref={`/home?lang=${lang}`}
+            backLabel={S.back}
+            title={labelOf(catEntry.id)}
+          />
+          <div className="mt-2 flex justify-center" aria-hidden="true">
+            <CategoryIcon id={catEntry.id} size={72} />
+          </div>
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -605,35 +1020,47 @@ export default function Home() {
             }}
             className="mt-4"
           >
-            <label htmlFor="subcounty" className="block font-bold">
+            <label id="subcounty-label" htmlFor="subcounty-search" className="block font-bold">
               {S.subcounty_prompt}
             </label>
-            <select
-              id="subcounty"
+            <SubcountyDropdown
+              labelId="subcounty-label"
               value={subcounty}
-              onChange={(e) => setSubcounty(e.target.value)}
-              aria-label={S.subcounty_prompt}
-              className="btn-ac mt-2 w-full bg-white border border-gray-300 rounded-lg px-4"
-            >
-              {subcountyOptions.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-            <button
-              type="submit"
-              className="btn-ac mt-3 w-full bg-primary text-white rounded-lg"
-            >
-              {S.yes} →
-            </button>
+              options={subcountyOptions}
+              onChange={setSubcounty}
+              searchPlaceholder={S.subcounty_search}
+              searchLabel={S.subcounty_search}
+              noMatchLabel={S.admin_no_match}
+            />
+            {catEntry.id !== 'know_your_lc' && (
+              <button
+                type="submit"
+                className="btn-ac mt-3 w-full bg-primary text-white rounded-lg"
+              >
+                {S.yes} →
+              </button>
+            )}
           </form>
-          <Link
-            href={`/home?lang=${lang}`}
-            className="btn-ac mt-2 w-full inline-flex bg-white text-primary border border-primary rounded-lg"
-          >
-            ← {S.no}
-          </Link>
+          {catEntry.id === 'know_your_lc' && (
+            <section aria-label={labelOf(catEntry.id)} className="mt-4 min-w-0">
+              <div className="flex flex-col gap-2" aria-live="polite">
+                {localReps.length === 0 && (
+                  <p className="bg-white rounded-lg p-4 text-center text-ac-muted">
+                    {S.rep_no_reps.replace('{location}', subcounty || district)}
+                  </p>
+                )}
+                {localReps.map((rep) => (
+                  <RepCard key={rep.id} rep={rep} lang={lang} S={S} />
+                ))}
+              </div>
+              <p
+                className="mt-2 text-center text-ac-muted"
+                style={{ fontSize: '14px' }}
+              >
+                {S.rep_rate_later}
+              </p>
+            </section>
+          )}
         </div>
         <BottomNav active={router.pathname} lang={lang} strings={S} />
       </main>
@@ -646,7 +1073,11 @@ export default function Home() {
         {/* HEADER — darker than the page, no unnecessary borders */}
         <header className="bg-primary-soft -mx-4 -mt-4 px-4 pt-4 pb-3">
           <div className="flex items-center justify-between gap-2">
-            <div className="flex items-end gap-1 min-w-0 flex-1 mt-2">
+            <Link
+              href="/"
+              aria-label={S.app_name}
+              className="flex items-end gap-1 min-w-0 flex-1 mt-2"
+            >
               <ShieldLogo />
               <span className="relative min-w-0 w-fit max-w-full">
                 <span
@@ -669,7 +1100,7 @@ export default function Home() {
                   PoC
                 </span>
               </span>
-            </div>
+            </Link>
             <div className="flex items-center gap-2 shrink-0">
               <div className="flex flex-col justify-end items-end">
                 <button
@@ -907,87 +1338,69 @@ export default function Home() {
           </form>
         </section>
 
-        {/* CATEGORIES: screen-reader vertical list */}
+        {/* CATEGORIES: screen-reader vertical list.
+            The active card keeps its coloured icon on a light tint, and
+            its options sit right underneath it so no scrolling is needed. */}
         {accessible ? (
           <section aria-label={labelOf('knowledge_base')} className="mt-4">
-            {!walk.finished ? (
-              <>
-                <div className="flex flex-col gap-2" aria-live="polite">
+            <div className="flex flex-col gap-2" aria-live="polite">
                   {categories.map((c, i) => {
                     const active = i === walk.currentIndex;
                     return (
-                      <div
-                        key={c.id}
-                        aria-current={active ? 'true' : undefined}
-                        className={`rounded-lg p-6 ${active
-                            ? 'bg-primary text-white font-bold opacity-100'
-                            : 'bg-white text-ac-muted opacity-[0.15]'
-                          }`}
-                        style={{ fontSize: active ? '24px' : '16px' }}
-                      >
-                        <span className="inline-flex items-center gap-2">
-                          <CategoryIcon id={c.id} /> {labelOf(c.id)}
-                        </span>
+                      <div key={c.id}>
+                        <div
+                          aria-current={active ? 'true' : undefined}
+                          className={`rounded-lg p-6 ${active
+                              ? 'bg-primary-soft text-ink font-bold border-2 border-primary'
+                              : 'bg-white text-ac-muted opacity-[0.15]'
+                            }`}
+                          style={{ fontSize: active ? '24px' : '16px' }}
+                        >
+                          <span className="inline-flex items-center gap-2">
+                            <CategoryIcon id={c.id} /> {labelOf(c.id)}
+                          </span>
+                        </div>
+                        {active && (
+                          <div className="mt-2 bg-white rounded-xl shadow-lg border border-line p-3 flex flex-col gap-2">
+                            <button
+                              type="button"
+                              onClick={answerYes}
+                              className="btn-ac w-full bg-primary text-white rounded-lg"
+                              style={{ height: '64px' }}
+                            >
+                              {S.yes_continue}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={answerNo}
+                              className="btn-ac w-full bg-white text-primary border-2 border-primary rounded-lg"
+                              style={{ height: '64px' }}
+                            >
+                              {S.next_category}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={answerPrev}
+                              className="btn-ac w-full bg-white text-primary border-2 border-primary rounded-lg"
+                              style={{ height: '64px' }}
+                            >
+                              {S.previous_category}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={stopListening}
+                              aria-label={S.stop_listening}
+                              className="btn-ac w-full inline-flex gap-2 bg-white text-accent border-2 border-accent rounded-lg"
+                              style={{ height: '64px' }}
+                            >
+                              <StopIcon size={18} /> {S.stop_listening}
+                            </button>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
                 </div>
-                <button
-                  type="button"
-                  onClick={replay}
-                  aria-label={S.listen}
-                  className="btn-ac mt-2 w-full bg-white text-primary border border-primary rounded-lg"
-                >
-                  🔊 {S.listen}
-                </button>
-                <button
-                  type="button"
-                  onClick={answerYes}
-                  className="btn-ac mt-2 w-full bg-primary text-white rounded-lg"
-                  style={{ height: '64px' }}
-                >
-                  {S.yes}
-                </button>
-                <button
-                  type="button"
-                  onClick={answerNo}
-                  className="btn-ac mt-2 w-full bg-white text-primary border-2 border-primary rounded-lg"
-                  style={{ height: '64px' }}
-                >
-                  {S.no}
-                </button>
-              </>
-            ) : walk.allNo ? (
-              <div className="bg-white rounded-lg shadow-sm p-6 text-center">
-                <p className="font-bold">{S.no_match}</p>
-                <Link
-                  href={`/complaint?lang=${lang}`}
-                  className="btn-ac mt-3 w-full inline-flex bg-primary text-white rounded-lg"
-                >
-                  {S.file_complaint}
-                </Link>
-                <a
-                  href={`tel:${TOLL_FREE.replace(/-/g, '')}`}
-                  className="btn-ac mt-2 w-full inline-flex bg-white text-primary border-2 border-primary rounded-lg"
-                >
-                  {S.toll_free}
-                </a>
-              </div>
-            ) : (
-              walk.selectedCategory && (
-                <div className="bg-white rounded-lg shadow-sm p-6 text-center">
-                  <p className="font-bold">
-                    {labelOf(walk.selectedCategory)}
-                  </p>
-                  <Link
-                    href={`/home?cat=${walk.selectedCategory}&lang=${lang}`}
-                    className="btn-ac mt-3 w-full inline-flex bg-primary text-white rounded-lg"
-                  >
-                    {S.yes} →
-                  </Link>
-                </div>
-              )
-            )}
           </section>
         ) : (
           
