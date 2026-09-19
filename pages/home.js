@@ -80,6 +80,28 @@ function ChevronDownIcon({ size = 12 }) {
   );
 }
 
+// Right-arrow icon for the "See all" link.
+function ArrowRightIcon({ size = 14 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 16 16"
+      role="img"
+      aria-hidden="true"
+      className="shrink-0"
+    >
+      <path
+        d="M2.5 8h10M8.5 4.5 12 8l-3.5 3.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 // Speaker icon for the accessibility toggle: person silhouette + speech
 // sound waves, matching the intro page. Compact size fits the toggle knob.
 function SpeakerIcon({ size = 16 }) {
@@ -252,6 +274,22 @@ const SEVERITY_BORDER = {
   warning: 'border-amber',
   info: 'border-primary',
 };
+
+// Home announcement cards: two alternating muted tones (secondary / accent)
+// that repeat down the strip. Maps to secondary-soft / accent-soft.
+const ANNOUNCEMENT_CARD_BG = ['bg-secondary-soft', 'bg-accent-soft'];
+
+// Short date for home cards, e.g. "Sep 25" / "Aug 31".
+function formatShortDate(dateStr, lang) {
+  try {
+    return new Date(dateStr).toLocaleDateString(
+      lang === 'lg' ? 'en-UG' : lang,
+      { month: 'short', day: 'numeric' },
+    );
+  } catch {
+    return dateStr;
+  }
+}
 
 const TYPE_ICON = {
   power_outage: '⚡',
@@ -441,7 +479,7 @@ export default function Home() {
   }, [district, cat]);
   if (catEntry) {
     return (
-      <main className="min-h-screen bg-ac-bg p-4 pb-24">
+      <main className="min-h-screen bg-white p-4 pb-24">
         <div className="max-w-md mx-auto">
           <h1 className="text-lg font-bold text-primary flex items-center gap-2">
             <CategoryIcon id={catEntry.id} /> {labelOf(catEntry.id)}
@@ -489,7 +527,7 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-ac-bg p-4 pb-24">
+    <main className="min-h-screen bg-white p-4 pb-24">
       <div className="max-w-md mx-auto">
         {/* HEADER — darker than the page, no unnecessary borders */}
         <header className="bg-primary-soft -mx-4 -mt-4 px-4 pt-4 pb-3">
@@ -649,33 +687,60 @@ export default function Home() {
           </div>
         </header>
 
-        {/* ANNOUNCEMENTS STRIP */}
+        {/* ANNOUNCEMENTS STRIP — white page, muted alternating cards */}
         {announcements.length > 0 && (
-          <section aria-label={S.announcements} className="mt-4">
-            <h2 className="font-bold">{S.announcements}</h2>
+          <section aria-label={S.announcements} className="mt-2">
+            <div className="flex items-center justify-between mb-2">
+              <h2
+                className="font-bold text-ink"
+                style={{ fontSize: '22px', lineHeight: '1.25' }}
+              >
+                {S.announcements}
+              </h2>
+              <Link
+                href={`/announcements?lang=${lang}`}
+                aria-label={`See all ${S.announcements}`}
+                className="inline-flex items-center gap-1 text-primary font-semibold shrink-0"
+                style={{ fontSize: '15px', minHeight: '48px' }}
+              >
+                See all <ArrowRightIcon size={14} />
+              </Link>
+            </div>
             <div
               aria-live="polite"
-              className="mt-1 flex gap-2 overflow-x-auto pb-2"
+              className="no-scrollbar flex gap-3 overflow-x-auto pb-2"
             >
-              {announcements.map((a) => (
+              {announcements.slice(0, 3).map((a, i) => (
                 <Link
                   key={a.id}
                   href={`/announcements?id=${a.id}&lang=${lang}`}
                   aria-label={a.title[lang] || a.title.en}
-                  className={`shrink-0 w-56 bg-white rounded-lg shadow-sm p-3 border-l-4 text-left ${SEVERITY_BORDER[a.severity] || SEVERITY_BORDER.info
+                  className={`shrink-0 w-64 rounded-xl p-4 text-left ${ANNOUNCEMENT_CARD_BG[i % ANNOUNCEMENT_CARD_BG.length]
                     }`}
                 >
-                  <div className="text-lg" aria-hidden="true">
-                    {TYPE_ICON[a.type] || '📢'}
+                  <div
+                    className="font-medium text-ac-muted"
+                    style={{ fontSize: '14px' }}
+                  >
+                    {formatShortDate(a.start, lang)}
                   </div>
                   <div
-                    className="font-bold truncate"
-                    style={{ fontSize: '14px' }}
+                    className="mt-1 font-bold text-ink leading-snug"
+                    style={{ fontSize: '16px' }}
                   >
                     {a.title[lang] || a.title.en}
                   </div>
-                  <div className="text-ac-muted" style={{ fontSize: '14px' }}>
-                    {new Date(a.start).toLocaleDateString()}
+                  <div
+                    className="mt-1 text-ac-muted leading-snug line-clamp-2"
+                    style={{
+                      fontSize: '14px',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {a.description[lang] || a.description.en}
                   </div>
                 </Link>
               ))}
@@ -769,13 +834,13 @@ export default function Home() {
           /* CATEGORIES: responsive grid — 3 per row on wide screens, 2 per row
              on narrow, 1 per row at 300px and under so words aren't squashed */
           <section aria-label={labelOf('knowledge_base')} className="mt-4 min-w-0">
-            <div className="grid grid-cols-1 min-[301px]:grid-cols-2 min-[380px]:grid-cols-3 gap-2.5">
+            <div className="grid grid-cols-1 min-[319px]:grid-cols-2 min-[429px]:grid-cols-3 gap-2.5">
               {categories.map((c) => (
                 <Link
                   key={c.id}
                   href={`/home?cat=${c.id}&lang=${lang}`}
                   aria-label={labelOf(c.id)}
-                  className="rounded-xl p-3 min-h-[148px] min-w-0 w-full flex flex-col items-center justify-center gap-2 text-center"
+                  className="rounded-xl p-3 min-h-[132px] min-w-0 w-full flex flex-col items-center justify-center gap-2 text-center"
                   style={GLASS_CARD_STYLE}
                 >
                   <span aria-hidden="true" className="flex items-center justify-center">
