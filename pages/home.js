@@ -685,7 +685,7 @@ export default function Home() {
               aria-expanded={showDistrictSearch}
               aria-controls="district-search district-chips"
               aria-label={`${adminLabel} (${DISTRICTS.length})`}
-              className="sticky left-0 z-20 inline-flex shrink-0 items-center gap-1 whitespace-nowrap bg-primary-soft font-bold text-primary pr-2"
+              className="sticky left-0 z-20 inline-flex shrink-0 items-center gap-1 whitespace-nowrap bg-primary-soft font-bold text-primary pr-2 focus:outline-none focus-visible:outline-none border-0 border-r-2 border-gray-100"
               style={{ minHeight: '36px', fontSize: '16px', letterSpacing: '-0.5px' }}
             >
               <SearchIcon size={14} />
