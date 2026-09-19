@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import BottomNav from '../lib/bottom-nav';
+import DistrictCarousel, { isKnownDistrict } from '../lib/district-carousel';
 import {
   answerQuestion,
   calculateParishRank,
@@ -348,7 +349,7 @@ export default function Quiz() {
         localStorage.setItem(SCORES_KEY, JSON.stringify(DEMO_SEED));
       }
       const d = localStorage.getItem('ac_district');
-      if (d === 'kampala' || d === 'mukono') setDistrict(d);
+      if (isKnownDistrict(d)) setDistrict(d);
       if (!parish) {
         const saved =
           localStorage.getItem('ac_parish') || localStorage.getItem('ac_subcounty') || '';
@@ -393,30 +394,19 @@ export default function Quiz() {
           <p className="text-ac-muted" style={{ fontSize: '16px' }}>
             {S.quiz_desc}
           </p>
-          <div className="mt-2 flex gap-2" role="group" aria-label="District">
-            {['kampala', 'mukono'].map((d) => (
-              <button
-                key={d}
-                type="button"
-                aria-pressed={district === d}
-                onClick={() => {
-                  setDistrict(d);
-                  try {
-                    localStorage.setItem('ac_district', d);
-                  } catch {
-                    // Ignore.
-                  }
-                }}
-                className={`btn-ac flex-1 rounded-lg border-2 capitalize ${
-                  district === d
-                    ? 'bg-primary text-white border-primary'
-                    : 'bg-white text-primary border-primary'
-                }`}
-              >
-                {d}
-              </button>
-            ))}
-          </div>
+          <DistrictCarousel
+            district={district}
+            onPick={(d) => {
+              setDistrict(d);
+              try {
+                localStorage.setItem('ac_district', d);
+              } catch {
+                // Ignore.
+              }
+            }}
+            lang={lang}
+            UI={UI}
+          />
           <div className="mt-3 flex flex-col gap-2">
             {list.map((q) => (
               <Link
