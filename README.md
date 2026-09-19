@@ -3,6 +3,8 @@
 </p>
 <h1 align="center">AlertCitizen</h1>
 
+Live app: <https://alert-citizen.vercel.app/>
+
 <img width="480" src="docs/screenshots/home.png" />  <img width="480" src="docs/screenshots/alerts.png"/> <img width="480" src="docs/screenshots/representatives.png" />  <img width="480" src="docs/screenshots/quiz.png"/>
 
 ## What is AlertCitizen?
