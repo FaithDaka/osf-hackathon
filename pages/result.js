@@ -100,6 +100,7 @@ export default function Result() {
 
   // ---------------- CATEGORY LISTING (?cat=) ----------------
   if (cat) {
+    const catLabel = (S.categories && S.categories[cat]) || cat;
     const inScope = kb.filter(
       (e) => e.category === cat && (e.district === district || e.district === 'national'),
     );
@@ -118,7 +119,7 @@ export default function Result() {
           <PageHeader
             backHref={backHref}
             backLabel={S.back}
-            title={cat.replace(/_/g, ' ')}
+            title={catLabel}
           />
           <form
             onSubmit={(e) => {
@@ -294,13 +295,17 @@ export default function Result() {
     `&category=${encodeURIComponent(entry.category)}` +
     `&district=${entry.district === 'national' ? district : entry.district}`;
 
+  // Short home-page category title in the header (long entry titles
+  // would collide with the Back link); the full title lives in the body.
+  const entryCatLabel = (S.categories && S.categories[entry.category]) || entry.category;
+
   return (
     <main className="min-h-screen bg-white p-4 pb-24">
       <div className="max-w-md mx-auto min-w-0">
         <PageHeader
           backHref={backHref}
           backLabel={S.back}
-          title={r.title}
+          title={entryCatLabel}
         />
 
         {banner && (
@@ -313,6 +318,9 @@ export default function Result() {
         )}
 
         <article className="mt-2 bg-white rounded-lg shadow-sm p-5">
+          <h1 className="font-bold text-ink break-words" style={{ fontSize: '20px', lineHeight: 1.3 }}>
+            {r.title}
+          </h1>
           <p className="mt-2" style={{ fontSize: '18px', lineHeight: 1.6 }}>
             {r.answer}
           </p>
