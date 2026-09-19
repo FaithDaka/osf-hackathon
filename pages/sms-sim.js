@@ -11,9 +11,9 @@ const TOLL_FREE = '0800-ALERT';
 
 function replies(base) {
   return {
-    en: `Hello! Welcome to AlertCitizen.\n\nTap this link to get started:\n${base}?lang=en\n\nNo data? Call toll-free: ${TOLL_FREE}\n\nWe are here to help you with:\n- Public services\n- Local council info\n- Fees & permits\n- Land disputes\n- Safety & protection\n\nInformation you can trust.`,
-    lg: `Teegeka! Wakulinda mu AlertCitizen.\n\nKolaaki ku linkino eyo okutandika:\n${base}?lang=lg\n\nOsi na data? Sooka: ${TOLL_FREE}\n\nTukuyambako ku:\n- Emirimu gy'abantu bonna\n- Omukulembeze wo mu kibuga\n- Omutindo n'ebitegeeza\n- Emisaasaana y'ensi\n- Obulamu n'obukuumi\n\nEbikwata by'okusobola okwetegeka.`,
-    sw: `Karibu! Karibu kwenye AlertCitizen.\n\nBonyeza hii link ili uanze:\n${base}?lang=sw\n\nHuna data? Piga bure: ${TOLL_FREE}\n\nTutakusaidia na:\n- Huduma za umma\n- Taarifa za mamliko\n- Ada na vyeti\n- Migogoro ya nchi\n- Usalama na ulinzi\n\nTaarifa unaweza kuamini.`,
+    en: `Hello! Welcome to AlertCitizen.\n\nTap this link to get started:\n${base}/home?lang=en\n\nNo data? Call toll-free: ${TOLL_FREE}\n\nWe are here to help you with:\n- Public services\n- Local council info\n- Fees and permits\n- Land disputes\n- Safety and protection\n\nInformation you can trust.\n\nText back the word ALERT to receive citizen alerts via SMS.`,
+    lg: `Teegeka! Wakulinda mu AlertCitizen.\n\nKolaaki ku linkino eyo okutandika:\n${base}/home?lang=lg\n\nOsi na data? Sooka: ${TOLL_FREE}\n\nTukuyambako ku:\n- Emirimu gy'abantu bonna\n- Omukulembeze wo mu kibuga\n- Omutindo n'ebitegeeza\n- Emisaasaana y'ensi\n- Obulamu n'obukuumi\n\nEbikwata by'okusobola okwetegeka.\n\nWeereza ekigambo ALERT ofune obubaka bw'obunnansi ku SMS.`,
+    sw: `Karibu! Karibu kwenye AlertCitizen.\n\nBonyeza hii link ili uanze:\n${base}/home?lang=sw\n\nHuna data? Piga bure: ${TOLL_FREE}\n\nTutakusaidia na:\n- Huduma za umma\n- Taarifa za mamliko\n- Ada na vyeti\n- Migogoro ya nchi\n- Usalama na ulinzi\n\nTaarifa unaweza kuamini.\n\nTuma neno ALERT kupokea arifa za uraia kwa SMS.`,
   };
 }
 
@@ -26,21 +26,80 @@ function stamp() {
 }
 
 function renderRich(text) {
-  // Escape, linkify, preserve line breaks. Links only ever come from our own
-  // reply templates; user text is escaped first so echo is XSS-safe.
-  const esc = String(text)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-  const parts = esc.split(/(https?:\/\/[^\s<]+)/g);
+  // Split on URLs and render plain text nodes — React escapes them, so
+  // ampersands and brackets display exactly as typed (no double-escaping).
+  // Links only ever come from our own reply templates.
+  const parts = String(text).split(/(https?:\/\/[^\s]+)/g);
   return parts.map((p, i) =>
     /^https?:\/\//.test(p) ? (
-      <a key={i} href={p} className="underline" style={{ color: '#5B2D8E' }}>
+      <a key={i} href={p} className="underline break-all" style={{ color: '#5B2D8E' }}>
         {p}
       </a>
     ) : (
       <span key={i}>{p}</span>
     ),
+  );
+}
+
+function ChevronLeftIcon({ size = 20 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      role="img"
+      aria-hidden="true"
+      className="shrink-0"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M14.5 5 8 12l6.5 7" />
+    </svg>
+  );
+}
+
+function ResetIcon({ size = 18 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      role="img"
+      aria-hidden="true"
+      className="shrink-0"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4 12a8 8 0 0 1 14-5.3" />
+      <path d="M18 3v4h-4" />
+    </svg>
+  );
+}
+
+function SendIcon({ size = 20 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      role="img"
+      aria-hidden="true"
+      className="shrink-0"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21 3 10.5 13.5" />
+      <path d="M21 3 14 21l-3.5-7.5L3 10 21 3Z" />
+    </svg>
   );
 }
 
@@ -86,75 +145,60 @@ export default function SmsSim() {
 
   return (
     <main
-      style={{
-        background: '#0f0f1a',
-        minHeight: '100vh',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        fontFamily: "'Public Sans', system-ui, sans-serif",
-      }}
+      className="min-h-screen bg-white flex flex-col"
+      style={{ fontFamily: "'Public Sans', system-ui, sans-serif" }}
     >
       <style>{`
         .sim-user{align-self:flex-end;background:#0E7A55;color:#fff;border-radius:12px 12px 2px 12px;padding:10px 14px;max-width:80%;font-size:15px;line-height:1.4;overflow-wrap:break-word}
-        .sim-sys{align-self:flex-start;background:#fff;color:#201C2B;border-radius:12px 12px 12px 2px;padding:10px 14px;max-width:80%;font-size:15px;line-height:1.4;overflow-wrap:break-word}
+        .sim-sys{align-self:flex-start;background:#fff;color:#201C2B;border-radius:12px 12px 12px 2px;padding:10px 14px;max-width:85%;font-size:15px;line-height:1.4;overflow-wrap:break-word;box-shadow:0 1px 2px rgba(32,28,43,0.12)}
       `}</style>
-      <div
-        style={{
-          background: '#1a1a2e',
-          borderRadius: 24,
-          width: '100%',
-          maxWidth: 360,
-          height: 640,
-          overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
-          position: 'relative',
-        }}
-      >
-        <div
-          style={{
-            padding: '8px 16px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            fontSize: 12,
-            color: '#aaa',
-            borderBottom: '1px solid #2a2a3e',
-          }}
-        >
-          <span>MTN</span>
-          <span>10:42 🔋</span>
-        </div>
-        <button
-          type="button"
-          onClick={() => setMessages([])}
-          aria-label="Reset conversation"
-          style={{
-            position: 'absolute',
-            top: 40,
-            right: 16,
-            fontSize: 10,
-            color: '#666',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-          }}
-        >
-          RESET
-        </button>
+      <div className="mx-auto w-full max-w-md flex flex-col h-screen min-w-0">
+        <header className="bg-white border-b border-line px-4 py-2 flex items-center gap-3 shrink-0">
+          <Link
+            href="/"
+            aria-label="Back to AlertCitizen"
+            className="inline-flex items-center justify-center text-primary shrink-0"
+            style={{ width: '44px', height: '44px' }}
+          >
+            <ChevronLeftIcon size={20} />
+          </Link>
+          <span
+            aria-hidden="true"
+            className="inline-flex items-center justify-center rounded-full bg-primary text-white font-bold shrink-0"
+            style={{ width: '40px', height: '40px', fontSize: '15px' }}
+          >
+            AC
+          </span>
+          <span className="flex-1 min-w-0">
+            <span className="block font-bold text-ink truncate" style={{ fontSize: '16px' }}>
+              AlertCitizen
+            </span>
+            <span className="block text-ac-muted" style={{ fontSize: '13px' }}>
+              SMS simulator
+            </span>
+          </span>
+          <button
+            type="button"
+            onClick={() => setMessages([])}
+            aria-label="Reset conversation"
+            title="Reset conversation"
+            className="inline-flex items-center justify-center text-ac-muted shrink-0"
+            style={{ width: '44px', height: '44px' }}
+          >
+            <ResetIcon size={18} />
+          </button>
+        </header>
         <div
           ref={areaRef}
           aria-live="polite"
-          style={{
-            flex: 1,
-            overflowY: 'auto',
-            padding: 16,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 8,
-          }}
+          className="flex-1 min-h-0 overflow-y-auto px-4 py-3 flex flex-col gap-2"
+          style={{ background: '#F5F1FA' }}
         >
+          {messages.length === 0 && (
+            <p className="text-center text-ac-muted" style={{ fontSize: '14px' }}>
+              Text I NEED HELP to begin.
+            </p>
+          )}
           {messages.map((m, i) => (
             <div key={i} className={m.user ? 'sim-user' : 'sim-sys'}>
               {m.user ? (
@@ -169,7 +213,7 @@ export default function SmsSim() {
                   ))}
                 </>
               )}
-              <div style={{ fontSize: 10, color: '#888', marginTop: 4, textAlign: 'right' }}>
+              <div style={{ fontSize: 10, color: '#8b9096', marginTop: 4, textAlign: 'right' }}>
                 {m.at}
               </div>
             </div>
@@ -180,15 +224,9 @@ export default function SmsSim() {
             e.preventDefault();
             send();
           }}
-          style={{
-            padding: '12px 16px',
-            display: 'flex',
-            gap: 8,
-            alignItems: 'center',
-            borderTop: '1px solid #2a2a3e',
-          }}
+          className="bg-white border-t border-line px-4 py-2 flex gap-2 items-center shrink-0"
         >
-          <label htmlFor="sim-input" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden' }}>
+          <label htmlFor="sim-input" className="sr-only">
             Type your message
           </label>
           <input
@@ -198,42 +236,20 @@ export default function SmsSim() {
             onInput={(e) => setDraft(e.target.value)}
             placeholder="Type your message..."
             autoComplete="off"
-            style={{
-              flex: 1,
-              height: 44,
-              borderRadius: 20,
-              border: '1px solid #444',
-              background: '#2a2a3e',
-              color: '#fff',
-              padding: '0 16px',
-              fontSize: 16,
-              outline: 'none',
-            }}
+            className="btn-ac flex-1 min-w-0 bg-white border border-gray-300 rounded-full px-4"
           />
           <button
             type="submit"
             aria-label="Send"
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: '50%',
-              background: '#5B2D8E',
-              border: 'none',
-              color: '#fff',
-              fontSize: 18,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flex: 'none',
-            }}
+            className="btn-ac rounded-full bg-primary text-white shrink-0 inline-flex items-center justify-center px-0"
+            style={{ width: '48px' }}
           >
-            ➤
+            <SendIcon size={20} />
           </button>
         </form>
-        <div style={{ textAlign: 'center', fontSize: 10, color: '#666', padding: '0 16px 10px' }}>
-          Simulator. No real SMS is sent. <Link href="/">← AlertCitizen</Link>
-        </div>
+        <p className="bg-white text-center text-ac-muted shrink-0" style={{ fontSize: '11px', padding: '0 16px 8px' }}>
+          Simulator. No real SMS is sent.
+        </p>
       </div>
     </main>
   );
