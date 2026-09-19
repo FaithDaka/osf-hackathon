@@ -1103,7 +1103,14 @@ export default function Home() {
             </Link>
             <div className="flex items-center gap-2 shrink-0">
               <div className="flex flex-col justify-end items-end">
-                <button
+                <span className="inline-flex items-center gap-1.5">
+                  <span
+                    className="text-primary font-semibold"
+                    style={{ fontSize: '14px' }}
+                  >
+                    {S.voice}
+                  </span>
+                  <button
                 type="button"
                 role="switch"
                 aria-checked={accessible}
@@ -1128,6 +1135,7 @@ export default function Home() {
                   <SpeakerIcon size={20} />
                 </span>
               </button>
+                </span>
                 <span ref={langRef} className="relative inline-flex items-center">
                   <button
                     type="button"
