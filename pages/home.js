@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { setLang, t } from '../lib/i18n';
 import BottomNav from '../lib/bottom-nav';
+import ConfirmModal from '../lib/confirm-modal';
 import DistrictCarousel, { isKnownDistrict } from '../lib/district-carousel';
 import { getActiveAnnouncements } from '../lib/announcement-store';
 import {
@@ -69,8 +70,30 @@ function ChevronDownIcon({ size = 12 }) {
   );
 }
 
-// Council building icon for the representatives link (no emojis).
-function RepsLinkIcon({ size = 20 }) {
+// Magnifier for the search input (decorative — the input carries the name).
+function SearchIcon({ size = 18 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      role="img"
+      aria-hidden="true"
+      className="shrink-0"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    >
+      <circle cx="11" cy="11" r="6.5" />
+      <path d="M15.8 15.8 21 21" />
+    </svg>
+  );
+}
+
+// Microphone inside the search input. Voice search is not ready yet, so
+// the button intentionally does nothing on click.
+function MicIcon({ size = 18 }) {
   return (
     <svg
       width={size}
@@ -85,11 +108,75 @@ function RepsLinkIcon({ size = 20 }) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="M3 21h18" />
-      <path d="M5 21V7l7-4 7 4v14" />
-      <path d="M9 21v-4h6v4" />
+      <rect x="9" y="3" width="6" height="11" rx="3" />
+      <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0" />
+      <path d="M12 18v3" />
     </svg>
   );
+}
+
+// Coloured quick-topic icons (no emojis).
+function QuickTopicIcon({ kind, size = 20 }) {
+  const colors = {
+    land: '#0E7A55',
+    fees: '#B45309',
+    safety: '#C22433',
+    permits: '#5B2D8E',
+    education: '#0E7490',
+  };
+  const color = colors[kind] || '#5B2D8E';
+  const common = {
+    width: size,
+    height: size,
+    viewBox: '0 0 24 24',
+    role: 'img',
+    'aria-hidden': 'true',
+    className: 'shrink-0',
+    fill: 'none',
+    stroke: color,
+    strokeWidth: '1.8',
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+  };
+  switch (kind) {
+    case 'land':
+      return (
+        <svg {...common}>
+          <rect x="4" y="5" width="16" height="14" rx="2" />
+          <path d="M12 5v14M4 12h16" />
+        </svg>
+      );
+    case 'fees':
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="12" r="8" />
+          <path d="M12 8.5v7M9.5 10.5h5" />
+        </svg>
+      );
+    case 'safety':
+      return (
+        <svg {...common}>
+          <path d="M12 3l7 2.8v5.4c0 4.8-3.4 7.7-7 8.8-3.6-1.1-7-4-7-8.8V5.8L12 3Z" />
+          <path d="M9.3 12l2 2 3.6-4" />
+        </svg>
+      );
+    case 'permits':
+      return (
+        <svg {...common}>
+          <path d="M6 3h9l4 4v14H6V3Z" />
+          <path d="M9 12h7M9 15.5h5" />
+        </svg>
+      );
+    case 'education':
+      return (
+        <svg {...common}>
+          <path d="M12 4 2.5 9.5 12 15l9.5-5.5L12 4Z" />
+          <path d="M6.5 11.5V16c0 1.6 11 1.6 11 0v-4.5" />
+        </svg>
+      );
+    default:
+      return null;
+  }
 }
 
 // Right-arrow icon for the "See all" link.
@@ -313,13 +400,12 @@ const TYPE_ICON = {
   policy_change: '📜',
 };
 
-const VOICE_PROMPTS = [
-  { label: 'Land', query: 'land dispute' },
-  { label: 'Fees', query: 'LC1 stamp fee' },
-  { label: 'Safety', query: 'domestic violence' },
-  { label: 'Permits', query: 'business permit' },
-  { label: 'Education', query: 'school enrollment' },
-  { label: 'Other', query: 'help' },
+const QUICK_TOPICS = [
+  { key: 'land', label: 'Land', query: 'land dispute' },
+  { key: 'fees', label: 'Fees', query: 'LC1 stamp fee' },
+  { key: 'safety', label: 'Safety', query: 'domestic violence' },
+  { key: 'permits', label: 'Permits', query: 'business permit' },
+  { key: 'education', label: 'Education', query: 'school enrollment' },
 ];
 
 function validLang(q) {
@@ -354,6 +440,7 @@ export default function Home() {
   const [subcounty, setSubcounty] = useState('');
   const [walk, setWalk] = useState(() => createWalkthroughState());
   const [langOpen, setLangOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const announcedRef = useRef('');
   const langRef = useRef(null);
 
@@ -464,6 +551,21 @@ export default function Home() {
   const submitSearch = (e) => {
     if (e) e.preventDefault();
     if (query.trim()) goResult(query.trim(), '');
+  };
+
+  const confirmDeleteData = () => setDeleteOpen(true);
+  const cancelDeleteData = () => {
+    setDeleteOpen(false);
+    router.push(`/home?lang=${lang}`);
+  };
+  const doDeleteData = () => {
+    try {
+      localStorage.clear();
+    } catch {
+      // Storage unavailable — navigation still resets in-memory state.
+    }
+    setDeleteOpen(false);
+    window.location.href = `/home?lang=${lang}`;
   };
 
   const answerNo = () => setWalk((s) => advanceWalkthrough(s, categories));
@@ -730,6 +832,52 @@ export default function Home() {
           </section>
         )}
 
+        {/* SEARCH — input + button in one row, above the topics */}
+        <section aria-label="Search" className="mt-4 min-w-0">
+          <form onSubmit={submitSearch} className="flex gap-2 min-w-0">
+            <div className="relative flex-1 min-w-0">
+              <label htmlFor="q" className="sr-only">
+                {S.search_kb_placeholder}
+              </label>
+              <span
+                aria-hidden="true"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-ac-muted pointer-events-none flex"
+              >
+                <SearchIcon size={18} />
+              </span>
+              <input
+                id="q"
+                type="text"
+                value={query}
+                onInput={(e) => setQuery(e.target.value)}
+                placeholder={S.search_kb_placeholder}
+                autoComplete="off"
+                className="btn-ac w-full min-w-0 bg-white border border-gray-300 rounded-lg focus:outline-none focus-within:outline-none"
+                style={{ paddingLeft: '40px', paddingRight: '48px' }}
+              />
+              <button
+                type="button"
+                aria-label={S.voice_search}
+                title={S.voice_search}
+                onClick={() => {
+                  // Voice search is not ready yet — intentionally a no-op.
+                }}
+                className="absolute right-1 top-1/2 -translate-y-1/2 inline-flex items-center justify-center text-primary shrink-0"
+                style={{ width: '40px', height: '40px' }}
+              >
+                <MicIcon size={18} />
+              </button>
+            </div>
+            <button
+              type="submit"
+              aria-label={S.search_submit}
+              className="btn-ac bg-primary text-white rounded-lg shrink-0 px-4"
+            >
+              {S.search_submit}
+            </button>
+          </form>
+        </section>
+
         {/* CATEGORIES: screen-reader vertical list */}
         {accessible ? (
           <section aria-label={labelOf('knowledge_base')} className="mt-4">
@@ -840,54 +988,51 @@ export default function Home() {
           </section>
         )}
 
-        {/* SEARCH */}
-        <section aria-label="Search" className="mt-4">
-          <form onSubmit={submitSearch}>
-            <label htmlFor="q" className="sr-only">
-              {S.search_placeholder}
-            </label>
-            <input
-              id="q"
-              type="text"
-              value={query}
-              onInput={(e) => setQuery(e.target.value)}
-              placeholder={S.search_placeholder}
-              className="btn-ac w-full bg-white border border-gray-300 rounded-lg px-4"
-            />
-            <button
-              type="submit"
-              aria-label={S.search_submit}
-              className="btn-ac mt-2 w-full bg-primary text-white rounded-lg"
-            >
-              🔍 {S.search_submit}
-            </button>
-          </form>
-          <div className="mt-2 grid grid-cols-3 gap-2">
-            {VOICE_PROMPTS.map((p) => (
+        {/* QUICK KNOWLEDGE — shortcuts below the topics */}
+        <section aria-label={S.quick_knowledge} className="mt-6 min-w-0">
+          <h2
+            className="font-bold text-ink"
+            style={{ fontSize: '20px', lineHeight: '1.3' }}
+          >
+            {S.quick_knowledge}
+          </h2>
+          <div className="mt-2 grid grid-cols-2 min-[400px]:grid-cols-3 gap-2">
+            {QUICK_TOPICS.map((p) => (
               <button
-                key={p.label}
+                key={p.key}
                 type="button"
-                aria-label={`${S.listen}: ${p.label}`}
+                aria-label={p.label}
                 onClick={() => {
                   setQuery(p.query);
                   goResult(p.query, '');
                 }}
-                className="bg-white border border-primary text-primary rounded-lg"
-                style={{ height: '40px', fontSize: '14px' }}
+                className="bg-white border border-primary text-primary rounded-lg inline-flex items-center justify-center gap-1.5 min-w-0 px-2"
+                style={{ minHeight: '48px', fontSize: '14px' }}
               >
-                🔊 {p.label}
+                <QuickTopicIcon kind={p.key} size={20} />
+                <span className="truncate">{p.label}</span>
               </button>
             ))}
           </div>
-          <Link
-            href={`/lc-initiatives?lang=${lang}`}
-            aria-label={S.representatives}
-            className="btn-ac mt-2 w-full inline-flex gap-2 bg-white text-primary border border-primary rounded-lg"
+          <button
+            type="button"
+            onClick={confirmDeleteData}
+            className="btn-ac mt-2 w-full bg-accent text-white rounded-lg"
           >
-            <RepsLinkIcon size={20} /> {S.representatives} →
-          </Link>
+            {S.delete_data}
+          </button>
         </section>
       </div>
+
+      <ConfirmModal
+        open={deleteOpen}
+        title={S.delete_data_title}
+        description={S.delete_data_desc}
+        yesLabel={S.delete_data_yes}
+        cancelLabel={S.delete_data_cancel}
+        onYes={doDeleteData}
+        onCancel={cancelDeleteData}
+      />
 
       {/* BOTTOM NAV */}
       <BottomNav active={router.pathname} lang={lang} strings={S} />
