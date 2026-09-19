@@ -46,9 +46,10 @@ AlertCitizen is a civic ledger, not a social feed.
 - **Announcements.** Power outages, water disruptions, road closures,
   community events, and policy changes are pushed to users in their
   district. Not gated by Twitter engagement.
-- **LC Initiatives with community rating.** See what your local
-  council is doing. Rate the effort: Low Effort, Poor Effort,
-  Looking Good, or Excellent Work.
+- **Your Representatives.** Know who your representatives are and what
+  they are doing. Filter by City Council, Local Council, MPs, and State
+  Ministers. Open a profile for initiatives, bills sponsored, and
+  funding raised.
 - **Civic quizzes with parish ranking.** Test your knowledge. See
   how your parish ranks. Gamified civic education.
 - **Screen reader mode.** Audio-guided navigation. The app reads aloud for increased accessibility. You tap Yes or No. No reading required.
@@ -88,7 +89,7 @@ to GitHub Pages (a workflow is included under `.github/workflows/`).
 3. **Complain.** File a complaint from the result screen, then check
    its status with the reference number.
 4. **Quiz.** Take a civic quiz, see the parish ranking, share the score.
-5. **Rate.** Open LC Initiatives, rate an effort badge, add a comment.
+5. **Reps.** Open Your Representatives, filter by group, open a profile.
 
 ## Project structure
 
