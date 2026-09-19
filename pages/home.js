@@ -1071,7 +1071,7 @@ export default function Home() {
     <main className="min-h-screen bg-white p-4 pb-24">
       <div className="max-w-md mx-auto">
         {/* HEADER — darker than the page, no unnecessary borders */}
-        <header className="bg-primary-soft -mx-4 -mt-4 px-4 pt-8 pb-3">
+        <header className="bg-primary-soft -mx-4 -mt-4 px-4 pt-4 pb-3">
           <div className="flex items-center justify-between gap-2">
             <Link
               href="/"
