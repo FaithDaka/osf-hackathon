@@ -19,10 +19,18 @@ import swStrings from '../public/i18n/sw.json';
 
 const UI = { en: enStrings, lg: lgStrings, sw: swStrings };
 const LANGS = ['en', 'lg', 'sw'];
-const DISTRICTS = [
-  { code: 'kampala', label: 'Kampala' },
-  { code: 'mukono', label: 'Mukono' },
-];
+const ADMIN_LEVELS = ['districts', 'provinces', 'states'];
+function adminLevelKey() {
+  const v = geo && geo.adminLevel;
+  return ADMIN_LEVELS.includes(v) ? v : 'districts';
+}
+function getDistricts() {
+  const d = (geo && geo.districts) || {};
+  return Object.entries(d).map(([code, info]) => ({
+    code,
+    label: (info && info.label) || code,
+  }));
+}
 const TOLL_FREE = '0800-225-8424';
 
 const CATEGORY_ICONS = {
@@ -92,14 +100,27 @@ export default function Home() {
   const [accessible, setAccessible] = useState(false);
   const [query, setQuery] = useState('');
   const [subcounty, setSubcounty] = useState('');
+  const [districtFilter, setDistrictFilter] = useState('');
+  const [showDistrictSearch, setShowDistrictSearch] = useState(false);
   const [walk, setWalk] = useState(() => createWalkthroughState());
   const announcedRef = useRef('');
+
+  const districts = useMemo(() => getDistricts(), []);
+  const adminKey = adminLevelKey();
+  const adminLabel = t(`admin_${adminKey}`, lang, UI);
+  const adminSearchPlaceholder = t(`admin_search_${adminKey}`, lang, UI);
+  const adminNoMatch = t('admin_no_match', lang, UI);
+  const filteredDistricts = useMemo(() => {
+    const q = districtFilter.trim().toLowerCase();
+    if (!q) return districts;
+    return districts.filter((d) => d.label.toLowerCase().includes(q));
+  }, [districts, districtFilter]);
 
   // Restore persisted prefs (client only).
   useEffect(() => {
     try {
       const d = localStorage.getItem('ac_district');
-      if (d === 'kampala' || d === 'mukono') setDistrict(d);
+      if (d && geo.districts && geo.districts[d]) setDistrict(d);
       setAccessible(localStorage.getItem('ac_accessibility') === 'true');
     } catch {
       // Storage unavailable — defaults apply.
@@ -263,23 +284,70 @@ export default function Home() {
         </div>
 
         {/* DISTRICT SELECTOR */}
-        <div className="mt-2 flex gap-2" role="group" aria-label="District">
-          {DISTRICTS.map((d) => (
-            <button
-              key={d.code}
-              type="button"
-              aria-pressed={district === d.code}
-              onClick={() => pickDistrict(d.code)}
-              className={`btn-ac flex-1 rounded-lg border-2 ${
-                district === d.code
-                  ? 'bg-ac-green text-white border-ac-green'
-                  : 'bg-white text-ac-green border-ac-green'
-              }`}
-            >
-              {d.label}
-            </button>
-          ))}
-        </div>
+        <section aria-labelledby="district-label" className="mt-2">
+          <div className="sticky top-0 z-20 bg-ac-bg py-1">
+            <div className="flex items-center justify-between gap-2">
+              <button
+                type="button"
+                onClick={() => setShowDistrictSearch((s) => !s)}
+                aria-expanded={showDistrictSearch}
+                aria-controls="district-search district-chips"
+                aria-label={`${adminLabel} (${districts.length})`}
+                className="inline-flex items-center gap-1 font-bold text-ac-green min-h-[48px]"
+              >
+                <span aria-hidden="true">🔍</span>
+                <span id="district-label">
+                  {adminLabel} ({districts.length})
+                </span>
+              </button>
+            </div>
+            {showDistrictSearch && (
+              <>
+                <label htmlFor="district-search" className="sr-only">
+                  {adminSearchPlaceholder}
+                </label>
+                <input
+                  id="district-search"
+                  type="search"
+                  value={districtFilter}
+                  onInput={(e) => setDistrictFilter(e.target.value)}
+                  placeholder={adminSearchPlaceholder}
+                  autoComplete="off"
+                  className="mt-1 w-full bg-white border border-gray-300 rounded-lg px-4 min-h-[48px]"
+                  style={{ fontSize: '16px' }}
+                />
+              </>
+            )}
+          </div>
+
+          <div
+            id="district-chips"
+            role="group"
+            aria-labelledby="district-label"
+            className="relative z-10 mt-1 flex gap-2 overflow-x-auto pb-2"
+          >
+            {filteredDistricts.map((d) => (
+              <button
+                key={d.code}
+                type="button"
+                aria-pressed={district === d.code}
+                onClick={() => pickDistrict(d.code)}
+                className={`btn-ac shrink-0 rounded-lg border-2 px-6 ${
+                  district === d.code
+                    ? 'bg-ac-green text-white border-ac-green'
+                    : 'bg-white text-ac-green border-ac-green'
+                }`}
+              >
+                {d.label}
+              </button>
+            ))}
+            {filteredDistricts.length === 0 && (
+              <p className="text-ac-muted py-3" style={{ fontSize: '16px' }}>
+                {adminNoMatch}
+              </p>
+            )}
+          </div>
+        </section>
 
         {/* ANNOUNCEMENTS STRIP */}
         {announcements.length > 0 && (
