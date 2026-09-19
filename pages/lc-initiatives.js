@@ -199,12 +199,132 @@ function MailIcon({ size = 14 }) {
   );
 }
 
+function PinIcon({ size = 14 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      role="img"
+      aria-hidden="true"
+      className="shrink-0"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 21s-7-5.8-7-11a7 7 0 0 1 14 0c0 5.2-7 11-7 11Z" />
+      <circle cx="12" cy="10" r="2.5" />
+    </svg>
+  );
+}
+
+// Raised-fist mark for the Take Action modal (solid red, no emoji).
+function FistIcon({ size = 48 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      role="img"
+      aria-hidden="true"
+      className="shrink-0"
+      fill="#C22433"
+    >
+      <rect x="6" y="4.5" width="3.2" height="6.5" rx="1.6" />
+      <rect x="9.6" y="3.5" width="3.2" height="7.5" rx="1.6" />
+      <rect x="13.2" y="4.5" width="3.2" height="6.5" rx="1.6" />
+      <rect x="6" y="9.5" width="11" height="7.5" rx="3.2" />
+      <rect x="14.6" y="8" width="4.6" height="9" rx="2.3" transform="rotate(18 16.9 12.5)" />
+      <rect x="8" y="16.5" width="8" height="4.5" rx="1.8" />
+    </svg>
+  );
+}
+
+function CloseIcon({ size = 20 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      role="img"
+      aria-hidden="true"
+      className="shrink-0"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    >
+      <path d="M6 6l12 12M18 6 6 18" />
+    </svg>
+  );
+}
+
+// Take Action modal: red fist, title, and outlined option buttons.
+// Options are not wired to any flow yet — picking one just closes.
+function TakeActionModal({ open, S, onPick, onCancel }) {
+  if (!open) return null;
+  const options = [S.take_action_report, S.take_action_demand, S.take_action_cheer];
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={S.take_action_title}
+      onClick={onCancel}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{
+        backgroundColor: 'rgba(32, 28, 43, 0.5)',
+        backdropFilter: 'blur(3px)',
+        WebkitBackdropFilter: 'blur(3px)',
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="relative bg-white rounded-2xl shadow-lg w-full max-w-sm p-6 pt-12 text-center"
+      >
+        <button
+          type="button"
+          onClick={onCancel}
+          aria-label={S.back}
+          title={S.back}
+          className="absolute top-2 right-2 inline-flex items-center justify-center text-ac-muted"
+          style={{ width: '48px', height: '48px' }}
+        >
+          <CloseIcon size={20} />
+        </button>
+        <div className="flex justify-center" aria-hidden="true">
+          <FistIcon size={48} />
+        </div>
+        <h2
+          className="mt-3 font-bold text-ink break-words"
+          style={{ fontSize: '20px', lineHeight: 1.3 }}
+        >
+          {S.take_action_title}
+        </h2>
+        <div className="mt-4 flex flex-col gap-2">
+          {options.map((label) => (
+            <button
+              key={label}
+              type="button"
+              onClick={() => onPick(label)}
+              className="btn-ac w-full bg-white text-primary border-2 border-primary rounded-full"
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function groupLabel(group, lang, S) {
   if (group === 'all') return (S.rep_groups && S.rep_groups.all) || 'All';
   return (S.rep_groups && S.rep_groups[group]) || group;
 }
 
-function RepCard({ rep, lang, S }) {
+export function RepCard({ rep, lang, S }) {
   const role = rep.role[lang] || rep.role.en;
   const area = rep.area[lang] || rep.area.en;
   return (
@@ -249,6 +369,7 @@ export default function Representatives() {
   const [district, setDistrict] = useState('kampala');
   const [group, setGroup] = useState('all');
   const [toast, setToast] = useState('');
+  const [actionOpen, setActionOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -293,6 +414,8 @@ export default function Representatives() {
     }
     const role = rep.role[lang] || rep.role.en;
     const area = rep.area[lang] || rep.area.en;
+    const office = rep.office ? rep.office[lang] || rep.office.en : '';
+    const bio = rep.bio ? rep.bio[lang] || rep.bio.en : '';
     const initiatives = getRepInitiatives(rep, initiativesData);
     const bills = Array.isArray(rep.bills) ? rep.bills : [];
     const funding = Array.isArray(rep.funding) ? rep.funding : [];
@@ -319,6 +442,12 @@ export default function Representatives() {
                 <p className="text-ac-muted" style={{ fontSize: '14px' }}>
                   {area}
                 </p>
+                {office ? (
+                  <p className="mt-0.5 flex items-center gap-1 text-ac-muted" style={{ fontSize: '14px' }}>
+                    <PinIcon size={14} />
+                    <span>{S.rep_office}: {office}</span>
+                  </p>
+                ) : null}
               </div>
             </div>
             <h3 className="mt-4 font-bold" style={{ fontSize: '16px' }}>
@@ -336,6 +465,17 @@ export default function Representatives() {
               </div>
             </div>
           </section>
+
+          {bio ? (
+            <section aria-label={S.rep_about} className="mt-4 bg-white rounded-lg shadow-sm p-5">
+              <h3 className="font-bold" style={{ fontSize: '18px' }}>
+                {S.rep_about}
+              </h3>
+              <p className="mt-1" style={{ fontSize: '15px', lineHeight: 1.55 }}>
+                {bio}
+              </p>
+            </section>
+          ) : null}
 
           <section aria-label={S.rep_initiatives} className="mt-4">
             <h3 className="font-bold" style={{ fontSize: '18px' }}>
@@ -390,9 +530,9 @@ export default function Representatives() {
                     </div>
                   </dl>
                 </article>
-              ))}
-            </div>
-          </section>
+                ))}
+              </div>
+            </section>
 
           <section aria-label={S.rep_bills} className="mt-4">
             <h3 className="font-bold" style={{ fontSize: '18px' }}>
@@ -421,9 +561,9 @@ export default function Representatives() {
                     {b.year}
                   </p>
                 </div>
-              ))}
-            </div>
-          </section>
+                ))}
+              </div>
+            </section>
 
           <section aria-label={S.rep_funding} className="mt-4">
             <h3 className="font-bold" style={{ fontSize: '18px' }}>
@@ -444,17 +584,45 @@ export default function Representatives() {
                     {f.amount}
                   </span>
                 </div>
-              ))}
-            </div>
-          </section>
+                ))}
+              </div>
+            </section>
 
-          <Link
-            href={`/complaint?new=1&lang=${lang}&district=${rep.district}`}
+          {rep.mandate ? (
+            <Link
+              href={`/result?q=${rep.mandate}&lang=${lang}&district=${rep.district}`}
+              aria-label={`${S.rep_know_role}: ${rep.name}`}
+              className="btn-ac mt-4 w-full inline-flex bg-amber text-white rounded-lg"
+            >
+              {S.rep_know_role}
+            </Link>
+          ) : (
+            <button
+              type="button"
+              aria-disabled="true"
+              title={S.rep_know_role}
+              onClick={() => {
+                // No mandate page for this title yet — intentionally a no-op.
+              }}
+              className="btn-ac mt-4 w-full bg-amber text-white rounded-lg"
+            >
+              {S.rep_know_role}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setActionOpen(true)}
             aria-label={S.rep_take_action}
-            className="btn-ac mt-4 w-full inline-flex bg-accent text-white rounded-lg"
+            className="btn-ac mt-2 w-full bg-accent text-white rounded-lg"
           >
             {S.rep_take_action}
-          </Link>
+          </button>
+          <TakeActionModal
+            open={actionOpen}
+            S={S}
+            onPick={() => setActionOpen(false)}
+            onCancel={() => setActionOpen(false)}
+          />
         </div>
         {toast && (
           <div role="status" className="fixed bottom-4 left-0 right-0 mx-auto max-w-md px-4">
